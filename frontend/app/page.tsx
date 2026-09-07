@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from 'react';
-import { FileUp, FileDown, Zap, ArrowLeft, CheckCircle, Loader2, Send, Copy, Layers, Radio, XCircle, Clock, Smartphone, Image as ImageIcon, FileText, Video, History } from 'lucide-react';
+// YAHAN THI GALTI: Wifi aur Globe miss ho gaye the, ab add kar diye hain 👇
+import { FileUp, FileDown, Zap, ArrowLeft, CheckCircle, Loader2, Send, Copy, Layers, Radio, XCircle, Clock, Smartphone, Image as ImageIcon, FileText, Video, History, Wifi, Globe } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import confetti from 'canvas-confetti';
 
@@ -75,13 +76,13 @@ export default function Home() {
   };
 
   const triggerHapticsAndCelebration = () => {
-    if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Feature 5: Haptics
-    playSuccessSound(); // Feature 6: Audio
-    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#3b82f6', '#a855f7', '#22c55e'] }); // Feature 7: Confetti
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+    playSuccessSound(); 
+    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#3b82f6', '#a855f7', '#22c55e'] }); 
   };
 
   // --- UI HELPERS ---
-  const getFileIcon = (type: string) => { // Feature 12: Smart Icons
+  const getFileIcon = (type: string) => { 
     if (type.includes('image')) return <ImageIcon className="w-5 h-5 text-blue-400" />;
     if (type.includes('video')) return <Video className="w-5 h-5 text-purple-400" />;
     return <FileText className="w-5 h-5 text-slate-400" />;
@@ -93,7 +94,7 @@ export default function Home() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const calculateETA = (bytesReceived: number, totalBytes: number, elapsedSec: number) => { // Feature 2: ETA
+  const calculateETA = (bytesReceived: number, totalBytes: number, elapsedSec: number) => { 
     if (bytesReceived === 0 || elapsedSec === 0) return '--:--';
     const bps = bytesReceived / elapsedSec;
     const remainingBytes = totalBytes - bytesReceived;
@@ -103,7 +104,7 @@ export default function Home() {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
-  const goHome = () => { // Feature 13: 1-Click Disconnect
+  const goHome = () => { 
     if (connectionRef.current) connectionRef.current.close();
     if (peerInstance.current) peerInstance.current.destroy();
     setMode('home');
@@ -121,14 +122,14 @@ export default function Home() {
     releaseWakeLock();
   };
 
-  const cancelTransfer = () => { // Feature 8: Cancel Transfer
+  const cancelTransfer = () => { 
     if (connectionRef.current) connectionRef.current.send(JSON.stringify({ type: 'cancel' }));
     setIsTransferring(false);
     setStatus('Transfer Cancelled ❌');
     releaseWakeLock();
   };
 
-  const logHistory = (filename: string, size: number, type: 'Sent' | 'Received') => { // Feature 10 & 11: History
+  const logHistory = (filename: string, size: number, type: 'Sent' | 'Received') => { 
     setTransferHistory(prev => [{ filename, size, type, time: new Date().toLocaleTimeString() }, ...prev]);
     setTotalDataMoved(prev => prev + size);
   };
@@ -167,7 +168,7 @@ export default function Home() {
         setStatus(`Connected to ${parsed.name}! Ready to send.`);
         setIsConnected(true);
       }
-      if (parsed.type === 'accept') { // Feature 3: Accepted
+      if (parsed.type === 'accept') { 
         setStatus(`Sending: ${fileQueueRef.current[currentFileIndexRef.current].name}`);
         setTimeout(() => sendChunksFast(fileQueueRef.current[currentFileIndexRef.current]), 200);
       }
@@ -220,7 +221,6 @@ export default function Home() {
     startTimeRef.current = Date.now();
     uiUpdateCounter.current = 0;
 
-    // Ask permission to send (Feature 3)
     connectionRef.current.send(JSON.stringify({ 
       type: 'request', filename: file.name, filetype: file.type, filesize: file.size, 
       fileIndex: index + 1, totalFiles: fileQueueRef.current.length, network: networkType 
@@ -279,7 +279,7 @@ export default function Home() {
     connectionRef.current = conn;
 
     conn.on('open', () => {
-      conn.send(JSON.stringify({ type: 'hello', name: myName })); // Feature 4: Nicknames
+      conn.send(JSON.stringify({ type: 'hello', name: myName })); 
       setStatus('Connected! Waiting for files...');
       setIsConnected(true);
     });
@@ -291,7 +291,7 @@ export default function Home() {
     if (typeof data === 'string') {
       const parsed = JSON.parse(data);
       
-      if (parsed.type === 'request') { // Feature 3: Accept Prompt
+      if (parsed.type === 'request') { 
         setIncomingRequest(parsed);
       } 
       else if (parsed.type === 'file_done') {
@@ -370,7 +370,6 @@ export default function Home() {
     } catch (e) {}
   };
 
-  // --- INITIAL NICKNAME SCREEN ---
   if (mode === 'nickname') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-900 text-white">
@@ -395,7 +394,6 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-slate-900 text-white selection:bg-blue-500/30 overflow-x-hidden relative">
       
-      {/* Feature 1: Dynamic Island Progress */}
       {isTransferring && (
         <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xl border border-slate-700/50 rounded-full px-6 py-2 flex items-center gap-4 shadow-2xl z-50 transition-all">
           <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
@@ -415,7 +413,6 @@ export default function Home() {
         </button>
       )}
       
-      {/* 1. Home Screen */}
       {mode === 'home' && (
         <>
           <div className="mb-10 w-full max-w-sm flex items-center justify-between">
@@ -451,7 +448,6 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Feature 10 & 11: Transfer History Dashboard */}
           <div className="w-full max-w-sm bg-slate-800/40 p-5 rounded-3xl border border-slate-700/50">
             <div className="flex justify-between items-center mb-4 border-b border-slate-700/50 pb-3">
               <div className="flex items-center gap-2"><History className="w-5 h-5 text-slate-400" /><span className="font-bold text-sm">Session History</span></div>
@@ -482,7 +478,6 @@ export default function Home() {
         </>
       )}
 
-      {/* 2. Sender Screen */}
       {mode === 'send' && (
         <div className="flex flex-col items-center w-full max-w-sm mt-10">
           {!isConnected ? (
@@ -499,7 +494,6 @@ export default function Home() {
             </div>
           ) : (
             <div className="bg-slate-800/80 p-6 rounded-3xl w-full border border-slate-700/50 shadow-2xl">
-              {/* Feature 14: Network Ping Visualizer */}
               <div className="flex justify-between items-center mb-6 bg-slate-900/50 p-3 rounded-xl">
                 <div className="flex items-center gap-3">
                   <div className="relative"><div className="w-3 h-3 bg-green-500 rounded-full animate-ping absolute"></div><div className="w-3 h-3 bg-green-500 rounded-full relative"></div></div>
@@ -538,7 +532,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* 3. Receiver Screen */}
       {mode === 'receive' && (
         <div className="flex flex-col items-center w-full max-w-sm mt-10">
           {!isConnected ? (
@@ -559,7 +552,6 @@ export default function Home() {
                 <button onClick={goHome} className="text-xs bg-red-500/20 text-red-400 px-3 py-1 rounded-lg font-bold">Disconnect</button>
               </div>
 
-              {/* Feature 3: Incoming Request Prompt */}
               {incomingRequest && (
                 <div className="bg-slate-900 p-5 rounded-2xl border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.2)] mb-4 animate-in fade-in slide-in-from-bottom-4">
                   <div className="flex items-center gap-3 mb-4">
