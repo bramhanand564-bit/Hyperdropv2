@@ -1,0 +1,50 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch: # Iska matlab ye tabhi chalega jab aap manual "Run workflow" dabayenge
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Java 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install & Build Web App
+        run: |
+          cd frontend
+          npm install
+          npm install @capacitor/core @capacitor/android
+          npm install -D @capacitor/cli
+          npm run build
+
+      - name: Convert to Android App
+        run: |
+          cd frontend
+          npx cap init HyperDrop com.hyperdrop.v2 --web-dir out
+          npx cap add android
+          npx cap sync android
+
+      - name: Build APK File
+        run: |
+          cd frontend/android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --no-parallel
+
+      - name: Upload APK ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: HyperDrop-V2-App
+          path: frontend/android/app/build/outputs/apk/debug/app-debug.apk
