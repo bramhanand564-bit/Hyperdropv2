@@ -11,6 +11,7 @@
     "@capacitor/core": "^6.0.0",
     "@capacitor/filesystem": "^6.0.0",
     "canvas-confetti": "^1.9.2",
+    "html5-qrcode": "^2.3.8",
     "lucide-react": "^0.344.0",
     "next": "14.1.0",
     "peerjs": "^1.5.2",
