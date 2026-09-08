@@ -37,9 +37,12 @@ jobs:
           npx cap add android
           npx cap sync android
 
-      - name: Fix Kotlin Duplicate Bug & Build APK
+      - name: Inject Camera Permission & Fix Bugs
         run: |
           cd frontend/android
+          
+          # 🚀 MAGIC FIX: Auto-Inject Camera Permission into AndroidManifest.xml
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.CAMERA" />' app/src/main/AndroidManifest.xml
           
           # Ye command purane duplicate Kotlin files ko exclude (bahar) kar dega
           cat << 'EOF' >> app/build.gradle
