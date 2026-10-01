@@ -1,1 +1,85 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#05070d"><title>TIME LOCK — NAX World</title><link rel="stylesheet" href="./src/styles.css"><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js"}}</script></head><body><main id="game"><canvas id="game-canvas"></canvas><section id="start-screen" class="screen"><div class="start-card"><div class="logo">TL</div><p class="eyebrow">NAX WORLD • ORIGINAL SOLO ADVENTURE</p><h1>TIME LOCK</h1><p>Chapter-based 3D puzzle adventure. Control time, solve the room, collect the fragment and escape.</p><label>PLAYER <input id="player-name" maxlength="18" value="Explorer"></label><button id="start-btn" class="primary">START CHAPTER 1</button><small>Single-player • No chat • No store • No portal</small></div></section><section id="hud" class="hidden"><header><div><strong id="chapter-label">CHAPTER 1</strong><span id="player-label">Explorer</span></div><div class="objective"><span id="objective">Collect the Time Fragment</span><b id="fragment-count">0 / 1</b></div></header><div id="mode-label">TIME: NORMAL</div><div id="message"></div><div id="touch-controls"><div id="joystick"><div id="stick"></div></div><div class="right-controls"><button id="rewind">REWIND</button><button id="freeze">FREEZE</button><button id="forward">FORWARD</button><button id="jump">JUMP</button><button id="interact">INTERACT</button></div></div><div class="camera-hint">Drag the world to rotate the camera</div></section><section id="complete" class="screen hidden"><div class="start-card"><div class="logo">01</div><p class="eyebrow">CHAPTER COMPLETE</p><h2>THE FIRST FRACTURE</h2><p>Time fragment recovered. The next chapter can expand the mechanics and story.</p><button id="restart-btn" class="primary">REPLAY CHAPTER</button></div></section></main><script type="module" src="./src/main.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#05070d">
+  <title>ORIGINAL VIRTUAL WORLD</title>
+  <link rel="stylesheet" href="./src/styles.css">
+  <script type="importmap">
+    {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js"}}
+  </script>
+</head>
+<body>
+<main id="game">
+  <canvas id="game-canvas"></canvas>
+
+  <section id="start-screen" class="screen">
+    <div class="start-card">
+      <div class="logo">NW</div>
+      <p class="eyebrow">ORIGINAL • SOLO • FULL 3D</p>
+      <h1>NEXUS</h1>
+      <p>Enter a living virtual world built around exploration, challenges, discovery and progression.</p>
+      <label>PLAYER NAME
+        <input id="player-name" maxlength="18" value="Explorer" autocomplete="off">
+      </label>
+      <button id="start-btn" class="primary">ENTER WORLD</button>
+      <small>Standalone core • No chat • No store • No portal</small>
+    </div>
+  </section>
+
+  <section id="hud" class="hidden" aria-live="polite">
+    <header>
+      <div class="status-card">
+        <strong id="zone-label">CENTRAL HUB</strong>
+        <span id="player-label">Explorer</span>
+      </div>
+
+      <div class="objective-card">
+        <span id="level-label">LEVEL 1</span>
+        <b id="credits-label">CR 0</b>
+      </div>
+    </header>
+
+    <div id="event-pill">WORLD STATUS • STABLE</div>
+
+    <section id="mission-card">
+      <div class="mission-kicker">ACTIVE MISSION</div>
+      <strong id="mission-title">FIRST SIGNAL</strong>
+      <p id="objective">Find the signal terminal.</p>
+      <div class="progress-row">
+        <span id="progress-label">0 / 4</span>
+        <div class="progress-track"><i id="progress-fill"></i></div>
+      </div>
+    </section>
+
+    <div id="alert-stack"></div>
+    <div id="interaction-prompt" class="hidden">INTERACT</div>
+    <div id="hint">Swipe anywhere on the right side to rotate camera</div>
+
+    <div id="touch-controls">
+      <div id="joystick" aria-label="Movement joystick"><div id="stick"></div></div>
+
+      <div class="right-controls">
+        <button id="jump">JUMP</button>
+        <button id="sprint">SPRINT</button>
+        <button id="interact">ACTION</button>
+        <button id="map">RADAR</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="complete" class="screen hidden">
+    <div class="start-card">
+      <div class="logo">01</div>
+      <p class="eyebrow">CORE BUILD COMPLETE</p>
+      <h2>SIGNAL RUN CLEARED</h2>
+      <p id="complete-copy">The first playable challenge loop is complete.</p>
+      <button id="continue-btn" class="primary">RETURN TO HUB</button>
+    </div>
+  </section>
+</main>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
