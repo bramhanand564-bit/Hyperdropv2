@@ -5,8 +5,8 @@ button,input{font:inherit}
 button{-webkit-tap-highlight-color:transparent}
 #game-canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 .hidden{display:none!important}
-.screen{position:fixed;inset:0;display:grid;place-items:center;padding:22px;z-index:30;background:radial-gradient(circle at 50% 24%,rgba(90,130,220,.18),rgba(3,5,10,.92) 58%,#010207)}
-.start-card{width:min(500px,100%);padding:30px;border:1px solid rgba(255,255,255,.13);border-radius:28px;background:rgba(7,11,20,.86);backdrop-filter:blur(18px);box-shadow:0 28px 100px rgba(0,0,0,.5)}
+.screen{position:fixed;inset:0;display:grid;place-items:end center;padding:18px;z-index:30;background:linear-gradient(180deg,rgba(2,5,10,.04) 0%,rgba(2,5,10,.18) 34%,rgba(2,5,10,.78) 100%);pointer-events:auto}
+.start-card{width:min(500px,100%);padding:24px;border:1px solid rgba(255,255,255,.13);border-radius:28px;background:rgba(7,11,20,.86);backdrop-filter:blur(18px);box-shadow:0 28px 100px rgba(0,0,0,.5)}
 .logo{width:66px;height:66px;display:grid;place-items:center;border-radius:18px;background:#eef4ff;color:#060a12;font-weight:950;font-size:20px;margin-bottom:18px}
 .eyebrow{font-size:10px;letter-spacing:.18em;opacity:.56}
 .start-card h1{font-size:clamp(46px,13vw,78px);line-height:.88;margin:8px 0 16px;letter-spacing:-.075em}
