@@ -1,407 +1,49 @@
 import * as THREE from 'three';
-
-const canvas = document.querySelector('#game-canvas');
-const bootScreen = document.querySelector('#boot-screen');
-const startButton = document.querySelector('#start-button');
-const nameInput = document.querySelector('#player-name');
-const hud = document.querySelector('#hud');
-const hudName = document.querySelector('#hud-name');
-const hudXp = document.querySelector('#hud-xp');
-const mapDot = document.querySelector('#map-dot');
-const prompt = document.querySelector('#interaction-prompt');
-const toast = document.querySelector('#toast');
-const joystick = document.querySelector('#joystick');
-const knob = document.querySelector('#joystick-knob');
-const jumpButton = document.querySelector('#jump-button');
-const sprintButton = document.querySelector('#sprint-button');
-const interactButton = document.querySelector('#interact-button');
-
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x091322);
-scene.fog = new THREE.FogExp2(0x091322, 0.018);
-
-const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 500);
-camera.position.set(7, 5, 9);
-
-const renderer = new THREE.WebGLRenderer({
-  canvas,
-  antialias: false,
-  powerPreference: 'high-performance',
-});
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.7));
-renderer.setSize(innerWidth, innerHeight, false);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-scene.add(new THREE.HemisphereLight(0xbfd8ff, 0x263246, 1.35));
-const sun = new THREE.DirectionalLight(0xffffff, 2.4);
-sun.position.set(-35, 45, 20);
-sun.castShadow = true;
-sun.shadow.mapSize.set(1024, 1024);
-sun.shadow.camera.left = -60;
-sun.shadow.camera.right = 60;
-sun.shadow.camera.top = 60;
-sun.shadow.camera.bottom = -60;
-scene.add(sun);
-
-const clockState = { last: performance.now() };
-const input = { x: 0, y: 0, sprint: false, jumpQueued: false };
-const cameraState = { yaw: 0.65, pitch: 0.45, distance: 8.5, dragging: false, lastX: 0, lastY: 0 };
-const saveKey = 'nax-world-foundation-v1';
-
-const player = {
-  group: new THREE.Group(),
-  velocityY: 0,
-  grounded: true,
-  xp: 0,
-  position: new THREE.Vector3(0, 0, 8),
-  spawn: new THREE.Vector3(0, 0, 8),
-  speed: 4.6,
-  sprintMultiplier: 1.8,
-  walkCycle: 0,
-};
-
-const interactables = [];
-const obstacles = [];
-
-function material(color, roughness = 0.78, metalness = 0) {
-  return new THREE.MeshStandardMaterial({ color, roughness, metalness });
+const $=s=>document.querySelector(s);
+const canvas=$('#game-canvas'),start=$('#start-screen'),hud=$('#hud'),complete=$('#complete');
+const nameInput=$('#player-name'),startBtn=$('#start-btn'),restartBtn=$('#restart-btn');
+const chapterLabel=$('#chapter-label'),playerLabel=$('#player-label'),objective=$('#objective'),fragmentCount=$('#fragment-count'),modeLabel=$('#mode-label'),message=$('#message'),joystick=$('#joystick'),stick=$('#stick');
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x050a14);scene.fog=new THREE.FogExp2(0x07101d,.025);
+const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,300);
+const renderer=new THREE.WebGLRenderer({canvas,antialias:false,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight,false);renderer.shadowMap.enabled=true;
+scene.add(new THREE.HemisphereLight(0xb9d4ff,0x151923,1.35));const sun=new THREE.DirectionalLight(0xffffff,2.1);sun.position.set(-18,28,12);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
+const state={started:false,mode:'NORMAL',xp:0,fragment:false,history:[],historyTimer:0};const input={x:0,y:0,jump:false};const cam={yaw:.65,pitch:.42,distance:8.2,drag:false,x:0,y:0};
+const player={pos:new THREE.Vector3(0,0,9),velY:0,grounded:true,speed:4.3,group:new THREE.Group(),walk:0};const hazards=[],switches=[];
+const mat=(c,r=.8,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
+function mesh(g,m,p,parent=scene){const o=new THREE.Mesh(g,m);o.position.copy(p);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
+function buildRoom(){
+ mesh(new THREE.BoxGeometry(46,.5,46),mat(0x202c3b,1),new THREE.Vector3(0,-.28,0));const grid=new THREE.GridHelper(46,23,0x3f5269,0x2c3b4d);grid.material.opacity=.25;grid.material.transparent=true;scene.add(grid);
+ const wall=mat(0x172331,.9);[[0,3,-22,46,6,.7],[0,3,22,46,6,.7],[-22,3,0,.7,6,46],[22,3,0,.7,6,46]].forEach(([x,y,z,w,h,d])=>mesh(new THREE.BoxGeometry(w,h,d),wall,new THREE.Vector3(x,y,z)));
+ for(let i=0;i<7;i++)mesh(new THREE.BoxGeometry(3,4,3),mat(0x26374a,.82),new THREE.Vector3(-15+i*5,2,-8));
+ const gate=mesh(new THREE.BoxGeometry(5,.3,.5),mat(0x8298b0,.35,.3),new THREE.Vector3(0,4,-15));gate.userData.gate=true;switches.push(gate);
+ for(let i=0;i<3;i++){const p=mesh(new THREE.CylinderGeometry(.85,.85,.16,24),mat(0x4f667d,.65),new THREE.Vector3(-7+i*7,.08,3));p.userData.switch=i;switches.push(p)}
+ const shard=mesh(new THREE.OctahedronGeometry(.75),mat(0xdbe8ff,.18,.8),new THREE.Vector3(0,2,-5));shard.userData.fragment=true;switches.push(shard);
+ for(let i=0;i<4;i++){const h=mesh(new THREE.BoxGeometry(1.3,.55,1.3),mat(0x8d4550,.55),new THREE.Vector3(-10+i*6,.28,-2));h.userData.phase=i*1.7;hazards.push(h)}
+ const exit=mesh(new THREE.TorusGeometry(2.1,.18,10,40),mat(0x91aac4,.35,.5),new THREE.Vector3(0,2,15));exit.rotation.x=Math.PI/2;exit.userData.exit=true;switches.push(exit);
 }
-
-function addMesh(geometry, mat, position, parent = scene, cast = true, receive = true) {
-  const mesh = new THREE.Mesh(geometry, mat);
-  mesh.position.copy(position);
-  mesh.castShadow = cast;
-  mesh.receiveShadow = receive;
-  parent.add(mesh);
-  return mesh;
+function buildPlayer(){
+ const body=new THREE.Group();mesh(new THREE.CapsuleGeometry(.42,.9,6,12),mat(0xe8edf5,.68),new THREE.Vector3(0,1.35,0),body);mesh(new THREE.SphereGeometry(.34,18,12),mat(0xdce5ef,.7),new THREE.Vector3(0,2.25,0),body);mesh(new THREE.BoxGeometry(.42,.13,.09),mat(0x07111d,.3,.2),new THREE.Vector3(0,2.25,-.31),body);
+ const a=mat(0xaab8c9),l=mat(0x68788d),la=mesh(new THREE.BoxGeometry(.2,.8,.2),a,new THREE.Vector3(-.58,1.4,0),body),ra=mesh(new THREE.BoxGeometry(.2,.8,.2),a,new THREE.Vector3(.58,1.4,0),body),ll=mesh(new THREE.BoxGeometry(.25,.85,.25),l,new THREE.Vector3(-.2,.5,0),body),rl=mesh(new THREE.BoxGeometry(.25,.85,.25),l,new THREE.Vector3(.2,.5,0),body);
+ player.group.add(body);player.group.userData.parts={la,ra,ll,rl};scene.add(player.group);
 }
-
-function buildPlayer() {
-  const body = new THREE.Group();
-  const torso = addMesh(new THREE.BoxGeometry(0.85, 1.25, 0.55), material(0xeff4fb, .65), new THREE.Vector3(0, 1.45, 0), body);
-  torso.scale.y = 1.05;
-  addMesh(new THREE.SphereGeometry(0.38, 18, 14), material(0xe6edf5, .7), new THREE.Vector3(0, 2.35, 0), body);
-
-  const visor = addMesh(new THREE.BoxGeometry(0.45, 0.15, 0.10), material(0x0a1523, .35, .15), new THREE.Vector3(0, 2.35, -0.34), body);
-  visor.castShadow = false;
-
-  const armMat = material(0xb9c4d3, .78);
-  const legMat = material(0x7f8da2, .9);
-  const leftArm = addMesh(new THREE.BoxGeometry(0.22, .85, .22), armMat, new THREE.Vector3(-0.62, 1.45, 0), body);
-  const rightArm = addMesh(new THREE.BoxGeometry(0.22, .85, .22), armMat, new THREE.Vector3(0.62, 1.45, 0), body);
-  const leftLeg = addMesh(new THREE.BoxGeometry(0.27, .9, .28), legMat, new THREE.Vector3(-0.22, 0.55, 0), body);
-  const rightLeg = addMesh(new THREE.BoxGeometry(0.27, .9, .28), legMat, new THREE.Vector3(0.22, 0.55, 0), body);
-
-  player.group.add(body);
-  player.group.userData.parts = { leftArm, rightArm, leftLeg, rightLeg, body };
-  player.group.position.copy(player.position);
-  scene.add(player.group);
+function setMode(mode){state.mode=mode;modeLabel.textContent='TIME: '+mode;document.querySelectorAll('.right-controls button').forEach(b=>b.classList.remove('active'));if(mode!=='NORMAL')$('#'+mode.toLowerCase()).classList.add('active');showMessage(mode==='NORMAL'?'Time flowing normally':mode==='REWIND'?'Rewinding recent movement':mode==='FREEZE'?'Time locked around hazards':'Time accelerated')}
+function showMessage(t){message.textContent=t;clearTimeout(showMessage.timer);showMessage.timer=setTimeout(()=>message.textContent='',1600)}
+function joystickMove(x,y){const r=joystick.getBoundingClientRect(),dx=x-(r.left+r.width/2),dy=y-(r.top+r.height/2),max=r.width*.34,len=Math.hypot(dx,dy)||1,s=Math.min(1,max/len),nx=dx*s,ny=dy*s;stick.style.transform=`translate(calc(-50% + ${nx}px),calc(-50% + ${ny}px))`;input.x=nx/max;input.y=ny/max}
+joystick.addEventListener('pointerdown',e=>{joystick.setPointerCapture(e.pointerId);joystickMove(e.clientX,e.clientY)});joystick.addEventListener('pointermove',e=>{if(joystick.hasPointerCapture(e.pointerId))joystickMove(e.clientX,e.clientY)});['pointerup','pointercancel'].forEach(ev=>joystick.addEventListener(ev,()=>{input.x=0;input.y=0;stick.style.transform='translate(-50%,-50%)'}));
+$('#jump').addEventListener('pointerdown',()=>input.jump=true);$('#rewind').addEventListener('pointerdown',()=>setMode(state.mode==='REWIND'?'NORMAL':'REWIND'));$('#freeze').addEventListener('pointerdown',()=>setMode(state.mode==='FREEZE'?'NORMAL':'FREEZE'));$('#forward').addEventListener('pointerdown',()=>setMode(state.mode==='FORWARD'?'NORMAL':'FORWARD'));
+$('#interact').addEventListener('pointerdown',()=>{const d=player.pos.distanceTo(new THREE.Vector3(0,0,-5));if(d<3&&!state.fragment){state.fragment=true;state.xp+=25;fragmentCount.textContent='1 / 1';objective.textContent='Reach the Time Gate';showMessage('+25 XP • Time Fragment recovered')}if(state.fragment&&player.pos.z<-12){complete.classList.remove('hidden');hud.classList.add('hidden')}});
+canvas.addEventListener('pointerdown',e=>{if(!hud.classList.contains('hidden')&&e.clientX>innerWidth*.25){cam.drag=true;cam.x=e.clientX;cam.y=e.clientY;canvas.setPointerCapture(e.pointerId)}});canvas.addEventListener('pointermove',e=>{if(!cam.drag)return;cam.yaw-=(e.clientX-cam.x)*.008;cam.pitch=THREE.MathUtils.clamp(cam.pitch+(e.clientY-cam.y)*.005,.12,1.05);cam.x=e.clientX;cam.y=e.clientY});canvas.addEventListener('pointerup',()=>cam.drag=false);canvas.addEventListener('pointercancel',()=>cam.drag=false);
+function updatePlayer(dt){
+ if(state.mode==='REWIND'&&state.history.length>2){player.pos.copy(state.history.pop());player.group.position.copy(player.pos);return}
+ const f=new THREE.Vector3(Math.sin(cam.yaw),0,Math.cos(cam.yaw)),r=new THREE.Vector3(Math.cos(cam.yaw),0,-Math.sin(cam.yaw)),move=new THREE.Vector3().addScaledVector(f,-input.y).addScaledVector(r,input.x),mag=Math.min(1,move.length());if(mag>.01)move.normalize();
+ const speed=player.speed*mag*(state.mode==='FORWARD'?1.45:1);player.pos.x=THREE.MathUtils.clamp(player.pos.x+move.x*speed*dt,-19,19);player.pos.z=THREE.MathUtils.clamp(player.pos.z+move.z*speed*dt,-19,19);
+ if(input.jump&&player.grounded){player.velY=6.8;player.grounded=false}input.jump=false;player.velY-=18*dt;player.pos.y+=player.velY*dt;if(player.pos.y<=0){player.pos.y=0;player.velY=0;player.grounded=true}player.group.position.copy(player.pos);
+ if(mag>.01){const yaw=Math.atan2(move.x,move.z);player.group.rotation.y=THREE.MathUtils.lerpAngle(player.group.rotation.y,yaw,Math.min(1,dt*10));player.walk+=dt*9*mag}
+ const s=Math.sin(player.walk)*.5,p=player.group.userData.parts;p.la.rotation.x=s;p.ra.rotation.x=-s;p.ll.rotation.x=-s;p.rl.rotation.x=s;state.historyTimer+=dt;if(state.historyTimer>.09){state.history.push(player.pos.clone());if(state.history.length>90)state.history.shift();state.historyTimer=0}
 }
-
-function buildWorld() {
-  const ground = addMesh(
-    new THREE.PlaneGeometry(240, 240, 1, 1),
-    material(0x253443, 1),
-    new THREE.Vector3(0, 0, 0)
-  );
-  ground.rotation.x = -Math.PI / 2;
-
-  const grid = new THREE.GridHelper(240, 60, 0x3d5266, 0x2a3b4c);
-  grid.position.y = 0.008;
-  grid.material.opacity = .23;
-  grid.material.transparent = true;
-  scene.add(grid);
-
-  const roadMat = material(0x121c28, .92);
-  addMesh(new THREE.BoxGeometry(18, .04, 112), roadMat, new THREE.Vector3(0, .02, -8), scene, false, true);
-  addMesh(new THREE.BoxGeometry(112, .04, 18), roadMat, new THREE.Vector3(0, .025, -8), scene, false, true);
-
-  for (let i = 0; i < 10; i++) {
-    const size = 3 + (i % 3);
-    const h = 4 + (i % 4) * 2;
-    const x = i < 5 ? -17 - (i % 2) * 7 : 17 + (i % 2) * 7;
-    const z = -38 + i * 8;
-    const building = addMesh(new THREE.BoxGeometry(size, h, size), material(0x33465b + (i % 2) * 0x111111, .82), new THREE.Vector3(x, h / 2, z));
-    obstacles.push({ x, z, radius: size * .8 });
-    const roof = addMesh(new THREE.BoxGeometry(size + .15, .18, size + .15), material(0x1b2634, .72), new THREE.Vector3(x, h + .08, z), building.parent);
-    roof.position.y = h + .08;
-  }
-
-  for (let i = 0; i < 18; i++) {
-    const x = (i % 2 === 0 ? -1 : 1) * (24 + (i % 4) * 5);
-    const z = -45 + i * 5.5;
-    const trunk = addMesh(new THREE.CylinderGeometry(.22, .3, 1.8, 8), material(0x5b4635), new THREE.Vector3(x, .9, z));
-    const crown = addMesh(new THREE.SphereGeometry(1.15 + (i % 3) * .18, 12, 10), material(0x587b61, .95), new THREE.Vector3(x, 2.35, z));
-    crown.castShadow = true;
-  }
-
-  const plaza = addMesh(new THREE.CylinderGeometry(5.5, 5.5, .18, 48), material(0x3a4f64, .62), new THREE.Vector3(0, .09, -7), scene, false, true);
-  const core = new THREE.Mesh(new THREE.TorusGeometry(3.2, .10, 8, 48), material(0x91b6d9, .4, .4));
-  core.rotation.x = Math.PI / 2;
-  core.position.set(0, .2, -7);
-  core.castShadow = false;
-  scene.add(core);
-
-  const beacon = addMesh(new THREE.CylinderGeometry(.7, .9, 3.8, 16), material(0x8798ad, .42, .55), new THREE.Vector3(0, 2, -7));
-  beacon.userData.interactable = true;
-  beacon.userData.label = 'NAX Beacon';
-  interactables.push(beacon);
-
-  const orb = addMesh(new THREE.SphereGeometry(.55, 20, 16), material(0xdce9ff, .2, .75), new THREE.Vector3(0, 4.25, -7));
-  orb.userData.interactable = true;
-  orb.userData.label = 'World Core';
-  interactables.push(orb);
-
-  for (let i = 0; i < 5; i++) {
-    const pad = addMesh(new THREE.CylinderGeometry(.9, .9, .12, 20), material(0x526c83, .6, .05), new THREE.Vector3(-8 + i * 4, .06, 3));
-    pad.userData.interactable = true;
-    pad.userData.label = 'Discovery Pad';
-    interactables.push(pad);
-  }
-}
-
-function queueJump() { input.jumpQueued = true; }
-function setJoystick(clientX, clientY, pointerId) {
-  const rect = joystick.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
-  const dx = clientX - cx;
-  const dy = clientY - cy;
-  const max = rect.width * .34;
-  const len = Math.hypot(dx, dy) || 1;
-  const scale = Math.min(1, max / len);
-  const nx = dx * scale;
-  const ny = dy * scale;
-  knob.style.transform = `translate(calc(-50% + ${nx}px), calc(-50% + ${ny}px))`;
-  input.x = nx / max;
-  input.y = ny / max;
-  joystick.dataset.pointer = String(pointerId);
-}
-function resetJoystick() {
-  input.x = 0; input.y = 0; delete joystick.dataset.pointer;
-  knob.style.transform = 'translate(-50%, -50%)';
-}
-joystick.addEventListener('pointerdown', e => {
-  joystick.setPointerCapture(e.pointerId);
-  setJoystick(e.clientX, e.clientY, e.pointerId);
-});
-joystick.addEventListener('pointermove', e => {
-  if (joystick.dataset.pointer === String(e.pointerId)) setJoystick(e.clientX, e.clientY, e.pointerId);
-});
-joystick.addEventListener('pointerup', resetJoystick);
-joystick.addEventListener('pointercancel', resetJoystick);
-jumpButton.addEventListener('pointerdown', e => { e.preventDefault(); queueJump(); });
-sprintButton.addEventListener('pointerdown', e => { e.preventDefault(); input.sprint = true; });
-sprintButton.addEventListener('pointerup', () => { input.sprint = false; });
-sprintButton.addEventListener('pointercancel', () => { input.sprint = false; });
-interactButton.addEventListener('pointerdown', e => { e.preventDefault(); interact(); });
-
-canvas.addEventListener('pointerdown', e => {
-  if (!hud.classList.contains('hidden') && e.clientX > innerWidth * .25) {
-    cameraState.dragging = true; cameraState.lastX = e.clientX; cameraState.lastY = e.clientY;
-    canvas.setPointerCapture(e.pointerId);
-  }
-});
-canvas.addEventListener('pointermove', e => {
-  if (!cameraState.dragging) return;
-  const dx = e.clientX - cameraState.lastX;
-  const dy = e.clientY - cameraState.lastY;
-  cameraState.lastX = e.clientX; cameraState.lastY = e.clientY;
-  cameraState.yaw -= dx * .008;
-  cameraState.pitch = THREE.MathUtils.clamp(cameraState.pitch + dy * .005, .12, 1.05);
-});
-canvas.addEventListener('pointerup', () => { cameraState.dragging = false; });
-canvas.addEventListener('pointercancel', () => { cameraState.dragging = false; });
-
-function worldDirection() {
-  const forward = new THREE.Vector3(Math.sin(cameraState.yaw), 0, Math.cos(cameraState.yaw));
-  const right = new THREE.Vector3(Math.cos(cameraState.yaw), 0, -Math.sin(cameraState.yaw));
-  return { forward, right };
-}
-
-function circleCollision(nextX, nextZ) {
-  const radius = .62;
-  for (const o of obstacles) {
-    const dx = nextX - o.x, dz = nextZ - o.z;
-    const distance = Math.hypot(dx, dz);
-    if (distance < o.radius + radius) return true;
-  }
-  return false;
-}
-
-function updatePlayer(dt) {
-  const { forward, right } = worldDirection();
-  const move = new THREE.Vector3()
-    .addScaledVector(forward, -input.y)
-    .addScaledVector(right, input.x);
-  const magnitude = Math.min(1, move.length());
-  if (magnitude > .01) move.normalize();
-
-  const speed = player.speed * (input.sprint ? player.sprintMultiplier : 1) * magnitude;
-  const nextX = player.position.x + move.x * speed * dt;
-  const nextZ = player.position.z + move.z * speed * dt;
-  if (!circleCollision(nextX, player.position.z)) player.position.x = nextX;
-  if (!circleCollision(player.position.x, nextZ)) player.position.z = nextZ;
-
-  if (input.jumpQueued && player.grounded) {
-    player.velocityY = 7.1;
-    player.grounded = false;
-  }
-  input.jumpQueued = false;
-
-  player.velocityY -= 17 * dt;
-  player.position.y += player.velocityY * dt;
-  if (player.position.y <= 0) {
-    player.position.y = 0; player.velocityY = 0; player.grounded = true;
-  }
-
-  player.group.position.copy(player.position);
-  if (magnitude > .01) {
-    const targetYaw = Math.atan2(move.x, move.z);
-    player.group.rotation.y = THREE.MathUtils.lerpAngle(player.group.rotation.y, targetYaw, Math.min(1, dt * 12));
-    player.walkCycle += dt * (input.sprint ? 13 : 9) * magnitude;
-  } else {
-    player.walkCycle += dt * 2;
-  }
-  const parts = player.group.userData.parts;
-  const swing = magnitude > .01 ? Math.sin(player.walkCycle) * .52 : Math.sin(player.walkCycle) * .04;
-  parts.leftArm.rotation.x = swing;
-  parts.rightArm.rotation.x = -swing;
-  parts.leftLeg.rotation.x = -swing;
-  parts.rightLeg.rotation.x = swing;
-}
-
-function updateCamera(dt) {
-  const target = player.position.clone().add(new THREE.Vector3(0, 1.25, 0));
-  const offset = new THREE.Vector3(
-    Math.sin(cameraState.yaw) * Math.cos(cameraState.pitch) * cameraState.distance,
-    Math.sin(cameraState.pitch) * cameraState.distance,
-    Math.cos(cameraState.yaw) * Math.cos(cameraState.pitch) * cameraState.distance
-  );
-  const desired = target.clone().add(offset);
-  camera.position.lerp(desired, Math.min(1, dt * 7));
-  camera.lookAt(target);
-}
-
-function updateMiniMap() {
-  const x = THREE.MathUtils.clamp(player.position.x / 60, -1, 1);
-  const z = THREE.MathUtils.clamp(player.position.z / 60, -1, 1);
-  mapDot.style.left = `${50 + x * 42}%`;
-  mapDot.style.top = `${50 + z * 42}%`;
-}
-
-function nearestInteractable() {
-  let closest = null; let distance = Infinity;
-  for (const obj of interactables) {
-    const d = obj.position.distanceTo(player.position);
-    if (d < distance) { distance = d; closest = obj; }
-  }
-  return distance < 4.2 ? closest : null;
-}
-
-let toastTimer;
-function showToast(message) {
-  toast.textContent = message;
-  toast.classList.remove('hidden');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.add('hidden'), 1800);
-}
-
-function interact() {
-  const target = nearestInteractable();
-  if (!target) {
-    showToast('Move closer to a discovery point.');
-    return;
-  }
-  player.xp += 10;
-  hudXp.textContent = String(player.xp);
-  target.rotation.y += Math.PI / 4;
-  showToast(`${target.userData.label} discovered • +10 XP`);
-  saveState();
-}
-
-function refreshPrompt() {
-  const target = nearestInteractable();
-  if (!target) prompt.classList.add('hidden');
-  else {
-    prompt.textContent = `TAP INTERACT • ${target.userData.label}`;
-    prompt.classList.remove('hidden');
-  }
-}
-
-function saveState() {
-  localStorage.setItem(saveKey, JSON.stringify({
-    name: hudName.textContent || 'Explorer',
-    xp: player.xp,
-    x: player.position.x, z: player.position.z
-  }));
-}
-
-function loadState() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(saveKey) || 'null');
-    if (!saved) return;
-    if (saved.name) {
-      nameInput.value = saved.name;
-      hudName.textContent = saved.name;
-    }
-    if (Number.isFinite(saved.x)) player.position.x = THREE.MathUtils.clamp(saved.x, -55, 55);
-    if (Number.isFinite(saved.z)) player.position.z = THREE.MathUtils.clamp(saved.z, -55, 55);
-    player.xp = Number(saved.xp) || 0;
-    hudXp.textContent = String(player.xp);
-  } catch {
-    localStorage.removeItem(saveKey);
-  }
-}
-
-function startGame() {
-  const name = (nameInput.value || 'Explorer').trim().slice(0, 18) || 'Explorer';
-  hudName.textContent = name;
-  loadState();
-  hudName.textContent = nameInput.value.trim() || name;
-  saveState();
-  bootScreen.classList.add('hidden');
-  hud.classList.remove('hidden');
-  showToast('NAX World loaded • explore the zone');
-}
-
-startButton.addEventListener('click', startGame);
-nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') startGame(); });
-
-buildWorld();
-buildPlayer();
-loadState();
-player.group.position.copy(player.position);
-
-function animate() {
-  requestAnimationFrame(animate);
-  const now = performance.now();
-  const dt = Math.min(.05, Math.max(.001, (now - clockState.last) / 1000));
-  clockState.last = now;
-
-  updatePlayer(dt);
-  updateCamera(dt);
-  refreshPrompt();
-  updateMiniMap();
-
-  const t = now * .001;
-  scene.traverse(obj => {
-    if (obj.userData.interactable && obj.geometry?.type === 'SphereGeometry') {
-      obj.position.y = 4.25 + Math.sin(t * 1.8) * .17;
-    }
-  });
-
-  renderer.render(scene, camera);
-}
-animate();
-
-addEventListener('resize', () => {
-  camera.aspect = innerWidth / innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight, false);
-});
-
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') saveState();
-});
+function updateWorld(t){hazards.forEach(h=>{if(state.mode!=='FREEZE'){const rate=state.mode==='FORWARD'?2.1:1;h.position.y=.28+Math.abs(Math.sin(t*rate+h.userData.phase))*.75}});const shard=switches.find(x=>x.userData.fragment);if(shard&&!state.fragment){shard.rotation.y+=.025;shard.position.y=2+Math.sin(t*2)*.25}else if(shard)shard.visible=false}
+function updateCamera(dt){const target=player.pos.clone().add(new THREE.Vector3(0,1.25,0)),off=new THREE.Vector3(Math.sin(cam.yaw)*Math.cos(cam.pitch)*cam.distance,Math.sin(cam.pitch)*cam.distance,Math.cos(cam.yaw)*Math.cos(cam.pitch)*cam.distance);camera.position.lerp(target.clone().add(off),Math.min(1,dt*7));camera.lookAt(target)}
+function startGame(){playerLabel.textContent=(nameInput.value||'Explorer').trim().slice(0,18)||'Explorer';chapterLabel.textContent='CHAPTER 1 • THE FIRST FRACTURE';start.classList.add('hidden');hud.classList.remove('hidden');player.pos.set(0,0,9);player.group.position.copy(player.pos);state.started=true;state.fragment=false;state.history=[];fragmentCount.textContent='0 / 1';objective.textContent='Collect the Time Fragment';setMode('NORMAL');showMessage('Find the fragment, then reach the Time Gate')}
+startBtn.addEventListener('click',startGame);restartBtn.addEventListener('click',()=>{complete.classList.add('hidden');hud.classList.remove('hidden');startGame()});
+buildRoom();buildPlayer();let last=performance.now();function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/1000);last=now;if(state.started)updatePlayer(dt);updateWorld(now*.001);updateCamera(dt);renderer.render(scene,camera)}loop(last);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight,false)});
