@@ -597,6 +597,19 @@ function updateCamera(dt) {
   camera.lookAt(target);
 }
 
+function restoreMissionWorld() {
+  state.challengeActive = false;
+  beacons.forEach((beacon) => {
+    beacon.visible = state.missionStep === 1;
+    beacon.userData.active = false;
+  });
+
+  if (state.missionStep >= 2) {
+    beacons.forEach((beacon) => { beacon.visible = false; });
+    setWorldEvent('WORLD STATUS • SIGNAL RUN CLEARED');
+  }
+}
+
 function startGame() {
   loadGame();
   state.savedName = (nameInput.value || state.savedName || 'Explorer').trim().slice(0, 18) || 'Explorer';
@@ -608,10 +621,20 @@ function startGame() {
   hud.classList.remove('hidden');
 
   zoneLabel.textContent = 'CENTRAL HUB';
+  restoreMissionWorld();
   updateStatusUI();
   updateMissionUI();
-  addAlert('SYSTEM ONLINE', `Welcome, ${state.savedName}. Explore the hub and locate the signal terminal.`, 3200);
-  setWorldEvent('WORLD STATUS • STABLE');
+
+  const message = state.missionStep === 0
+    ? `Welcome, ${state.savedName}. Explore the hub and locate the signal terminal.`
+    : state.missionStep === 1
+      ? `Welcome back, ${state.savedName}. The Signal Run is ready.`
+      : `Welcome back, ${state.savedName}. The Central Gate is now accessible.`;
+
+  addAlert('SYSTEM ONLINE', message, 3200);
+  if (state.missionStep === 1) {
+    setWorldEvent('EVENT • SIGNAL RUN AVAILABLE');
+  }
 }
 
 startBtn.addEventListener('click', startGame);
