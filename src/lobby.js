@@ -11,8 +11,8 @@ export function buildLobbyExperience(scene, hub, playerGroup) {
   const material = (color, emissive = 0x000000, intensity = 0) =>
     new THREE.MeshStandardMaterial({
       color,
-      roughness: 0.42,
-      metalness: 0.58,
+      roughness: 0.38,
+      metalness: 0.62,
       emissive,
       emissiveIntensity: intensity
     });
@@ -21,163 +21,227 @@ export function buildLobbyExperience(scene, hub, playerGroup) {
   lobby.name = 'NEXUS_CINEMATIC_HOME';
   hub.add(lobby);
 
+  // Wide cinematic platform: the avatar is the visual anchor.
   const plaza = add(
-    new THREE.CylinderGeometry(15.5, 16.2, 0.22, 64),
-    material(0x111d2b, 0x173c59, 0.7),
+    new THREE.CylinderGeometry(17.5, 18.2, 0.26, 72),
+    material(0x101b29, 0x173c59, 0.8),
     new THREE.Vector3(0, 0.02, 8)
   );
   plaza.userData.lobbyDecor = true;
 
-  const innerRing = add(
-    new THREE.TorusGeometry(14.3, 0.12, 12, 96),
-    material(0x6bd8ff, 0x238dca, 2.4),
-    new THREE.Vector3(0, 0.18, 8)
+  const plazaRing = add(
+    new THREE.TorusGeometry(16.1, 0.11, 10, 120),
+    material(0x70dfff, 0x20a9dd, 2.8),
+    new THREE.Vector3(0, 0.2, 8)
   );
-  innerRing.rotation.x = Math.PI / 2;
-  animated.push({ object: innerRing, type: 'ring', speed: 0.25 });
+  plazaRing.rotation.x = Math.PI / 2;
+  animated.push({ object: plazaRing, type: 'pulseRing', speed: 1.15 });
 
+  // Reflective runway strips frame the avatar like a premium game lobby.
+  for (const x of [-5.2, 5.2]) {
+    const strip = add(
+      new THREE.BoxGeometry(0.12, 0.035, 15.5),
+      material(0x6fdcff, 0x22b8f2, 3.1),
+      new THREE.Vector3(x, 0.18, 8)
+    );
+    animated.push({ object: strip, type: 'runway', phase: x > 0 ? 1.4 : 0 });
+  }
+
+  // Distant skyline and floating architecture create depth behind the avatar.
+  const skyline = new THREE.Group();
+  skyline.position.set(0, 0, -22);
+  lobby.add(skyline);
+
+  const skylinePalette = [0x172c40, 0x1b3850, 0x223e56, 0x14273a];
+  for (let i = 0; i < 18; i += 1) {
+    const x = -30 + i * 3.6;
+    const h = 7 + (i % 6) * 2.2;
+    const w = 1.7 + (i % 3) * 0.7;
+    const tower = add(
+      new THREE.BoxGeometry(w, h, 1.8 + (i % 2) * 0.8),
+      material(skylinePalette[i % skylinePalette.length], 0x0b2942, 0.5),
+      new THREE.Vector3(x, h / 2, (i % 4) * 1.5),
+      skyline
+    );
+    const strip = add(
+      new THREE.BoxGeometry(0.07, h * 0.72, 0.08),
+      material(0x52d8ff, 0x1ab2e5, 2.7),
+      new THREE.Vector3(x - w * 0.25, h * 0.52, -0.94),
+      skyline
+    );
+    animated.push({ object: strip, type: 'skyline', phase: i * 0.37 });
+    tower.userData.lobbyDecor = true;
+  }
+
+  // Floating rings / platforms in the distant skyline.
+  const skyRings = [];
+  for (let i = 0; i < 4; i += 1) {
+    const ring = add(
+      new THREE.TorusGeometry(3.8 + i * 1.25, 0.13, 10, 64),
+      material(0x79dcff, 0x218fd0, 2.2),
+      new THREE.Vector3(-9 + i * 7.0, 8.5 + (i % 2) * 2.5, -25 - i * 1.8),
+      lobby
+    );
+    ring.rotation.x = Math.PI / 2;
+    ring.rotation.z = 0.2 + i * 0.22;
+    skyRings.push(ring);
+  }
+  skyRings.forEach((ring, i) => animated.push({ object: ring, type: 'skyRing', speed: 0.16 + i * 0.04, phase: i }));
+
+  // Large luminous gateway sits to the right, never blocking the avatar.
   const portal = new THREE.Group();
-  portal.position.set(0, 3.8, -2.2);
+  portal.position.set(10.8, 4.6, -8.5);
+  portal.rotation.y = -0.12;
   lobby.add(portal);
+
   const portalRing = add(
-    new THREE.TorusGeometry(4.2, 0.22, 16, 64),
-    material(0x8fe7ff, 0x1da8df, 3.4),
+    new THREE.TorusGeometry(4.0, 0.2, 16, 72),
+    material(0x8eeaff, 0x1da8df, 3.8),
     new THREE.Vector3(0, 0, 0),
     portal
   );
-  animated.push({ object: portal, type: 'portal', speed: 0.5 });
   const portalCore = add(
-    new THREE.CircleGeometry(3.75, 48),
-    new THREE.MeshBasicMaterial({ color: 0x12385a, transparent: true, opacity: 0.42, side: THREE.DoubleSide }),
-    new THREE.Vector3(0, 0, 0.08),
+    new THREE.CircleGeometry(3.55, 48),
+    new THREE.MeshBasicMaterial({
+      color: 0x102f4d,
+      transparent: true,
+      opacity: 0.36,
+      side: THREE.DoubleSide
+    }),
+    new THREE.Vector3(0, 0, 0.05),
     portal
   );
+  portalCore.userData.lobbyDecor = true;
+  animated.push({ object: portalRing, type: 'portal', speed: 0.22 });
+  animated.push({ object: portalCore, type: 'portalCore', speed: 0.9 });
 
-  const towers = [];
-  for (let i = 0; i < 12; i += 1) {
-    const a = (i / 12) * Math.PI * 2;
-    const radius = 12 + (i % 3) * 2.4;
-    const h = 5 + (i % 4) * 2.5;
-    const tower = add(
-      new THREE.BoxGeometry(1.7 + (i % 2) * 0.7, h, 1.7 + (i % 2) * 0.7),
-      material(i % 2 ? 0x17283b : 0x20364a, 0x173f66, 0.55),
-      new THREE.Vector3(Math.cos(a) * radius, h / 2, 8 + Math.sin(a) * radius)
-    );
-    towers.push(tower);
-    const strip = add(
-      new THREE.BoxGeometry(0.12, h * 0.72, 0.12),
-      material(0x71d8ff, 0x1d9ed1, 2.6),
-      new THREE.Vector3(tower.position.x, h * 0.5, tower.position.z - 0.91)
-    );
-    strip.userData.lobbyLight = true;
-  }
-
-  // Futuristic hover vehicle, parked to the left of the Home pad.
+  // Premium hover vehicle parked on the left, with animated underglow.
   const vehicle = new THREE.Group();
-  vehicle.position.set(-7.4, 0.55, 8.7);
-  vehicle.rotation.y = -0.18;
+  vehicle.position.set(-8.0, 0.35, 8.5);
+  vehicle.rotation.y = -0.12;
   lobby.add(vehicle);
-  add(new THREE.BoxGeometry(5.2, 0.72, 2.2), material(0x101824, 0x174d77, 1.2), new THREE.Vector3(0, 0.45, 0), vehicle);
-  add(new THREE.BoxGeometry(3.0, 0.72, 1.45), material(0x1a2b3d, 0x286f9d, 1.4), new THREE.Vector3(0.45, 0.92, 0), vehicle);
-  add(new THREE.BoxGeometry(2.1, 0.12, 1.05), material(0x5edbff, 0x27c7ff, 3.4), new THREE.Vector3(0.1, 1.27, 0), vehicle);
-  for (const x of [-1.7, 1.55]) {
-    for (const z of [-0.92, 0.92]) {
+
+  add(new THREE.BoxGeometry(5.6, 0.55, 2.25), material(0x07111b, 0x0c4670, 1.0), new THREE.Vector3(0, 0.45, 0), vehicle);
+  add(new THREE.BoxGeometry(3.4, 0.62, 1.5), material(0x14283b, 0x176a98, 1.5), new THREE.Vector3(0.35, 0.92, 0), vehicle);
+  add(new THREE.BoxGeometry(2.25, 0.08, 1.05), material(0x7ce5ff, 0x25c9ff, 3.8), new THREE.Vector3(0.1, 1.27, 0), vehicle);
+
+  for (const x of [-1.8, 1.65]) {
+    for (const z of [-0.96, 0.96]) {
       const wheel = add(
-        new THREE.CylinderGeometry(0.48, 0.48, 0.18, 20),
-        material(0x07101a, 0x0e5c87, 1.3),
+        new THREE.CylinderGeometry(0.5, 0.5, 0.18, 24),
+        material(0x03070d, 0x0b4f78, 1.6),
         new THREE.Vector3(x, 0.22, z),
         vehicle
       );
       wheel.rotation.x = Math.PI / 2;
     }
   }
+
   const vehicleGlow = add(
-    new THREE.BoxGeometry(4.2, 0.08, 0.16),
-    material(0x62dfff, 0x29c7ff, 3.8),
-    new THREE.Vector3(0, 0.15, -1.02),
+    new THREE.BoxGeometry(4.7, 0.08, 0.14),
+    material(0x62dfff, 0x29c7ff, 4.2),
+    new THREE.Vector3(0, 0.12, -1.08),
     vehicle
   );
-  animated.push({ object: vehicleGlow, type: 'pulse', speed: 2.2 });
+  animated.push({ object: vehicleGlow, type: 'pulse', speed: 2.4 });
 
-  // Small original companion drone.
-  const drone = new THREE.Group();
-  drone.position.set(2.35, 0.65, 8.5);
-  lobby.add(drone);
-  add(new THREE.SphereGeometry(0.72, 16, 12), material(0xeaf4ff, 0x4acfff, 1.4), new THREE.Vector3(0, 0.75, 0), drone);
-  add(new THREE.ConeGeometry(0.18, 0.55, 4), material(0x7fe5ff, 0x2acbff, 3), new THREE.Vector3(-0.42, 1.2, 0), drone);
-  add(new THREE.ConeGeometry(0.18, 0.55, 4), material(0x7fe5ff, 0x2acbff, 3), new THREE.Vector3(0.42, 1.2, 0), drone);
-  add(new THREE.BoxGeometry(0.14, 0.22, 0.14), material(0x06101a, 0x5ce0ff, 3), new THREE.Vector3(0, 0.78, -0.68), drone);
-  animated.push({ object: drone, type: 'drone', speed: 1.5 });
-
-  // Holographic NEXUS sign.
-  const sign = add(
-    new THREE.BoxGeometry(5.4, 1.25, 0.18),
-    material(0x0b1724, 0x2b8dca, 2.2),
-    new THREE.Vector3(0, 4.7, 3.2)
+  const vehicleBeacon = add(
+    new THREE.SphereGeometry(0.11, 10, 8),
+    material(0xffc84a, 0xff9b00, 3.0),
+    new THREE.Vector3(2.2, 1.1, -0.6),
+    vehicle
   );
-  sign.rotation.x = -0.04;
-  const signBars = [];
-  for (let i = 0; i < 5; i += 1) {
+  animated.push({ object: vehicleBeacon, type: 'blink', speed: 3.0 });
+
+  // Original companion: small floating robot beside the avatar.
+  const companion = new THREE.Group();
+  companion.position.set(2.35, 0.35, 8.8);
+  lobby.add(companion);
+  add(new THREE.SphereGeometry(0.7, 18, 14), material(0xe9f4ff, 0x46cfff, 1.7), new THREE.Vector3(0, 0.85, 0), companion);
+  add(new THREE.BoxGeometry(0.36, 0.5, 0.34), material(0x1a3042, 0x1a91c4, 1.7), new THREE.Vector3(0, 0.34, 0), companion);
+  add(new THREE.SphereGeometry(0.13, 10, 8), material(0x07111b, 0x5ce0ff, 3.8), new THREE.Vector3(0, 0.84, -0.62), companion);
+  for (const x of [-0.43, 0.43]) {
+    add(new THREE.ConeGeometry(0.15, 0.48, 4), material(0x78e2ff, 0x2acbff, 3.2), new THREE.Vector3(x, 1.28, 0), companion);
+  }
+  animated.push({ object: companion, type: 'companion', speed: 1.35 });
+
+  // Large NEXUS holographic sign in the left background.
+  const sign = add(
+    new THREE.BoxGeometry(4.8, 1.45, 0.16),
+    material(0x081522, 0x1c79ad, 2.3),
+    new THREE.Vector3(-3.8, 4.2, -8.0)
+  );
+  sign.rotation.y = 0.08;
+  for (let i = 0; i < 6; i += 1) {
     const bar = add(
-      new THREE.BoxGeometry(0.55 + (i % 2) * 0.25, 0.08, 0.08),
-      material(0x8be7ff, 0x2bc8ff, 3.4),
-      new THREE.Vector3(-1.8 + i * 0.9, 4.72, 3.05)
+      new THREE.BoxGeometry(0.48 + (i % 2) * 0.18, 0.07, 0.07),
+      material(0x8ce9ff, 0x2bc8ff, 3.6),
+      new THREE.Vector3(-5.35 + i * 0.62, 4.2, -8.14)
     );
-    signBars.push(bar);
+    animated.push({ object: bar, type: 'sign', phase: i * 0.4 });
   }
 
-  const orbitRings = [];
-  for (let i = 0; i < 3; i += 1) {
-    const ring = add(
-      new THREE.TorusGeometry(5.4 + i * 1.3, 0.055, 8, 64),
-      material(0x6fdcff, 0x2499d0, 2.2),
-      new THREE.Vector3(0, 5.4 + i * 0.5, -1.8)
-    );
-    ring.rotation.x = Math.PI / 2 + i * 0.18;
-    ring.rotation.z = i * 0.45;
-    orbitRings.push(ring);
-  }
+  // Sun / horizon glow gives the lobby a brighter "world" feeling.
+  const sun = add(
+    new THREE.CircleGeometry(5.5, 48),
+    new THREE.MeshBasicMaterial({ color: 0x8fdcff, transparent: true, opacity: 0.16, side: THREE.DoubleSide }),
+    new THREE.Vector3(0, 10.5, -31)
+  );
+  sun.rotation.x = -0.05;
+  animated.push({ object: sun, type: 'sun', speed: 0.2 });
 
+  // Atmospheric particles.
   const particles = new THREE.Group();
-  particles.position.set(0, 2, 8);
+  particles.position.set(0, 1.5, 5);
   lobby.add(particles);
-  for (let i = 0; i < 28; i += 1) {
-    const a = (i / 28) * Math.PI * 2;
-    const r = 7 + (i % 5) * 1.5;
+  for (let i = 0; i < 42; i += 1) {
+    const a = (i / 42) * Math.PI * 2;
+    const r = 6 + (i % 7) * 1.7;
     const p = add(
-      new THREE.SphereGeometry(0.055 + (i % 3) * 0.025, 7, 6),
+      new THREE.SphereGeometry(0.045 + (i % 3) * 0.02, 7, 6),
       material(0x9ceaff, 0x3bcfff, 3.2),
-      new THREE.Vector3(Math.cos(a) * r, 0.4 + (i % 6) * 0.65, Math.sin(a) * r),
+      new THREE.Vector3(Math.cos(a) * r, 0.4 + (i % 9) * 0.62, Math.sin(a) * r),
       particles
     );
-    animated.push({ object: p, type: 'particle', baseY: p.position.y, phase: i * 0.31, speed: 0.65 + (i % 4) * 0.12 });
+    animated.push({ object: p, type: 'particle', baseY: p.position.y, phase: i * 0.31, speed: 0.6 + (i % 4) * 0.12 });
   }
-
-  animated.push({ object: portalRing, type: 'spin', speed: 0.28 });
-  orbitRings.forEach((ring, i) => animated.push({ object: ring, type: 'orbit', speed: 0.16 + i * 0.06, phase: i * 0.8 }));
-  towers.forEach((tower, i) => animated.push({ object: tower, type: 'tower', phase: i * 0.45, speed: 0.7 }));
 
   return {
     update(nowSeconds, lobbyActive) {
       if (!lobbyActive) return;
-      portal.rotation.y += 0.0028;
-      orbitRings.forEach((ring, i) => {
-        ring.rotation.y += 0.002 + i * 0.0007;
-        ring.rotation.x = Math.PI / 2 + Math.sin(nowSeconds * 0.45 + i) * 0.12;
-      });
+
+      plazaRing.rotation.z += 0.0014;
+      plazaRing.material.emissiveIntensity = 2.2 + Math.sin(nowSeconds * 1.15) * 0.7;
+
       animated.forEach((entry) => {
         const o = entry.object;
         if (entry.type === 'pulse') {
-          o.material.emissiveIntensity = 2.8 + Math.sin(nowSeconds * entry.speed) * 1.1;
-        } else if (entry.type === 'drone') {
-          o.position.y = 0.65 + Math.sin(nowSeconds * entry.speed) * 0.16;
-          o.rotation.y = Math.sin(nowSeconds * 0.45) * 0.35;
+          o.material.emissiveIntensity = 3.2 + Math.sin(nowSeconds * entry.speed) * 1.1;
+        } else if (entry.type === 'blink') {
+          o.material.emissiveIntensity = 1.2 + Math.max(0, Math.sin(nowSeconds * entry.speed)) * 3.4;
+        } else if (entry.type === 'companion') {
+          o.position.y = 0.35 + Math.sin(nowSeconds * entry.speed) * 0.14;
+          o.rotation.y = Math.sin(nowSeconds * 0.5) * 0.4;
+        } else if (entry.type === 'portal') {
+          o.rotation.z += entry.speed * 0.012;
+          o.material.emissiveIntensity = 3.0 + Math.sin(nowSeconds * 1.4) * 0.8;
+        } else if (entry.type === 'portalCore') {
+          o.material.opacity = 0.28 + (Math.sin(nowSeconds * entry.speed) + 1) * 0.08;
+        } else if (entry.type === 'skyRing') {
+          o.rotation.y += entry.speed * 0.008;
+          o.rotation.z += entry.speed * 0.004;
+        } else if (entry.type === 'skyline') {
+          o.material.emissiveIntensity = 2.0 + Math.sin(nowSeconds * 0.8 + entry.phase) * 0.8;
+        } else if (entry.type === 'runway') {
+          o.material.emissiveIntensity = 2.4 + Math.sin(nowSeconds * 1.4 + entry.phase) * 0.7;
+        } else if (entry.type === 'sign') {
+          o.material.emissiveIntensity = 2.4 + Math.sin(nowSeconds * 1.7 + entry.phase) * 1.2;
+        } else if (entry.type === 'sun') {
+          o.material.opacity = 0.13 + Math.sin(nowSeconds * entry.speed) * 0.025;
         } else if (entry.type === 'particle') {
           o.position.y = entry.baseY + Math.sin(nowSeconds * entry.speed + entry.phase) * 0.28;
-        } else if (entry.type === 'spin') {
-          o.rotation.z += entry.speed * 0.01;
-        } else if (entry.type === 'tower') {
-          o.position.y = o.geometry.parameters.height / 2 + Math.sin(nowSeconds * entry.speed + entry.phase) * 0.03;
+        } else if (entry.type === 'pulseRing') {
+          o.rotation.z += 0.002;
         }
       });
     }
