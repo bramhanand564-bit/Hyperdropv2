@@ -1,27 +1,45 @@
-# NAX World
+# TIME LOCK — NAX World
 
-Original mobile-first, fully 3D virtual-world game project.
+A standalone, original, mobile-first **fully 3D single-player** puzzle adventure.
 
-## Current build
-**Phase 1 — 3D Foundation / Vertical Slice — IN PROGRESS**
+## Direct game
+The player launches the game and enters the 3D world directly.
 
-The repository now contains a clean browser-playable Three.js foundation with:
-- Fully 3D third-person player avatar
-- Small 3D exploration zone
-- Virtual joystick movement
+This repository does **not** contain:
+- Chat
+- Store
+- Portal
+- Community channels
+- Social feed
+- Multiplayer-first systems
+
+## Chapter 1 prototype
+**The First Fracture**
+
+Current gameplay:
+- Third-person 3D player
+- Touch joystick
 - Swipe camera
-- Jump and sprint
-- Discovery/interact points
-- Local save/load
-- Mobile HUD and mini-map
-- GitHub Pages deployment workflow
+- Jump
+- Walk animation
+- Rewind
+- Freeze
+- Forward
+- Time Fragment objective
+- Time Gate
+- Animated hazards
+- Chapter completion flow
 
-Three.js is pinned to **r0.186.0** for this foundation.
+## Chapter roadmap
+- World 1 — Time Basics: Chapters 1–10
+- World 2 — Broken Time: Chapters 11–20
+- World 3 — Paradox: Chapters 21–30
+- World 4 — Collapse: Chapters 31–40
+- World 5 — Time Zero: Chapters 41–50
 
-## Test
-Open the deployed GitHub Pages site on an Android phone in landscape orientation.
+All characters, environments, animations, story, levels, UI, audio and code are intended to be original.
 
-## Development principle
+## Development rule
 **BUILD SMALL -> TEST -> RECORD -> LOCK -> EXPAND**
 
 See [memory.md](./memory.md) for the persistent project state and rules.
