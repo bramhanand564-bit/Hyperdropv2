@@ -102,3 +102,4 @@ Never claim VERIFIED or LOCKED without target-device evidence.
 - 2026-10-01: Removed the blocking NEXUS start card and booted directly into the 3D Home lobby.
 - 2026-10-01: Diagnosed Android black-screen behavior as a runtime/module-loading risk after the start card was removed; Android APK packaging now rewrites the Three.js import to a local relative module and the resulting APK build passes.
 - 2026-10-01: Physical Android gameplay verification remains pending; build/CI success is not treated as device verification.
+- 2026-10-01: Android APK v33 hardened again after the uploaded 4.76-second black-screen video: the APK now bundles Three.js + game code into a single classic `game.bundle.js` using esbuild, eliminating WebView `file://` ES-module/import-map resolution as a startup dependency. Build v33 passed and the APK asset was inspected to confirm the bundle is present.
