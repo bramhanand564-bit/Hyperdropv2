@@ -1,8 +1,8 @@
 {
-  "name": "nax-world",
+  "name": "nexus-world",
   "version": "0.1.0",
   "private": true,
-  "description": "NAX World — original mobile-first 3D virtual-world foundation.",
+  "description": "NEXUS World — original mobile-first 3D virtual-world foundation.",
   "type": "module",
   "scripts": {
     "check": "node --check src/main.js"
