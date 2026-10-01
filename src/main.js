@@ -1149,7 +1149,6 @@ function loadGame() {
       state.zoneMissionStep = 0;
       state.relayCollected = [false, false, false];
     }
-    nameInput.value = state.savedName;
   } catch {
     // Invalid or partial saves are ignored safely.
   }
