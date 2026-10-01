@@ -964,14 +964,14 @@ function buildPlayer() {
 
   const hair = new THREE.Group();
   hair.position.set(0, 2.56, -0.01);
-  body.add(hair);
+  body.mesh(hair);
   const hairMat = mat(0x070a10, 0.4, 0.55, 0x07172a);
-  add(new THREE.SphereGeometry(0.43, 18, 12), hairMat, new THREE.Vector3(0, 0, 0), hair);
+  mesh(new THREE.SphereGeometry(0.43, 18, 12), hairMat, new THREE.Vector3(0, 0, 0), hair);
 
   // Spiky silhouette.
   for (let i = 0; i < 11; i += 1) {
     const a = (i / 11) * Math.PI * 2;
-    const spike = add(
+    const spike = mesh(
       new THREE.ConeGeometry(0.075, 0.46 + (i % 3) * 0.12, 5),
       hairMat,
       new THREE.Vector3(Math.cos(a) * 0.25, 0.15 + (i % 3) * 0.035, Math.sin(a) * 0.23),
@@ -995,8 +995,8 @@ function buildPlayer() {
   );
 
   // High collar.
-  add(new THREE.BoxGeometry(0.3, 0.48, 0.24), suit2, new THREE.Vector3(-0.36, 1.82, 0.02), body);
-  add(new THREE.BoxGeometry(0.3, 0.48, 0.24), suit2, new THREE.Vector3(0.36, 1.82, 0.02), body);
+  mesh(new THREE.BoxGeometry(0.3, 0.48, 0.24), suit2, new THREE.Vector3(-0.36, 1.82, 0.02), body);
+  mesh(new THREE.BoxGeometry(0.3, 0.48, 0.24), suit2, new THREE.Vector3(0.36, 1.82, 0.02), body);
 
   const shoulderL = mesh(new THREE.SphereGeometry(0.28, 12, 10), silver, new THREE.Vector3(-0.62, 1.73, 0), body);
   const shoulderR = mesh(new THREE.SphereGeometry(0.28, 12, 10), silver, new THREE.Vector3(0.62, 1.73, 0), body);
@@ -1007,10 +1007,10 @@ function buildPlayer() {
   const ra = mesh(new THREE.CapsuleGeometry(0.13, 0.68, 5, 8), suit2, new THREE.Vector3(0.66, 1.34, 0), body);
 
   // Arm guards and glowing wrist plates.
-  add(new THREE.BoxGeometry(0.25, 0.22, 0.32), black, new THREE.Vector3(-0.68, 0.94, -0.04), body);
-  add(new THREE.BoxGeometry(0.25, 0.22, 0.32), black, new THREE.Vector3(0.68, 0.94, -0.04), body);
-  add(new THREE.BoxGeometry(0.15, 0.055, 0.05), blue, new THREE.Vector3(-0.68, 0.94, -0.2), body);
-  add(new THREE.BoxGeometry(0.15, 0.055, 0.05), blue, new THREE.Vector3(0.68, 0.94, -0.2), body);
+  mesh(new THREE.BoxGeometry(0.25, 0.22, 0.32), black, new THREE.Vector3(-0.68, 0.94, -0.04), body);
+  mesh(new THREE.BoxGeometry(0.25, 0.22, 0.32), black, new THREE.Vector3(0.68, 0.94, -0.04), body);
+  mesh(new THREE.BoxGeometry(0.15, 0.055, 0.05), blue, new THREE.Vector3(-0.68, 0.94, -0.2), body);
+  mesh(new THREE.BoxGeometry(0.15, 0.055, 0.05), blue, new THREE.Vector3(0.68, 0.94, -0.2), body);
 
   // Long split coat tails.
   const coatL = mesh(new THREE.BoxGeometry(0.52, 1.45, 0.12), suit, new THREE.Vector3(-0.31, 0.93, 0.34), body);
@@ -1021,31 +1021,31 @@ function buildPlayer() {
   const coatAccentR = mesh(new THREE.BoxGeometry(0.08, 1.32, 0.04), blueSoft, new THREE.Vector3(0.58, 0.93, 0.27), body);
 
   // Belt / utility straps.
-  add(new THREE.BoxGeometry(0.94, 0.12, 0.55), black, new THREE.Vector3(0, 0.94, 0), body);
-  add(new THREE.BoxGeometry(0.18, 0.14, 0.08), silver, new THREE.Vector3(0, 0.94, -0.31), body);
+  mesh(new THREE.BoxGeometry(0.94, 0.12, 0.55), black, new THREE.Vector3(0, 0.94, 0), body);
+  mesh(new THREE.BoxGeometry(0.18, 0.14, 0.08), silver, new THREE.Vector3(0, 0.94, -0.31), body);
 
   const leg = mat(0x111822, 0.58, 0.5);
   const laLeg = mesh(new THREE.CapsuleGeometry(0.16, 0.72, 5, 8), leg, new THREE.Vector3(-0.22, 0.43, 0), body);
   const raLeg = mesh(new THREE.CapsuleGeometry(0.16, 0.72, 5, 8), leg, new THREE.Vector3(0.22, 0.43, 0), body);
 
   // Tactical knee armor.
-  add(new THREE.BoxGeometry(0.34, 0.22, 0.32), silver, new THREE.Vector3(-0.22, 0.63, -0.16), body);
-  add(new THREE.BoxGeometry(0.34, 0.22, 0.32), silver, new THREE.Vector3(0.22, 0.63, -0.16), body);
+  mesh(new THREE.BoxGeometry(0.34, 0.22, 0.32), silver, new THREE.Vector3(-0.22, 0.63, -0.16), body);
+  mesh(new THREE.BoxGeometry(0.34, 0.22, 0.32), silver, new THREE.Vector3(0.22, 0.63, -0.16), body);
 
   const bootL = mesh(new THREE.BoxGeometry(0.39, 0.28, 0.72), black, new THREE.Vector3(-0.22, 0.12, -0.1), body);
   const bootR = mesh(new THREE.BoxGeometry(0.39, 0.28, 0.72), black, new THREE.Vector3(0.22, 0.12, -0.1), body);
-  add(new THREE.BoxGeometry(0.4, 0.065, 0.1), blue, new THREE.Vector3(-0.22, 0.08, -0.43), body);
-  add(new THREE.BoxGeometry(0.4, 0.065, 0.1), blue, new THREE.Vector3(0.22, 0.08, -0.43), body);
+  mesh(new THREE.BoxGeometry(0.4, 0.065, 0.1), blue, new THREE.Vector3(-0.22, 0.08, -0.43), body);
+  mesh(new THREE.BoxGeometry(0.4, 0.065, 0.1), blue, new THREE.Vector3(0.22, 0.08, -0.43), body);
 
   // Back-mounted original energy blade.
   const sword = new THREE.Group();
   sword.position.set(0.43, 1.6, 0.42);
   sword.rotation.z = -0.22;
-  body.add(sword);
-  add(new THREE.BoxGeometry(0.12, 1.45, 0.12), black, new THREE.Vector3(0, 0.18, 0), sword);
-  add(new THREE.BoxGeometry(0.08, 1.22, 0.06), blue, new THREE.Vector3(0, 0.72, 0), sword);
-  add(new THREE.BoxGeometry(0.34, 0.08, 0.08), silver, new THREE.Vector3(0, -0.55, 0), sword);
-  add(new THREE.BoxGeometry(0.12, 0.22, 0.12), silver, new THREE.Vector3(0, -0.38, 0), sword);
+  body.mesh(sword);
+  mesh(new THREE.BoxGeometry(0.12, 1.45, 0.12), black, new THREE.Vector3(0, 0.18, 0), sword);
+  mesh(new THREE.BoxGeometry(0.08, 1.22, 0.06), blue, new THREE.Vector3(0, 0.72, 0), sword);
+  mesh(new THREE.BoxGeometry(0.34, 0.08, 0.08), silver, new THREE.Vector3(0, -0.55, 0), sword);
+  mesh(new THREE.BoxGeometry(0.12, 0.22, 0.12), silver, new THREE.Vector3(0, -0.38, 0), sword);
 
   const backpack = mesh(
     new THREE.BoxGeometry(0.72, 0.92, 0.3),
@@ -1067,13 +1067,31 @@ function buildPlayer() {
     body
   );
 
+  // Micro-details: layered coat seams, shoulder lights, visor glow and boot energy.
+  const seamL = mesh(new THREE.BoxGeometry(0.055, 1.05, 0.045), blueSoft, new THREE.Vector3(-0.34, 1.25, -0.50), body);
+  const seamR = mesh(new THREE.BoxGeometry(0.055, 1.05, 0.045), blueSoft, new THREE.Vector3(0.34, 1.25, -0.50), body);
+  const shoulderLightL = mesh(new THREE.SphereGeometry(0.055, 8, 6), blue, new THREE.Vector3(-0.7, 1.76, -0.12), body);
+  const shoulderLightR = mesh(new THREE.SphereGeometry(0.055, 8, 6), blue, new THREE.Vector3(0.7, 1.76, -0.12), body);
+  const chestCore = mesh(new THREE.OctahedronGeometry(0.13, 1), blue, new THREE.Vector3(0, 1.52, -0.56), body);
+  const coatHemL = mesh(new THREE.BoxGeometry(0.5, 0.07, 0.16), silver, new THREE.Vector3(-0.32, 0.22, 0.34), body);
+  const coatHemR = mesh(new THREE.BoxGeometry(0.5, 0.07, 0.16), silver, new THREE.Vector3(0.32, 0.22, 0.34), body);
+
+  // Glowing trail nodes make the hero silhouette readable on low-end devices.
+  const energyNodes = [];
+  for (const y of [0.55, 1.0, 1.45, 1.95]) {
+    const nodeL = mesh(new THREE.SphereGeometry(0.032, 7, 5), blue, new THREE.Vector3(-0.84, y, 0), body);
+    const nodeR = mesh(new THREE.SphereGeometry(0.032, 7, 5), blue, new THREE.Vector3(0.84, y, 0), body);
+    energyNodes.push(nodeL, nodeR);
+  }
+
   player.group.userData.parts = {
     la, ra, ll: laLeg, rl: raLeg, torso, head, visor, bootL, bootR,
-    backpack, backpackLight, accent, coatL, coatR, sword, visorGlow
+    backpack, backpackLight, accent, coatL, coatR, sword, visorGlow,
+    seamL, seamR, shoulderLightL, shoulderLightR, chestCore, coatHemL, coatHemR, energyNodes
   };
-  player.group.add(body);
+  player.group.mesh(body);
   player.group.position.copy(player.pos);
-  scene.add(player.group);
+  scene.mesh(player.group);
 }
 function applyAvatarStyle() {
   const style = avatarStyles[avatarStyleIndex];
@@ -1089,6 +1107,13 @@ function applyAvatarStyle() {
   parts.accent.material.color.setHex(style.accent);
   parts.backpackLight.material.color.setHex(style.accent);
   parts.visorGlow.material.color.setHex(style.accent);
+  parts.seamL.material.color.setHex(style.accent);
+  parts.seamR.material.color.setHex(style.accent);
+  parts.shoulderLightL.material.color.setHex(style.accent);
+  parts.shoulderLightR.material.color.setHex(style.accent);
+  parts.chestCore.material.color.setHex(style.accent);
+  parts.backpackLight.material.color.setHex(style.accent);
+  parts.energyNodes.forEach((node) => node.material.color.setHex(style.accent));
 }
 function cycleAvatarStyle() {
   avatarStyleIndex = (avatarStyleIndex + 1) % avatarStyles.length;
@@ -2398,6 +2423,9 @@ function updatePlayer(dt) {
     p.coatL.rotation.z = -0.06 + Math.sin(player.walkPhase * 0.5) * 0.06;
     p.coatR.rotation.z = 0.06 - Math.sin(player.walkPhase * 0.5) * 0.06;
     p.sword.rotation.z = -0.22 + Math.sin(player.walkPhase * 0.5) * 0.025;
+    p.chestCore.rotation.y += 0.035;
+    p.coatHemL.rotation.z = Math.sin(player.walkPhase) * 0.08;
+    p.coatHemR.rotation.z = -Math.sin(player.walkPhase) * 0.08;
   } else {
     // Simple idle pose so the opening scene feels alive.
     const idle = Math.sin(performance.now() * 0.0022) * 0.045;
@@ -2408,6 +2436,12 @@ function updatePlayer(dt) {
     p.coatL.rotation.z = THREE.MathUtils.lerp(p.coatL.rotation.z, -0.06 + idle * 0.7, Math.min(1, dt * 4));
     p.coatR.rotation.z = THREE.MathUtils.lerp(p.coatR.rotation.z, 0.06 - idle * 0.7, Math.min(1, dt * 4));
     p.sword.rotation.z = THREE.MathUtils.lerp(p.sword.rotation.z, -0.22 + idle * 0.3, Math.min(1, dt * 4));
+    p.head.rotation.y = THREE.MathUtils.lerp(p.head.rotation.y, Math.sin(performance.now() * 0.0007) * 0.045, Math.min(1, dt * 2.5));
+    p.head.rotation.z = THREE.MathUtils.lerp(p.head.rotation.z, Math.sin(performance.now() * 0.0011) * 0.018, Math.min(1, dt * 2.5));
+    p.chestCore.rotation.y += 0.022;
+    p.chestCore.scale.setScalar(1 + Math.sin(performance.now() * 0.004) * 0.08);
+    p.coatHemL.rotation.z = THREE.MathUtils.lerp(p.coatHemL.rotation.z, idle * 0.8, Math.min(1, dt * 4));
+    p.coatHemR.rotation.z = THREE.MathUtils.lerp(p.coatHemR.rotation.z, -idle * 0.8, Math.min(1, dt * 4));
     p.torso.position.y = 1.3 + Math.sin(performance.now() * 0.0022) * 0.018;
   }
 
