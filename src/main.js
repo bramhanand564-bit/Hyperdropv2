@@ -945,13 +945,13 @@ function applyAvatarStyle() {
   parts.accent.material.color.setHex(style.accent);
   parts.backpackLight.material.color.setHex(style.accent);
   parts.visorGlow.material.color.setHex(style.accent);
-  parts.seamL.material.color.setHex(style.accent);
-  parts.seamR.material.color.setHex(style.accent);
-  parts.shoulderLightL.material.color.setHex(style.accent);
-  parts.shoulderLightR.material.color.setHex(style.accent);
-  parts.chestCore.material.color.setHex(style.accent);
-  parts.backpackLight.material.color.setHex(style.accent);
-  parts.energyNodes.forEach((node) => node.material.color.setHex(style.accent));
+  if (parts.seamL) parts.seamL.material.color.setHex(style.accent);
+  if (parts.seamR) parts.seamR.material.color.setHex(style.accent);
+  if (parts.shoulderLightL) parts.shoulderLightL.material.color.setHex(style.accent);
+  if (parts.shoulderLightR) parts.shoulderLightR.material.color.setHex(style.accent);
+  if (parts.chestCore) parts.chestCore.material.color.setHex(style.accent);
+  if (parts.backpackLight) parts.backpackLight.material.color.setHex(style.accent);
+  if (parts.energyNodes) parts.energyNodes.forEach((node) => node.material.color.setHex(style.accent));
 }
 function cycleAvatarStyle() {
   avatarStyleIndex = (avatarStyleIndex + 1) % avatarStyles.length;
