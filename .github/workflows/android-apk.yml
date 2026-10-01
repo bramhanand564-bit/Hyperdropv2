@@ -1,26 +1,50 @@
-name: Build NEXUS Android APK
+name: Build APK
+
 on:
   push:
-    branches: [ main ]
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
+
 permissions:
   contents: read
+
+concurrency:
+  group: nexus-apk-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build-apk:
+  build:
+    name: Build NEXUS APK
     runs-on: ubuntu-latest
+    env:
+      GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
-      - uses: android-actions/setup-android@v3
-      - run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
-      - name: Download Gradle
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Download Gradle 8.9
         run: |
           curl -fsSL https://services.gradle.org/distributions/gradle-8.9-bin.zip -o /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /tmp
-      - name: Prepare offline game assets
+
+      - name: Prepare game assets
         run: |
           mkdir -p android/app/src/main/assets/src
           cp index.html android/app/src/main/assets/index.html
@@ -30,25 +54,25 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           p=Path("android/app/src/main/assets/index.html")
-          s=p.read_text().replace('"three":"https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js"','"three":"./src/three.module.js"')
+          s=p.read_text()
+          s=s.replace('"three":"https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js"', '"three":"./src/three.module.js"')
           p.write_text(s)
           PY
-      - name: Build APK
-        run: /tmp/gradle-8.9/bin/gradle -p android assembleDebug --no-daemon
-      - name: Verify and package
+
+      - name: Build debug APK
+        run: |
+          chmod +x gradlew
+          ./gradlew -p android assembleDebug --no-daemon --stacktrace
+
+      - name: Verify APK
         run: |
           test -s android/app/build/outputs/apk/debug/app-debug.apk
-          mkdir -p dist
-          cp android/app/build/outputs/apk/debug/app-debug.apk dist/NEXUS-World-debug.apk
-          cd dist
-          zip -9 NEXUS-World-debug-APK.zip NEXUS-World-debug.apk
-          sha256sum NEXUS-World-debug.apk NEXUS-World-debug-APK.zip
-      - name: Upload APK and ZIP
+          ls -lh android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: NEXUS-World-APK
-          path: |
-            dist/NEXUS-World-debug.apk
-            dist/NEXUS-World-debug-APK.zip
+          name: nexus-world-apk-${{ github.run_number }}
+          path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
