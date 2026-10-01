@@ -67,7 +67,8 @@ const state = {
   checkpoint: new THREE.Vector3(-20, 0, -80),
   soundOn: true,
   quality: 'HIGH',
-  lastAlertAt: 0
+  lastAlertAt: 0,
+  actionLockUntil: 0
 };
 
 const input = { x: 0, y: 0, jump: false, sprint: false };
@@ -104,6 +105,8 @@ const zoneGroups = {
   OUTPOST: new THREE.Group()
 };
 const SAVE_KEY = 'nexus-world-v04-save';
+const LEGACY_SAVE_KEYS = ['nexus-world-v03-save'];
+const ACTION_COOLDOWN_MS = 280;
 
 scene.add(zoneGroups.HUB);
 scene.add(zoneGroups.OUTPOST);
@@ -722,7 +725,18 @@ function saveGame() {
 
 function loadGame() {
   try {
-    const raw = localStorage.getItem(SAVE_KEY);
+    let raw = localStorage.getItem(SAVE_KEY);
+
+    if (!raw) {
+      for (const legacyKey of LEGACY_SAVE_KEYS) {
+        const legacyRaw = localStorage.getItem(legacyKey);
+        if (legacyRaw) {
+          raw = legacyRaw;
+          break;
+        }
+      }
+    }
+
     if (!raw) return;
     const payload = JSON.parse(raw);
     if (!payload || typeof payload !== 'object') return;
@@ -731,9 +745,9 @@ function loadGame() {
     state.xp = Number(payload.xp || 0);
     state.credits = Number(payload.credits || 0);
     state.level = Math.max(1, Number(payload.level || 1));
-    state.missionStep = Math.max(0, Number(payload.missionStep || 0));
-    state.zoneMissionStep = Math.max(0, Number(payload.zoneMissionStep || 0));
-    state.activeZone = payload.activeZone === 'OUTPOST' ? 'OUTPOST' : 'HUB';
+    state.missionStep = THREE.MathUtils.clamp(Number(payload.missionStep || 0), 0, 2);
+    state.zoneMissionStep = THREE.MathUtils.clamp(Number(payload.zoneMissionStep || 0), 0, 3);
+    state.activeZone = payload.activeZone === 'OUTPOST' && state.missionStep >= 2 ? 'OUTPOST' : 'HUB';
 
     if (Array.isArray(payload.relayCollected)) {
       state.relayCollected = [!!payload.relayCollected[0], !!payload.relayCollected[1], !!payload.relayCollected[2]];
@@ -757,6 +771,13 @@ function loadGame() {
 
     state.soundOn = payload.soundOn !== false;
     state.quality = payload.quality === 'LOW' || payload.quality === 'MEDIUM' ? payload.quality : 'HIGH';
+    if (state.relayCollected.every(Boolean) && state.zoneMissionStep < 2) {
+      state.zoneMissionStep = 2;
+    }
+    if (state.zoneMissionStep >= 2 && state.activeZone === 'HUB' && state.missionStep < 2) {
+      state.zoneMissionStep = 0;
+      state.relayCollected = [false, false, false];
+    }
     nameInput.value = state.savedName;
   } catch {
     // Invalid or partial saves are ignored safely.
@@ -945,6 +966,11 @@ function startMission() {
 }
 
 function beginChallenge(type) {
+  if (state.activeZone !== 'HUB') {
+    addAlert('CHALLENGE PAD', 'Challenges are available from the Central Hub.');
+    return;
+  }
+
   if (state.challengeActive) {
     addAlert('CHALLENGE BUSY', 'Finish or reset the current challenge first.');
     return;
@@ -1009,6 +1035,7 @@ function finishSignalChallenge() {
 
 function failChallenge() {
   state.challengeActive = false;
+  state.challengeStart = 0;
   challengeTargets.forEach((marker) => { marker.visible = false; });
   beacons.forEach((beacon) => {
     beacon.visible = false;
@@ -1152,11 +1179,13 @@ function completeVerticalSlice() {
 }
 
 function transitionToZone(zone) {
-  state.activeZone = zone === 'OUTPOST' ? 'OUTPOST' : 'HUB';
+  state.activeZone = zone === 'OUTPOST' && state.missionStep >= 2 ? 'OUTPOST' : 'HUB';
   state.challengeActive = false;
+  state.actionLockUntil = performance.now() + ACTION_COOLDOWN_MS;
   resetChallengeVisuals();
 
   if (state.activeZone === 'OUTPOST') {
+    if (state.zoneMissionStep > 3) state.zoneMissionStep = 3;
     player.pos.set(0, 0, -64);
     if (state.zoneMissionStep === 0) {
       state.checkpoint.set(0, 0, -64);
@@ -1209,6 +1238,10 @@ function nearestInteractable() {
 }
 
 function handleAction() {
+  const now = performance.now();
+  if (now < state.actionLockUntil) return;
+  state.actionLockUntil = now + ACTION_COOLDOWN_MS;
+
   const target = nearestInteractable();
 
   if (!target) {
@@ -1554,6 +1587,7 @@ function restoreMissionWorld() {
 }
 
 function startGame() {
+  state.actionLockUntil = 0;
   loadGame();
   state.savedName = (nameInput.value || state.savedName || 'Explorer').trim().slice(0, 18) || 'Explorer';
   state.started = true;
