@@ -46,6 +46,45 @@
     <div id="interaction-prompt" class="hidden">INTERACT</div>
     <div id="hint">Swipe anywhere on the right side to rotate camera</div>
 
+    <section id="lobby-ui" class="nexus-lobby-ui hidden" aria-label="NEXUS Home lobby">
+      <div class="lobby-topbar">
+        <div class="profile-block">
+          <div class="profile-avatar">N</div>
+          <div><b id="lobby-player-name">NEXPLORER</b><span>LEVEL <strong id="lobby-level">1</strong></span></div>
+        </div>
+        <div class="lobby-currency"><span>◉ <b id="lobby-credits">0</b></span><span>◇ <b>50</b></span><button data-lobby-action="settings">⚙</button></div>
+      </div>
+
+      <nav class="lobby-nav">
+        <button class="active" data-lobby-action="lobby">⌂ <span>LOBBY</span></button>
+        <button data-lobby-action="character">◉ <span>CHARACTER</span></button>
+        <button data-lobby-action="inventory">▣ <span>INVENTORY</span></button>
+        <button data-lobby-action="store">▰ <span>STORE</span></button>
+        <button data-lobby-action="missions">☷ <span>MISSIONS</span></button>
+        <button data-lobby-action="events">◇ <span>EVENTS</span></button>
+        <button data-lobby-action="rank">♛ <span>RANK</span></button>
+        <button data-lobby-action="settings">⚙ <span>SETTINGS</span></button>
+      </nav>
+
+      <div class="lobby-brand">
+        <span>NEXUS</span>
+        <small>HOME • CENTRAL HUB</small>
+      </div>
+
+      <div class="lobby-mode-stack">
+        <button class="mode-card" data-lobby-action="events"><b>WORLD EVENT</b><span>Explore the live world</span><i>›</i></button>
+        <button class="mode-card" data-lobby-action="missions"><b>MISSION RUN</b><span>Continue your signal journey</span><i>›</i></button>
+        <button class="mode-card" data-lobby-action="character"><b>CHARACTER</b><span>Choose your NEXUS style</span><i>›</i></button>
+      </div>
+
+      <div class="lobby-start-area">
+        <div class="lobby-location">⌖ CENTRAL HUB <span>•</span> FREE EXPLORE</div>
+        <button id="lobby-start" class="lobby-start">START <span>›</span></button>
+      </div>
+
+      <div class="lobby-chat">▰ <span>WORLD</span> <b>NEX:</b> Welcome to NEXUS Home.</div>
+    </section>
+
     <section id="radar-panel" class="hidden" aria-label="Zone radar">
       <div class="radar-head">
         <b id="radar-title">ZONE RADAR</b>
