@@ -168,3 +168,4 @@ Before changing a LOCKED system:
 - Lumen Wilds now has a Basin Gate that unlocks after the Shrine objective.
 - Basin has hazard recovery, collision geometry, radar entries, navigation targets, save/load state and a timed Resonance Surge world event.
 - V0.4 remains at 20% total-project progress until the milestone is completed and verified; no percentage inflation is used for partial implementation.
+- Opening experience foundation: permanent NEXUS Home spawn pad at the Central Hub, framed opening camera, and a lightweight player idle pose so a new session begins with the avatar visibly standing in a defined home location.
