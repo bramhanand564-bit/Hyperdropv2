@@ -2478,17 +2478,18 @@ function updateCamera(dt) {
   const target = player.pos.clone().add(new THREE.Vector3(0, targetHeight, 0));
 
   if (state.activeZone === 'HUB' && state.lobbyActive) {
-    const t = performance.now() * 0.00035;
-    const orbitYaw = Math.PI + Math.sin(t) * 0.18;
-    const orbitPitch = 0.24 + Math.sin(t * 0.7) * 0.025;
-    const orbitDistance = 12.2;
+    // Cinematic home framing: avatar centered, vehicle left, skyline open behind.
+    const t = performance.now() * 0.00028;
+    const orbitYaw = Math.PI + Math.sin(t) * 0.055;
+    const orbitPitch = 0.27 + Math.sin(t * 0.65) * 0.018;
+    const orbitDistance = 13.6;
     const offset = new THREE.Vector3(
       Math.sin(orbitYaw) * Math.cos(orbitPitch) * orbitDistance,
-      Math.sin(orbitPitch) * orbitDistance + 1.2,
+      Math.sin(orbitPitch) * orbitDistance + 1.05,
       Math.cos(orbitYaw) * Math.cos(orbitPitch) * orbitDistance
     );
-    camera.position.lerp(target.clone().add(offset), Math.min(1, dt * 3.5));
-    camera.lookAt(target.clone().add(new THREE.Vector3(0, 0.7, -1.4)));
+    camera.position.lerp(target.clone().add(offset), Math.min(1, dt * 3.2));
+    camera.lookAt(target.clone().add(new THREE.Vector3(0, 0.75, -1.8)));
     return;
   }
   const offset = new THREE.Vector3(
@@ -2574,7 +2575,7 @@ function startGame() {
     player.group.rotation.y = Math.PI;
     cameraState.yaw = Math.PI;
     cameraState.pitch = 0.30;
-    cameraState.distance = 8.6;
+    cameraState.distance = 9.4;
   }
 
   state.lobbyActive = state.activeZone === 'HUB';
@@ -2659,7 +2660,7 @@ player.pos.set(10.5, 0, 8);
 player.group.position.copy(player.pos);
 player.group.rotation.y = Math.PI;
 cameraState.yaw = Math.PI;
-cameraState.pitch = 0.27;
+cameraState.pitch = 0.28;
 cameraState.distance = 10.0;
 applyAvatarStyle();
 setZoneVisuals();
