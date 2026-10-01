@@ -942,9 +942,9 @@ function applyAvatarStyle() {
   parts.ra.material.color.setHex(style.suit);
   parts.ll.material.color.setHex(0x111822);
   parts.rl.material.color.setHex(0x111822);
-  parts.backpack.material.color.setHex(0x050a10);
-  parts.accent.material.color.setHex(style.accent);
-  parts.backpackLight.material.color.setHex(style.accent);
+  if (parts.backpack) parts.backpack.material.color.setHex(0x050a10);
+  if (parts.accent) parts.accent.material.color.setHex(style.accent);
+  if (parts.backpackLight) parts.backpackLight.material.color.setHex(style.accent);
   parts.visorGlow.material.color.setHex(style.accent);
   if (parts.seamL) parts.seamL.material.color.setHex(style.accent);
   if (parts.seamR) parts.seamR.material.color.setHex(style.accent);
