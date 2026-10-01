@@ -2230,6 +2230,7 @@ function updatePlayer(dt) {
 
   player.group.position.copy(player.pos);
 
+  const p = player.group.userData.parts;
   if (magnitude > 0.01) {
     const targetYaw = Math.atan2(move.x, move.z);
     player.group.rotation.y = THREE.MathUtils.lerp(
@@ -2240,12 +2241,21 @@ function updatePlayer(dt) {
     player.walkPhase += dt * (input.sprint ? 14 : 9) * magnitude;
   }
 
-  const swing = Math.sin(player.walkPhase) * 0.55;
-  const p = player.group.userData.parts;
-  p.la.rotation.x = swing;
-  p.ra.rotation.x = -swing;
-  p.ll.rotation.x = -swing;
-  p.rl.rotation.x = swing;
+  if (magnitude > 0.01) {
+    const swing = Math.sin(player.walkPhase) * 0.55;
+    p.la.rotation.x = swing;
+    p.ra.rotation.x = -swing;
+    p.ll.rotation.x = -swing;
+    p.rl.rotation.x = swing;
+  } else {
+    // Simple idle pose so the opening scene feels alive.
+    const idle = Math.sin(performance.now() * 0.0022) * 0.045;
+    p.la.rotation.x = THREE.MathUtils.lerp(p.la.rotation.x, idle, Math.min(1, dt * 5));
+    p.ra.rotation.x = THREE.MathUtils.lerp(p.ra.rotation.x, -idle, Math.min(1, dt * 5));
+    p.ll.rotation.x = THREE.MathUtils.lerp(p.ll.rotation.x, -idle * 0.35, Math.min(1, dt * 5));
+    p.rl.rotation.x = THREE.MathUtils.lerp(p.rl.rotation.x, idle * 0.35, Math.min(1, dt * 5));
+    p.torso.position.y = 1.3 + Math.sin(performance.now() * 0.0022) * 0.018;
+  }
 
   if (state.activeZone === 'OUTPOST') {
     if (player.pos.distanceTo(state.checkpoint) > 1.2) {
