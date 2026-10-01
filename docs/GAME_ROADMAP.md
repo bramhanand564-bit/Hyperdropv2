@@ -23,7 +23,11 @@ The total-game percentage is a project-management milestone metric, not a percen
 - V0.9 Polish + Optimization = 85%
 - V1.0 Complete Core Game = 100%
 
-Current project target after this implementation: V0.3 is IN PROGRESS; total-game percentage remains **10%** until the V0.3 milestone is completed and tested.
+Current project target: **V0.3 VERTICAL SLICE IN PROGRESS**
+Current total-game percentage: **10%**
+Remaining: **90%**
+
+The V0.3 milestone is not credited to the total until its remaining systems are completed and the target-device test pass is recorded.
 
 ## 01 — V0.1 FOUNDATION — 0% -> 5%
 - [x] Three.js runtime foundation
@@ -51,22 +55,34 @@ Current project target after this implementation: V0.3 is IN PROGRESS; total-gam
 - [ ] Formal LOCKED sign-off
 
 ## 03 — V0.3 VERTICAL SLICE — 10% -> 20%
-- [ ] One polished playable zone
-- [ ] Full first mission chain
-- [x] Three challenge types
-- [ ] Better avatar customization
-- [x] NPC prototype
-- [ ] Sound pass
-- [ ] Map/radar pass
-- [ ] Settings/graphics controls
-- [ ] Checkpoint/respawn polish
-- [ ] Mobile performance pass
+- [x] One substantial playable zone: Lumen Wilds
+- [x] Full first mission chain: hub mastery -> zone entry -> Scout -> relays -> Shrine -> return gate
+- [x] Three challenge types: Signal Run, Memory Grid, Core Delivery
+- [x] Better avatar customization: three persistent style variants
+- [x] NPC prototype and contextual dialogue
+- [x] Sound pass: lightweight WebAudio feedback cues
+- [x] Map/radar pass: functional zone radar panel
+- [x] Settings/graphics controls: High/Medium/Low + sound toggle
+- [x] Checkpoint/respawn pass with Lumen Wilds hazard recovery
+- [ ] Mobile performance pass on physical Android hardware
+- [ ] Formal V0.3 target-device verification
+- [ ] Formal V0.3 LOCKED sign-off
+
+### V0.3 functional slice now present
+Central Hub -> Central Gate -> Lumen Wilds -> Scout -> three relays -> Lumen Shrine -> return gate.
+
+Optional discovery:
+- 3 Lumen shards
+- checkpoint synchronization
+- hazard respawn
+- replayable challenge pads
+- local progression/save
 
 ## 04 — V0.4 WORLD EXPANSION — 20% -> 30%
 - [ ] Second large zone
-- [ ] Zone transitions
+- [ ] Zone transitions beyond the first slice
 - [ ] World event manager
-- [ ] Environmental secrets
+- [ ] Environmental secrets expansion
 - [ ] Multiple quest chains
 - [ ] Better world streaming
 
@@ -106,7 +122,7 @@ Current project target after this implementation: V0.3 is IN PROGRESS; total-gam
 - [ ] LOD / draw-call optimization
 - [ ] Texture and memory budget
 - [ ] Battery-aware graphics
-- [ ] Low/medium/high graphics modes
+- [x] Low/medium/high graphics modes
 - [ ] Audio polish
 - [ ] Accessibility pass
 - [ ] Save robustness
