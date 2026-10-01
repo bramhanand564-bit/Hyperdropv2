@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#05070d">
-  <title>ORIGINAL VIRTUAL WORLD</title>
+  <title>NEXUS — Original Virtual World</title>
   <link rel="stylesheet" href="./src/styles.css">
   <script type="importmap">
     {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js"}}
@@ -16,7 +16,7 @@
 
   <section id="start-screen" class="screen">
     <div class="start-card">
-      <div class="logo">NW</div>
+      <div class="logo">NX</div>
       <p class="eyebrow">ORIGINAL • SOLO • FULL 3D</p>
       <h1>NEXUS</h1>
       <p>Enter a living virtual world built around exploration, challenges, discovery and progression.</p>
@@ -48,7 +48,7 @@
       <strong id="mission-title">FIRST SIGNAL</strong>
       <p id="objective">Find the signal terminal.</p>
       <div class="progress-row">
-        <span id="progress-label">0 / 4</span>
+        <span id="progress-label">0 / 1</span>
         <div class="progress-track"><i id="progress-fill"></i></div>
       </div>
     </section>
@@ -56,6 +56,14 @@
     <div id="alert-stack"></div>
     <div id="interaction-prompt" class="hidden">INTERACT</div>
     <div id="hint">Swipe anywhere on the right side to rotate camera</div>
+
+    <section id="radar-panel" class="hidden" aria-label="Zone radar">
+      <div class="radar-head">
+        <b id="radar-title">ZONE RADAR</b>
+        <button id="radar-close" aria-label="Close radar">CLOSE</button>
+      </div>
+      <div id="radar-content"></div>
+    </section>
 
     <div id="touch-controls">
       <div id="joystick" aria-label="Movement joystick"><div id="stick"></div></div>
@@ -71,11 +79,12 @@
 
   <section id="complete" class="screen hidden">
     <div class="start-card">
-      <div class="logo">01</div>
-      <p class="eyebrow">CORE BUILD COMPLETE</p>
-      <h2>SIGNAL RUN CLEARED</h2>
-      <p id="complete-copy">The first playable challenge loop is complete.</p>
+      <div class="logo">NX</div>
+      <p class="eyebrow">VERTICAL SLICE CHECKPOINT</p>
+      <h2>ZONE CHAIN CLEARED</h2>
+      <p id="complete-copy">The first zone mission chain is complete.</p>
       <button id="continue-btn" class="primary">RETURN TO HUB</button>
+      <small>Progress is saved locally on this device.</small>
     </div>
   </section>
 </main>
