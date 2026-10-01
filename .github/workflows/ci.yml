@@ -15,4 +15,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: JavaScript syntax check
-        run: node --check src/main.js && node --check src/lobby.js
+        run: >-
+          node --check src/main.js &&
+          node --check src/lobby.js &&
+          node --check src/animation/heroRig.js &&
+          node --check src/animation/heroAnimator.js &&
+          node --check src/animation/hero2d.js &&
+          node --check src/animation/hero2dClips.js
+      - name: Verify animation architecture
+        run: node tools/verify-animation-architecture.mjs
