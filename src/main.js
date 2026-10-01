@@ -2538,6 +2538,12 @@ function restoreMissionWorld() {
 }
 
 function startGame() {
+  const bootDiagnostic = $('#boot-diagnostic');
+  if (bootDiagnostic) {
+    bootDiagnostic.classList.add('boot-ready');
+    setTimeout(() => bootDiagnostic.remove(), 320);
+  }
+  window.__nexusBoot.ok = true;
   state.actionLockUntil = 0;
   loadGame();
   state.savedName = (state.savedName || 'Explorer').trim().slice(0, 18) || 'Explorer';
