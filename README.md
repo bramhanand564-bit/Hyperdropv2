@@ -22,6 +22,7 @@ Total game development completion: 20%
 - Sprint
 - Original procedural avatar
 - Three persistent avatar styles
+- Permanent NEXUS Home opening spawn with framed camera and idle avatar presentation
 - Mission terminal
 - Three challenge pads
 - Signal beacons
@@ -84,7 +85,7 @@ This is a browser-based Three.js prototype. Use a static server or GitHub Pages.
 
 ## Verification status
 
-The V0.3 implementation is complete and tracked at 20% development progress. Physical Android verification and formal V0.3 LOCKED sign-off remain pending.
+V0.4 World Expansion is in progress at 20% development progress. The opening Home spawn is implemented, but physical Android verification and the V0.4 QA/LOCK sign-off remain pending.
 
 
 
