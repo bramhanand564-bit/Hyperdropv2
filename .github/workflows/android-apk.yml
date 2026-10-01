@@ -31,13 +31,38 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-          cache: gradle
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Locate preinstalled Android SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          if [ ! -d "$SDK_ROOT" ]; then
+            echo "Android SDK not found at $SDK_ROOT"
+            exit 1
+          fi
+
+          SDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -type f -name sdkmanager 2>/dev/null | head -n 1 || true)"
+          if [ -z "$SDKMANAGER" ]; then
+            echo "sdkmanager not found under $SDK_ROOT/cmdline-tools"
+            exit 1
+          fi
+
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "SDKMANAGER=$SDKMANAGER" >> "$GITHUB_ENV"
+          echo "$SDK_ROOT/platform-tools" >> "$GITHUB_PATH"
+          echo "$(dirname "$SDKMANAGER")" >> "$GITHUB_PATH"
+
+      - name: Accept Android SDK licenses
+        shell: bash
+        run: |
+          yes | "$SDKMANAGER" --licenses >/dev/null 2>&1 || true
 
       - name: Install Android SDK packages
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+        shell: bash
+        run: |
+          "$SDKMANAGER" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Download Gradle 8.9
         run: |
@@ -46,6 +71,8 @@ jobs:
 
       - name: Prepare game assets
         run: |
+          set -euo pipefail
+          rm -rf android/app/src/main/assets
           mkdir -p android/app/src/main/assets/src
           cp index.html android/app/src/main/assets/index.html
           cp src/main.js android/app/src/main/assets/src/main.js
@@ -53,26 +80,47 @@ jobs:
           curl -fsSL https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js -o android/app/src/main/assets/src/three.module.js
           python3 - <<'PY'
           from pathlib import Path
-          p=Path("android/app/src/main/assets/index.html")
-          s=p.read_text()
-          s=s.replace('"three":"https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js"', '"three":"./src/three.module.js"')
-          p.write_text(s)
+          p = Path("android/app/src/main/assets/index.html")
+          s = p.read_text()
+          old = '"three":"https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js"'
+          new = '"three":"./src/three.module.js"'
+          if old not in s:
+              raise SystemExit("Three.js import map entry not found")
+          p.write_text(s.replace(old, new))
           PY
 
       - name: Build debug APK
         run: |
-          chmod +x gradlew
-          ./gradlew -p android assembleDebug --no-daemon --stacktrace
+          set -euo pipefail
+          /tmp/gradle-8.9/bin/gradle -p android assembleDebug --no-daemon --stacktrace
 
       - name: Verify APK
         run: |
+          set -euo pipefail
           test -s android/app/build/outputs/apk/debug/app-debug.apk
-          ls -lh android/app/build/outputs/apk/debug/app-debug.apk
+          mkdir -p dist
+          cp android/app/build/outputs/apk/debug/app-debug.apk dist/NEXUS-World-debug.apk
+          ls -lh dist/NEXUS-World-debug.apk
+
+      - name: Package APK ZIP
+        run: |
+          set -euo pipefail
+          cd dist
+          zip -9 NEXUS-World-debug-APK.zip NEXUS-World-debug.apk
+          ls -lh NEXUS-World-debug-APK.zip
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: nexus-world-apk-${{ github.run_number }}
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: dist/NEXUS-World-debug.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-world-apk-zip-${{ github.run_number }}
+          path: dist/NEXUS-World-debug-APK.zip
           if-no-files-found: error
           retention-days: 30
