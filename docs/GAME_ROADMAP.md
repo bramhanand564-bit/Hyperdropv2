@@ -7,7 +7,7 @@ No protected characters, names, dialogue, maps, scenes, logos, music, assets or 
 ## Development rule
 BUILD SMALL -> TEST -> RECORD -> LOCK -> EXPAND
 
-A system is only marked VERIFIED/LOCKED after target-device testing evidence exists.
+A system is only marked VERIFIED/LOCKED after target-device testing evidence exists. Development percentage and verification status are tracked separately so untested hardware claims are never treated as completed verification.
 
 ## Completion metric
 The total-game percentage is a project-management milestone metric, not a percentage of source-code lines.
@@ -23,11 +23,11 @@ The total-game percentage is a project-management milestone metric, not a percen
 - V0.9 Polish + Optimization = 85%
 - V1.0 Complete Core Game = 100%
 
-Current project target: **V0.3 VERTICAL SLICE IN PROGRESS**
-Current total-game percentage: **10%**
-Remaining: **90%**
+Current project target: **V0.4 WORLD EXPANSION READY**
+Current total-game development percentage: **20%**
+Remaining: **80%**
 
-The V0.3 milestone is not credited to the total until its remaining systems are completed and the target-device test pass is recorded.
+V0.3 implementation is complete and the project is now tracked at 20% for development progress. Physical Android verification remains a separate release-readiness gate and is not claimed as completed.
 
 ## 01 — V0.1 FOUNDATION — 0% -> 5%
 - [x] Three.js runtime foundation
@@ -68,6 +68,8 @@ The V0.3 milestone is not credited to the total until its remaining systems are 
 - [ ] Formal V0.3 target-device verification
 - [ ] Formal V0.3 LOCKED sign-off
 
+V0.3 implementation milestone: **COMPLETE (20% development progress)**. Device verification is still pending.
+
 ### V0.3 functional slice now present
 Central Hub -> Central Gate -> Lumen Wilds -> Scout -> three relays -> Lumen Shrine -> return gate.
 
@@ -78,7 +80,7 @@ Optional discovery:
 - replayable challenge pads
 - local progression/save
 
-## 04 — V0.4 WORLD EXPANSION — 20% -> 30%
+## 04 — V0.4 WORLD EXPANSION — 20% -> 30% — NEXT BLOCK
 - [ ] Second large zone
 - [ ] Zone transitions beyond the first slice
 - [ ] World event manager
