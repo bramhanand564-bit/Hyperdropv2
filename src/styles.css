@@ -91,8 +91,8 @@ header{position:absolute;top:max(10px,env(safe-area-inset-top));left:0;right:0;p
 
 
 @media (orientation:landscape){
-  .screen{place-items:center;padding:24px 7vw;background:linear-gradient(90deg,rgba(2,5,10,.74),rgba(2,5,10,.12) 58%,rgba(2,5,10,.38))}
-  .start-card{width:min(430px,42vw);padding:22px;border-radius:24px}
+  .screen{place-items:center start;padding:24px 7vw;background:linear-gradient(90deg,rgba(2,5,10,.70),rgba(2,5,10,.10) 50%,rgba(2,5,10,.22))}
+  .start-card{width:min(430px,40vw);padding:22px;border-radius:24px;position:relative;z-index:2}
   .start-card h1{font-size:clamp(48px,7vw,76px)}
   .start-card p{font-size:13px}
   .start-card label{margin:14px 0 10px}
