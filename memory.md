@@ -94,3 +94,4 @@ Never claim VERIFIED or LOCKED without target-device evidence.
 - 2026-10-01: Hardened V0.3 state handling with action cooldowns, legacy-save migration and impossible-state normalization.
 - 2026-10-01: Added quality presets for camera/fog/pixel ratio plus lightweight FPS/draw-call telemetry for mobile performance testing.
 - 2026-10-01: Fixed local reset so both current and legacy saves are cleared.
+- 2026-10-01: Added persistent challenge-clear and best-time records for Signal Run, Memory Grid and Core Delivery.
