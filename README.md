@@ -49,6 +49,7 @@ Total game development completion: 20%
 - Two optional Basin discovery shards
 - Basin checkpoint + hazard recovery
 - Resonance Surge timed world event
+- Replayable Resonance Sprint with best-time tracking
 - Basin radar + navigation integration
 
 ### System polish
