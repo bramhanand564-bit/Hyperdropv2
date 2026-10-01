@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { buildLobbyExperience } from './lobby.js';
 import { buildHeroRig } from './animation/heroRig.js';
 import { updateHeroMicroAnimation } from './animation/heroAnimator.js';
+import { Hero2DRenderer } from './animation/hero2d.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -32,6 +33,8 @@ const perfHint = $('#perf-hint');
 const lobbyUi = $('#lobby-ui');
 const lobbyStart = $('#lobby-start');
 const lobbyMenuButtons = document.querySelectorAll('[data-lobby-action]');
+const hero2dCanvas = $('#hero-2d-preview');
+const hero2dStateLabel = $('#hero-2d-state');
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x050914);
@@ -125,6 +128,7 @@ const basinChallengeTargets = [];
 const basinEventNodes = [];
 const streamedDecor = [];
 let lobbyExperience = null;
+let hero2d = null;
 const collisionBoxes = [];
 const zoneGroups = {
   HUB: new THREE.Group(),
@@ -953,7 +957,18 @@ function applyAvatarStyle() {
   if (parts.chestCore) parts.chestCore.material.color.setHex(style.accent);
   if (parts.backpackLight) parts.backpackLight.material.color.setHex(style.accent);
   if (parts.energyNodes) parts.energyNodes.forEach((node) => node.material.color.setHex(style.accent));
+  syncHero2DStyle();
 }
+function syncHero2DStyle() {
+  if (!hero2d) return;
+  const style = avatarStyles[avatarStyleIndex];
+  hero2d.setStyle({
+    body: '#' + style.body.toString(16).padStart(6, '0'),
+    suit: '#' + style.suit.toString(16).padStart(6, '0'),
+    accent: '#' + style.accent.toString(16).padStart(6, '0')
+  });
+}
+
 function cycleAvatarStyle() {
   avatarStyleIndex = (avatarStyleIndex + 1) % avatarStyles.length;
   applyAvatarStyle();
@@ -2669,6 +2684,7 @@ buildOutpost();
 buildBasin();
 buildPlayer();
 lobbyExperience = buildLobbyExperience(scene, zoneGroups.HUB, player.group);
+hero2d = hero2dCanvas ? new Hero2DRenderer(hero2dCanvas) : null;
 
 // Boot directly into the permanent NEXUS Home lobby.
 // There is no start-screen card or extra tap gate; the world opens immediately.
@@ -2703,6 +2719,14 @@ function loop(now) {
   if (lobbyExperience) lobbyExperience.update(now * 0.001, state.activeZone === 'HUB' && state.lobbyActive);
   updateWorld(now * 0.001);
   updateCamera(dt);
+  if (hero2d) {
+    const clips = ['IDLE', 'TURN', 'INTERACT', 'WALK', 'RUN', 'JUMP', 'LANDING', 'STOP'];
+    const previewState = state.lobbyActive
+      ? clips[Math.floor(now / 1200) % clips.length]
+      : (player.__heroState || 'IDLE');
+    hero2d.update(dt, previewState);
+    if (hero2dStateLabel) hero2dStateLabel.textContent = previewState;
+  }
   renderer.render(scene, camera);
 }
 
