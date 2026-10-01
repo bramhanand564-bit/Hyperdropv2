@@ -11,7 +11,11 @@ export function updateHeroMicroAnimation(player, dt, timeMs, moving, sprinting) 
   // Locomotion state machine: IDLE -> WALK -> RUN, plus JUMP/LANDING.
   const airborne = !player.grounded;
   const wasAirborne = !!player.__heroWasAirborne;
-  let nextState = airborne ? 'JUMP' : (moving ? (sprinting ? 'RUN' : 'WALK') : 'IDLE');
+  const wasMoving = !!player.__heroWasMoving;
+  const previousYaw = player.__heroYaw ?? player.group.rotation.y;
+  const yawDelta = Math.abs(THREE.MathUtils.euclideanModulo(player.group.rotation.y - previousYaw + Math.PI, Math.PI * 2) - Math.PI);
+  const turning = moving && yawDelta > 0.045;
+  let nextState = airborne ? 'JUMP' : (wasAirborne ? 'LANDING' : turning ? 'TURN' : (!moving && wasMoving ? 'STOP' : moving ? (sprinting ? 'RUN' : 'WALK') : 'IDLE'));
   if (wasAirborne && !airborne) nextState = 'LANDING';
   if (player.__heroState === 'LANDING' && !airborne) {
     player.__heroLandingTime = (player.__heroLandingTime || 0) + dt;
@@ -19,6 +23,8 @@ export function updateHeroMicroAnimation(player, dt, timeMs, moving, sprinting) 
   } else if (nextState !== 'LANDING') player.__heroLandingTime = 0;
   player.__heroState = nextState;
   player.__heroWasAirborne = airborne;
+  player.__heroWasMoving = moving;
+  player.__heroYaw = player.group.rotation.y;
 
   const gait = nextState === 'RUN' ? 1.55 : nextState === 'WALK' ? 1 : 0.55;
 
@@ -46,11 +52,16 @@ export function updateHeroMicroAnimation(player, dt, timeMs, moving, sprinting) 
       p.ra.rotation.x = smooth(p.ra.rotation.x, -0.12, 9);
       p.ll.rotation.x = smooth(p.ll.rotation.x, -0.18, 9);
       p.rl.rotation.x = smooth(p.rl.rotation.x, -0.18, 9);
-    } else if (nextState === 'LANDING') {
+    } else if (nextState === 'LANDING' || nextState === 'STOP') {
       p.la.rotation.x = smooth(p.la.rotation.x, 0.18, 14);
       p.ra.rotation.x = smooth(p.ra.rotation.x, 0.18, 14);
       p.ll.rotation.x = smooth(p.ll.rotation.x, -0.22, 14);
       p.rl.rotation.x = smooth(p.rl.rotation.x, -0.22, 14);
+    } else if (nextState === 'TURN') {
+      p.la.rotation.x = smooth(p.la.rotation.x, -0.22, 10);
+      p.ra.rotation.x = smooth(p.ra.rotation.x, 0.34, 10);
+      p.ll.rotation.x = smooth(p.ll.rotation.x, 0.18, 10);
+      p.rl.rotation.x = smooth(p.rl.rotation.x, -0.12, 10);
     } else {
       const armL = Math.sin(phaseLead) * armSwing;
       const legL = Math.sin(phaseLead) * stride;
@@ -63,7 +74,7 @@ export function updateHeroMicroAnimation(player, dt, timeMs, moving, sprinting) 
 
   // Turn/stop response.
   if (p.torso) {
-    const lean = moving ? (sprinting ? -0.045 : -0.022) : 0;
+    const lean = nextState === 'RUN' ? -0.055 : nextState === 'TURN' ? -0.075 : nextState === 'STOP' || nextState === 'LANDING' ? 0.035 : moving ? -0.022 : 0;
     const breath = Math.sin(t * 2.15) * (moving ? 0.012 : 0.02);
     p.torso.rotation.z = smooth(p.torso.rotation.z, lean + breath, 7);
     const targetY = nextState === 'LANDING' ? 0.96 : nextState === 'JUMP' ? 1.025 : 1 + breath;
@@ -74,7 +85,7 @@ export function updateHeroMicroAnimation(player, dt, timeMs, moving, sprinting) 
     p.head.rotation.y = smooth(p.head.rotation.y, look, 5);
   }
   if (p.hips) {
-    const weight = moving ? Math.sin(phase * 0.5) * 0.025 : Math.sin(t * 1.7) * 0.012;
+    const weight = nextState === 'TURN' ? 0.045 : moving ? Math.sin(phase * 0.5) * 0.025 : Math.sin(t * 1.7) * 0.012;
     p.hips.rotation.z = smooth(p.hips.rotation.z, weight, 6);
   }
   if (Array.isArray(p.shoulders)) p.shoulders.forEach((shoulder, i) => {
