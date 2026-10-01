@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { buildLobbyExperience } from './lobby.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -26,6 +27,9 @@ const radarContent = $('#radar-content');
 const radarTitle = $('#radar-title');
 const navHint = $('#nav-hint');
 const perfHint = $('#perf-hint');
+const lobbyUi = $('#lobby-ui');
+const lobbyStart = $('#lobby-start');
+const lobbyMenuButtons = document.querySelectorAll('[data-lobby-action]');
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x050914);
@@ -50,6 +54,7 @@ const clock = new THREE.Clock();
 
 const state = {
   started: false,
+  lobbyActive: false,
   xp: 0,
   credits: 0,
   level: 1,
@@ -117,6 +122,7 @@ const basinHazards = [];
 const basinChallengeTargets = [];
 const basinEventNodes = [];
 const streamedDecor = [];
+let lobbyExperience = null;
 const collisionBoxes = [];
 const zoneGroups = {
   HUB: new THREE.Group(),
@@ -1244,6 +1250,22 @@ function updateStatusUI() {
   creditsLabel.textContent = 'CR ' + state.credits;
 }
 
+function setLobbyVisibility() {
+  const show = state.activeZone === 'HUB' && state.lobbyActive && state.started && !state.completed;
+  lobbyUi.classList.toggle('hidden', !show);
+  document.body.classList.toggle('nexus-lobby-active', show);
+}
+
+function exitLobby() {
+  state.lobbyActive = false;
+  setLobbyVisibility();
+  cameraState.yaw = Math.PI;
+  cameraState.pitch = 0.30;
+  cameraState.distance = 8.6;
+  addAlert('NEXUS HOME', 'Lobby cleared. Free exploration is now active.', 2200);
+  beep('ui');
+}
+
 function countRelays() {
   return state.relayCollected.filter(Boolean).length;
 }
@@ -2162,6 +2184,21 @@ function setupControls() {
   setupHudButton('sound', 'SOUND ON', toggleSound);
   setupHudButton('graphics', 'GRAPHICS HIGH', cycleQuality);
 
+  lobbyStart.addEventListener('pointerdown', exitLobby);
+  lobbyMenuButtons.forEach((button) => {
+    button.addEventListener('pointerdown', () => {
+      const action = button.dataset.lobbyAction;
+      if (action === 'character') cycleAvatarStyle();
+      else if (action === 'missions') addAlert('MISSIONS', 'Main progression and zone objectives are active.', 2200);
+      else if (action === 'events') addAlert('EVENTS', 'Live world events are surfaced through the HUD.', 2200);
+      else if (action === 'settings') addAlert('SETTINGS', 'Use AVATAR, SOUND and GRAPHICS controls for quick changes.', 2200);
+      else if (action === 'inventory') addAlert('INVENTORY', 'Credits and progression are saved locally.', 2200);
+      else if (action === 'store') addAlert('NEXUS STORE', 'Store systems are reserved for a later milestone.', 2200);
+      else if (action === 'rank') addAlert('RANK', 'Rank progression will unlock with challenge expansion.', 2200);
+      beep('ui');
+    });
+  });
+
   canvas.addEventListener('pointerdown', (event) => {
     if (hud.classList.contains('hidden') || event.clientX < innerWidth * 0.24) return;
     cameraState.dragging = true;
@@ -2433,6 +2470,21 @@ function updateWorld(nowSeconds) {
 function updateCamera(dt) {
   const targetHeight = state.activeZone === 'HUB' ? 1.1 : 1.35;
   const target = player.pos.clone().add(new THREE.Vector3(0, targetHeight, 0));
+
+  if (state.activeZone === 'HUB' && state.lobbyActive) {
+    const t = performance.now() * 0.00035;
+    const orbitYaw = Math.PI + Math.sin(t) * 0.18;
+    const orbitPitch = 0.24 + Math.sin(t * 0.7) * 0.025;
+    const orbitDistance = 12.2;
+    const offset = new THREE.Vector3(
+      Math.sin(orbitYaw) * Math.cos(orbitPitch) * orbitDistance,
+      Math.sin(orbitPitch) * orbitDistance + 1.2,
+      Math.cos(orbitYaw) * Math.cos(orbitPitch) * orbitDistance
+    );
+    camera.position.lerp(target.clone().add(offset), Math.min(1, dt * 3.5));
+    camera.lookAt(target.clone().add(new THREE.Vector3(0, 0.7, -1.4)));
+    return;
+  }
   const offset = new THREE.Vector3(
     Math.sin(cameraState.yaw) * Math.cos(cameraState.pitch) * cameraState.distance,
     Math.sin(cameraState.pitch) * cameraState.distance,
@@ -2513,8 +2565,10 @@ function startGame() {
     cameraState.distance = 8.6;
   }
 
+  state.lobbyActive = state.activeZone === 'HUB';
   player.group.position.copy(player.pos);
   hud.classList.remove('hidden');
+  setLobbyVisibility();
 
   updateStatusUI();
   updateMissionUI();
@@ -2584,6 +2638,7 @@ buildHub();
 buildOutpost();
 buildBasin();
 buildPlayer();
+lobbyExperience = buildLobbyExperience(scene, zoneGroups.HUB, player.group);
 
 // Boot directly into the permanent NEXUS Home lobby.
 // There is no start-screen card or extra tap gate; the world opens immediately.
@@ -2609,12 +2664,13 @@ function loop(now) {
   const dt = Math.min(0.05, (now - last) / 1000);
   last = now;
 
-  if (state.started && !state.completed) updatePlayer(dt);
+  if (state.started && !state.completed && !state.lobbyActive) updatePlayer(dt);
   updateChallenge(now * 0.001);
   updateBasinSprint(now * 0.001);
   updateNavigationUI(now * 0.001);
   updatePerformanceUI(dt);
   updateZoneStreaming(dt);
+  if (lobbyExperience) lobbyExperience.update(now * 0.001, state.activeZone === 'HUB' && state.lobbyActive);
   updateWorld(now * 0.001);
   updateCamera(dt);
   renderer.render(scene, camera);
