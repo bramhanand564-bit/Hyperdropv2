@@ -28,6 +28,7 @@ const radarPanel = $('#radar-panel');
 const radarContent = $('#radar-content');
 const radarTitle = $('#radar-title');
 const navHint = $('#nav-hint');
+const perfHint = $('#perf-hint');
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x050914);
@@ -786,8 +787,16 @@ function loadGame() {
 }
 
 function applyQuality() {
-  const ratioMap = { HIGH: 1.5, MEDIUM: 1.0, LOW: 0.75 };
-  renderer.setPixelRatio(Math.min(devicePixelRatio, ratioMap[state.quality]));
+  const qualityMap = {
+    HIGH: { ratio: 1.5, fog: 0.019, maxDistance: 520 },
+    MEDIUM: { ratio: 1.0, fog: 0.024, maxDistance: 360 },
+    LOW: { ratio: 0.75, fog: 0.032, maxDistance: 240 }
+  };
+  const preset = qualityMap[state.quality] || qualityMap.HIGH;
+  renderer.setPixelRatio(Math.min(devicePixelRatio, preset.ratio));
+  camera.far = preset.maxDistance;
+  camera.updateProjectionMatrix();
+  scene.fog.density = preset.fog;
   const button = $('#graphics');
   if (button) button.textContent = 'GRAPHICS ' + state.quality;
 }
@@ -895,6 +904,22 @@ function getNavigationTarget(nowSeconds) {
   }
   if (state.zoneMissionStep === 2) return { label: 'LUMEN SHRINE', pos: new THREE.Vector3(20, 0, -48) };
   return { label: 'RETURN GATE', pos: new THREE.Vector3(0, 0, -30.5) };
+}
+
+let perfFrames = 0;
+let perfElapsed = 0;
+
+function updatePerformanceUI(dt) {
+  if (!perfHint || !state.started || state.completed) return;
+  perfFrames += 1;
+  perfElapsed += dt;
+  if (perfElapsed < 0.5) return;
+
+  const fps = Math.round(perfFrames / perfElapsed);
+  const calls = renderer.info.render.calls;
+  perfHint.textContent = 'PERF • ' + fps + ' FPS • ' + calls + ' CALLS';
+  perfFrames = 0;
+  perfElapsed = 0;
 }
 
 function updateNavigationUI(nowSeconds) {
@@ -1729,6 +1754,7 @@ function loop(now) {
   if (state.started && !state.completed) updatePlayer(dt);
   updateChallenge(now * 0.001);
   updateNavigationUI(now * 0.001);
+  updatePerformanceUI(dt);
   updateWorld(now * 0.001);
   updateCamera(dt);
   renderer.render(scene, camera);
