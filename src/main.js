@@ -27,6 +27,7 @@ const controlsRoot = document.querySelector('.right-controls');
 const radarPanel = $('#radar-panel');
 const radarContent = $('#radar-content');
 const radarTitle = $('#radar-title');
+const navHint = $('#nav-hint');
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x050914);
@@ -861,6 +862,64 @@ function countSecrets() {
   return state.secretsCollected.filter(Boolean).length;
 }
 
+function getNavigationTarget(nowSeconds) {
+  if (state.activeZone === 'HUB') {
+    if (state.missionStep === 0) return { label: 'SIGNAL TERMINAL', pos: new THREE.Vector3(-7, 0, -6) };
+    if (state.missionStep === 1) {
+      if (state.challengeActive) {
+        if (state.challengeType === 'signal') {
+          const next = beacons.find((beacon) => beacon.visible && !beacon.userData.active);
+          if (next) return { label: 'ACTIVE BEACON ' + (next.userData.index + 1), pos: next.position };
+        }
+        if (state.challengeType === 'memory') {
+          const points = [
+            new THREE.Vector3(2, 0, 7), new THREE.Vector3(-4, 0, 10),
+            new THREE.Vector3(-6, 0, 3), new THREE.Vector3(3, 0, 1)
+          ];
+          const elapsed = nowSeconds - state.challengeStart;
+          return { label: 'GRID NODE ' + (Math.min(3, Math.floor(elapsed / 5)) + 1), pos: points[Math.min(3, Math.floor(elapsed / 5))] };
+        }
+        return { label: 'DELIVERY GATE', pos: new THREE.Vector3(-16, 0, -18) };
+      }
+      const pad = challengePads.find((item) => item.userData.challenge === 'signal');
+      if (pad) return { label: 'SIGNAL RUN PAD', pos: pad.position };
+    }
+    return { label: 'LUMEN WILDS GATE', pos: new THREE.Vector3(0, 0, -31) };
+  }
+
+  if (state.zoneMissionStep === 0) return { label: 'SCOUT', pos: new THREE.Vector3(-8, 0, -49) };
+  if (state.zoneMissionStep === 1) {
+    const nextIndex = state.relayCollected.findIndex((value) => !value);
+    const target = relays[Math.max(0, nextIndex)];
+    if (target) return { label: 'RELAY ' + (Math.max(0, nextIndex) + 1), pos: target.position };
+  }
+  if (state.zoneMissionStep === 2) return { label: 'LUMEN SHRINE', pos: new THREE.Vector3(20, 0, -48) };
+  return { label: 'RETURN GATE', pos: new THREE.Vector3(0, 0, -30.5) };
+}
+
+function updateNavigationUI(nowSeconds) {
+  if (!navHint || !state.started || state.completed) return;
+
+  const target = getNavigationTarget(nowSeconds);
+  if (!target) {
+    navHint.textContent = 'NAV • NO OBJECTIVE';
+    return;
+  }
+
+  const dx = target.pos.x - player.pos.x;
+  const dz = target.pos.z - player.pos.z;
+  const distance = Math.hypot(dx, dz);
+
+  const angleToTarget = Math.atan2(dx, dz);
+  let relative = THREE.MathUtils.euclideanModulo(angleToTarget - player.group.rotation.y + Math.PI, Math.PI * 2) - Math.PI;
+  let direction = 'AHEAD';
+  if (Math.abs(relative) < 0.45) direction = 'AHEAD';
+  else if (relative > 0) direction = Math.abs(relative) > 2.35 ? 'BACK-RIGHT' : 'RIGHT';
+  else direction = Math.abs(relative) > 2.35 ? 'BACK-LEFT' : 'LEFT';
+
+  navHint.textContent = 'NAV • ' + target.label + ' • ' + direction + ' • ' + distance.toFixed(1) + 'm';
+}
+
 function updateMissionUI() {
   let title = 'FIRST SIGNAL';
   let description = 'Find the signal terminal.';
@@ -1666,6 +1725,7 @@ function loop(now) {
 
   if (state.started && !state.completed) updatePlayer(dt);
   updateChallenge(now * 0.001);
+  updateNavigationUI(now * 0.001);
   updateWorld(now * 0.001);
   updateCamera(dt);
   renderer.render(scene, camera);
