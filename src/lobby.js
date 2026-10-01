@@ -21,6 +21,45 @@ export function buildLobbyExperience(scene, hub, playerGroup) {
   lobby.name = 'NEXUS_CINEMATIC_HOME';
   hub.add(lobby);
 
+  // Lighting accents remain lightweight: emissive geometry does most of the work.
+  const cyanLight = new THREE.PointLight(0x43d7ff, 3.2, 18, 2);
+  cyanLight.position.set(-7, 4.2, 8);
+  lobby.add(cyanLight);
+  const whiteLight = new THREE.PointLight(0xd8ecff, 2.1, 24, 2);
+  whiteLight.position.set(0, 6.5, -7);
+  lobby.add(whiteLight);
+
+  // Fine floor-panel detailing around the hero standing area.
+  const floorPanels = [];
+  for (let i = 0; i < 16; i += 1) {
+    const a = (i / 16) * Math.PI * 2;
+    const r = 4.2 + (i % 2) * 1.8;
+    const panel = add(
+      new THREE.BoxGeometry(0.88, 0.035, 0.24),
+      material(0x25364a, 0x123a57, 0.8),
+      new THREE.Vector3(Math.cos(a) * r, 0.17, 8 + Math.sin(a) * r)
+    );
+    panel.rotation.y = a + Math.PI / 2;
+    floorPanels.push(panel);
+  }
+
+  // Eight slim landing pylons frame the stage and pulse in sequence.
+  const stagePylons = [];
+  for (let i = 0; i < 8; i += 1) {
+    const a = (i / 8) * Math.PI * 2;
+    const p = add(
+      new THREE.BoxGeometry(0.22, 2.6 + (i % 2) * 0.9, 0.22),
+      material(0x142536, 0x0e4161, 0.9),
+      new THREE.Vector3(Math.cos(a) * 7.1, 1.3 + (i % 2) * 0.45, 8 + Math.sin(a) * 7.1)
+    );
+    const glow = add(
+      new THREE.BoxGeometry(0.055, 1.8, 0.055),
+      material(0x6ce3ff, 0x22c8ff, 3.6),
+      new THREE.Vector3(p.position.x, p.position.y, p.position.z - 0.13)
+    );
+    stagePylons.push(glow);
+  }
+
   // Wide cinematic platform: the avatar is the visual anchor.
   const plaza = add(
     new THREE.CylinderGeometry(17.5, 18.2, 0.26, 72),
@@ -47,6 +86,38 @@ export function buildLobbyExperience(scene, hub, playerGroup) {
     animated.push({ object: strip, type: 'runway', phase: x > 0 ? 1.4 : 0 });
   }
 
+  // Subtle overhead canopy beams add a premium hangar-like frame to the lobby.
+  const canopy = new THREE.Group();
+  canopy.position.set(0, 7.4, 3);
+  lobby.add(canopy);
+  for (const x of [-11, -5.5, 0, 5.5, 11]) {
+    const beam = add(
+      new THREE.BoxGeometry(0.22, 0.22, 18),
+      material(0x18293a, 0x0d2c45, 0.8),
+      new THREE.Vector3(x, 0, 0),
+      canopy
+    );
+    beam.rotation.y = 0.04;
+    const strip = add(
+      new THREE.BoxGeometry(0.07, 0.07, 15.5),
+      material(0x5ddfff, 0x1fb9ea, 3.2),
+      new THREE.Vector3(x, -0.12, -0.2),
+      canopy
+    );
+    animated.push({ object: strip, type: 'canopy', phase: x * 0.08 });
+  }
+
+  // Holographic navigation arrows continuously sweep toward the START platform.
+  const arrows = [];
+  for (let i = 0; i < 6; i += 1) {
+    const arrow = add(
+      new THREE.ConeGeometry(0.09, 0.55, 3),
+      material(0x83e8ff, 0x2bcfff, 3.8),
+      new THREE.Vector3(-2.5 + i * 1.0, 0.28, 4.8)
+    );
+    arrow.rotation.x = -Math.PI / 2;
+    arrows.push(arrow);
+  }
   // Distant skyline and floating architecture create depth behind the avatar.
   const skyline = new THREE.Group();
   skyline.position.set(0, 0, -22);
@@ -165,6 +236,17 @@ export function buildLobbyExperience(scene, hub, playerGroup) {
   }
   animated.push({ object: companion, type: 'companion', speed: 1.35 });
 
+  // Small service drones provide living motion in the background.
+  const serviceDrones = [];
+  for (let i = 0; i < 3; i += 1) {
+    const d = new THREE.Group();
+    d.position.set(-10 + i * 10, 3.6 + i * 0.7, -3.5 - i * 2.2);
+    lobby.add(d);
+    add(new THREE.SphereGeometry(0.22, 10, 8), material(0xbdefff, 0x2acfff, 3.5), new THREE.Vector3(0, 0, 0), d);
+    add(new THREE.BoxGeometry(0.62, 0.05, 0.08), material(0x58dcff, 0x2ccaff, 3.2), new THREE.Vector3(0, 0, 0), d);
+    serviceDrones.push(d);
+  }
+
   // Large NEXUS holographic sign in the left background.
   const sign = add(
     new THREE.BoxGeometry(4.8, 1.45, 0.16),
@@ -213,6 +295,21 @@ export function buildLobbyExperience(scene, hub, playerGroup) {
       plazaRing.rotation.z += 0.0014;
       plazaRing.material.emissiveIntensity = 2.2 + Math.sin(nowSeconds * 1.15) * 0.7;
 
+      stagePylons.forEach((glow, i) => {
+        glow.material.emissiveIntensity = 1.8 + (Math.sin(nowSeconds * 2.1 - i * 0.55) + 1) * 1.25;
+      });
+      arrows.forEach((arrow, i) => {
+        arrow.position.x = -2.5 + i * 1.0 + Math.sin(nowSeconds * 0.9 + i) * 0.06;
+        arrow.material.emissiveIntensity = 2.6 + (Math.sin(nowSeconds * 2.0 - i * 0.7) + 1) * 0.8;
+      });
+      serviceDrones.forEach((d, i) => {
+        const a = nowSeconds * (0.26 + i * 0.045) + i * 2.1;
+        d.position.x = Math.cos(a) * (9 + i * 1.8);
+        d.position.z = 8 + Math.sin(a) * (7 + i * 1.8) - 2;
+        d.position.y = 3.0 + i * 0.65 + Math.sin(nowSeconds * 1.4 + i) * 0.35;
+        d.rotation.y = -a + Math.PI / 2;
+      });
+
       animated.forEach((entry) => {
         const o = entry.object;
         if (entry.type === 'pulse') {
@@ -234,6 +331,8 @@ export function buildLobbyExperience(scene, hub, playerGroup) {
           o.material.emissiveIntensity = 2.0 + Math.sin(nowSeconds * 0.8 + entry.phase) * 0.8;
         } else if (entry.type === 'runway') {
           o.material.emissiveIntensity = 2.4 + Math.sin(nowSeconds * 1.4 + entry.phase) * 0.7;
+        } else if (entry.type === 'canopy') {
+          o.material.emissiveIntensity = 2.5 + Math.sin(nowSeconds * 1.6 + entry.phase) * 0.65;
         } else if (entry.type === 'sign') {
           o.material.emissiveIntensity = 2.4 + Math.sin(nowSeconds * 1.7 + entry.phase) * 1.2;
         } else if (entry.type === 'sun') {
