@@ -58,6 +58,10 @@ const state = {
   level: 1,
   missionStep: 0,
   zoneMissionStep: 0,
+  basinMissionStep: 0,
+  basinRelayCollected: [false, false, false, false],
+  basinSecretsCollected: [false, false],
+  basinCheckpoint: new THREE.Vector3(0, 0, -170),
   challengeActive: false,
   challengeType: 'signal',
   challengeStart: 0,
@@ -106,10 +110,14 @@ const challengeTargets = [];
 const relays = [];
 const secrets = [];
 const hazards = [];
+const basinRelays = [];
+const basinSecrets = [];
+const basinHazards = [];
 const collisionBoxes = [];
 const zoneGroups = {
   HUB: new THREE.Group(),
-  OUTPOST: new THREE.Group()
+  OUTPOST: new THREE.Group(),
+  BASIN: new THREE.Group()
 };
 const SAVE_KEY = 'nexus-world-v04-save';
 const LEGACY_SAVE_KEYS = ['nexus-world-v03-save'];
@@ -117,6 +125,7 @@ const ACTION_COOLDOWN_MS = 280;
 
 scene.add(zoneGroups.HUB);
 scene.add(zoneGroups.OUTPOST);
+scene.add(zoneGroups.BASIN);
 
 const avatarStyles = [
   { name: 'AURORA', body: 0xe9f0f9, suit: 0x5e88bd, accent: 0xb8d8ff },
@@ -136,11 +145,13 @@ const palette = {
 
 const zoneVisuals = {
   HUB: { background: 0x050914, fog: 0x07101b },
-  OUTPOST: { background: 0x0b0812, fog: 0x130c1c }
+  OUTPOST: { background: 0x0b0812, fog: 0x130c1c },
+  BASIN: { background: 0x061018, fog: 0x0a1b22 }
 };
 
 const hubBounds = { minX: -35, maxX: 35, minZ: -35, maxZ: 35 };
 const outpostBounds = { minX: -39, maxX: 39, minZ: -98, maxZ: -29 };
+const basinBounds = { minX: -44, maxX: 44, minZ: -178, maxZ: -105 };
 
 const mat = (color, roughness, metalness, emissive) =>
   new THREE.MeshStandardMaterial({
@@ -489,6 +500,22 @@ function buildOutpost() {
   registerInteractable(shrine, 'shrine', 'OUTPOST');
   addGlow(new THREE.Vector3(20, 2.2, -48), 1.3, 0xc6a6ff, g);
 
+  const basinGate = mesh(
+    new THREE.BoxGeometry(7.5, 1.0, 2),
+    mat(0x18313a, 0.42, 0.55, 0x2b7b84),
+    new THREE.Vector3(31, 0.5, -42),
+    g
+  );
+  registerInteractable(basinGate, 'basin-gate', 'OUTPOST');
+  const basinGateRing = mesh(
+    new THREE.TorusGeometry(2.6, 0.2, 10, 34),
+    mat(0x8ee3e5, 0.18, 0.55, 0x4daeb9),
+    new THREE.Vector3(31, 3.4, -42),
+    g
+  );
+  basinGateRing.rotation.x = Math.PI / 2;
+  addGlow(new THREE.Vector3(31, 2.2, -42), 1.0, 0x66d1d7, g);
+
   const relayPositions = [
     new THREE.Vector3(-22, 1.0, -54),
     new THREE.Vector3(18, 1.0, -69),
@@ -604,6 +631,212 @@ function buildOutpost() {
   zoneBeacon.rotation.x = Math.PI / 2;
 }
 
+function buildBasin() {
+  const g = zoneGroups.BASIN;
+
+  mesh(
+    new THREE.BoxGeometry(92, 0.5, 74),
+    mat(0x101d24, 0.78, 0.12),
+    new THREE.Vector3(0, -0.25, -141.5),
+    g
+  );
+
+  const river = mesh(
+    new THREE.BoxGeometry(9, 0.05, 68),
+    mat(0x07151a, 0.35, 0.2, 0x123f49),
+    new THREE.Vector3(-16, 0.03, -141.5),
+    g
+  );
+  river.material.emissiveIntensity = 1.1;
+
+  const causeways = [-5, 12, 29];
+  causeways.forEach((z, index) => {
+    mesh(
+      new THREE.BoxGeometry(44, 0.12, 3.2),
+      mat(0x1a2a32, 0.58, 0.25, 0x1f4650),
+      new THREE.Vector3(6, 0.08, z - 141.5),
+      g
+    );
+    if (index < causeways.length - 1) {
+      mesh(
+        new THREE.BoxGeometry(2.6, 0.18, 3.8),
+        mat(0x335f63, 0.45, 0.35, 0x2f6e70),
+        new THREE.Vector3(-16, 0.13, z - 141.5),
+        g
+      );
+    }
+  });
+
+  const monoliths = [
+    [-34, -168, 8], [-28, -124, 11], [22, -168, 12], [34, -128, 7],
+    [-2, -116, 9], [8, -173, 10]
+  ];
+  monoliths.forEach((item, index) => {
+    const h = item[2];
+    const pillar = mesh(
+      new THREE.CylinderGeometry(1.15, 1.55, h, 6),
+      mat(index % 2 ? 0x27414a : 0x22343e, 0.52, 0.22, index % 2 ? 0x16434a : 0x102a34),
+      new THREE.Vector3(item[0], h / 2, item[1]),
+      g
+    );
+    pillar.rotation.y = index * 0.31;
+    addCollisionBox(item[0], item[1], 1.8, 1.8, 'BASIN');
+    addGlow(new THREE.Vector3(item[0], h + 0.4, item[1]), 0.55, index % 2 ? 0x79d4d9 : 0x8ab4ff, g);
+  });
+
+  const lattice = [
+    [-32, -150], [-22, -132], [2, -154], [25, -144], [33, -162], [12, -123], [-5, -174]
+  ];
+  lattice.forEach((p, index) => {
+    const h = 2.6 + (index % 3) * 1.3;
+    const tree = mesh(
+      new THREE.ConeGeometry(0.7, h, 5),
+      mat(0x19343b, 0.55, 0.12, 0x113139),
+      new THREE.Vector3(p[0], h / 2, p[1]),
+      g
+    );
+    tree.rotation.y = index * 0.5;
+    addCollisionBox(p[0], p[1], 1.15, 1.15, 'BASIN');
+  });
+
+  const entry = mesh(
+    new THREE.BoxGeometry(9, 1, 2),
+    mat(0x172b34, 0.42, 0.55, 0x2e6e78),
+    new THREE.Vector3(0, 0.5, -105.8),
+    g
+  );
+  registerInteractable(entry, 'basin-return-gate', 'BASIN');
+
+  const vault = mesh(
+    new THREE.CylinderGeometry(3.3, 3.7, 1.0, 8),
+    mat(0x2e6770, 0.34, 0.52, 0x3a9eaa),
+    new THREE.Vector3(0, 0.5, -141.5),
+    g
+  );
+  registerInteractable(vault, 'basin-vault', 'BASIN');
+  addGlow(new THREE.Vector3(0, 2.0, -141.5), 1.25, 0x7fe1e5, g);
+
+  const relayPositions = [
+    new THREE.Vector3(-31, 1.0, -151),
+    new THREE.Vector3(-12, 1.0, -171),
+    new THREE.Vector3(22, 1.0, -156),
+    new THREE.Vector3(28, 1.0, -124)
+  ];
+  relayPositions.forEach((p, index) => {
+    const relay = mesh(
+      new THREE.TetrahedronGeometry(1.0, 0),
+      mat(0x83d7d9, 0.18, 0.58, 0x3b9ea8),
+      p.clone(),
+      g
+    );
+    registerInteractable(relay, 'basin-relay', 'BASIN', { index });
+    relay.visible = false;
+    basinRelays.push(relay);
+
+    mesh(
+      new THREE.CylinderGeometry(0.7, 0.9, 0.28, 8),
+      mat(0x203841, 0.45, 0.35),
+      new THREE.Vector3(p.x, 0.14, p.z),
+      g
+    );
+    addGlow(p.clone().add(new THREE.Vector3(0, 0.7, 0)), 0.75, 0x6ed8df, g);
+  });
+
+  const secretPositions = [
+    new THREE.Vector3(-37, 0.62, -139),
+    new THREE.Vector3(36, 0.62, -174)
+  ];
+  secretPositions.forEach((p, index) => {
+    const shard = mesh(
+      new THREE.IcosahedronGeometry(0.6, 0),
+      mat(0xa9e8ff, 0.15, 0.52, 0x4cb6cc),
+      p.clone(),
+      g
+    );
+    registerInteractable(shard, 'basin-secret', 'BASIN', { index });
+    basinSecrets.push(shard);
+    addGlow(p.clone().add(new THREE.Vector3(0, 0.6, 0)), 0.58, 0x76dff0, g);
+  });
+
+  const checkpoint = mesh(
+    new THREE.CylinderGeometry(1.2, 1.35, 0.22, 20),
+    mat(0x2e5e62, 0.3, 0.45, 0x42aab1),
+    new THREE.Vector3(-25, 0.11, -163),
+    g
+  );
+  registerInteractable(checkpoint, 'basin-checkpoint', 'BASIN');
+  addGlow(new THREE.Vector3(-25, 0.7, -163), 0.7, 0x6ed8df, g);
+
+  const hazardPositions = [
+    new THREE.Vector3(-3, 0.03, -152),
+    new THREE.Vector3(15, 0.03, -133),
+    new THREE.Vector3(31, 0.03, -148)
+  ];
+  hazardPositions.forEach((p, index) => {
+    const hazard = mesh(
+      new THREE.CylinderGeometry(3.0, 3.0, 0.05, 28),
+      mat(0x102c35, 0.25, 0.3, index % 2 ? 0x3c8592 : 0x2a6b7d),
+      p.clone(),
+      g
+    );
+    basinHazards.push({ mesh: hazard, pos: new THREE.Vector3(p.x, 0, p.z), radius: 3.0 });
+  });
+
+  const npcData = [
+    { x: 5, z: -118, name: 'Archivist', role: 'BASIN KEEPER' },
+    { x: -11, z: -146, name: 'Runner', role: 'RESONANCE RUNNER' }
+  ];
+  npcData.forEach((data, index) => {
+    const group = new THREE.Group();
+    mesh(
+      new THREE.CapsuleGeometry(0.44, 0.96, 6, 10),
+      mat(index ? 0x5fb5c4 : 0x809fe0, 0.55, 0.28),
+      new THREE.Vector3(0, 1.27, 0),
+      group
+    );
+    mesh(
+      new THREE.SphereGeometry(0.35, 14, 10),
+      mat(0xdfe8ea, 0.68),
+      new THREE.Vector3(0, 2.28, 0),
+      group
+    );
+    mesh(
+      new THREE.BoxGeometry(0.52, 0.12, 0.1),
+      mat(0x071219, 0.3, 0.45),
+      new THREE.Vector3(0, 2.27, -0.32),
+      group
+    );
+    group.position.set(data.x, 0, data.z);
+    registerInteractable(group, 'npc', 'BASIN', { name: data.name, role: data.role });
+    npcs.push(group);
+    g.add(group);
+  });
+
+  for (let i = 0; i < 9; i += 1) {
+    const x = -40 + i * 10;
+    const h = 3.2 + (i % 4) * 1.1;
+    addPillar(x, 0, -111, h, i % 2 ? 0x4d9cb0 : 0x6888c9, g);
+    addPillar(x, 0, -175, h - 0.4, i % 2 ? 0x668fc8 : 0x4c9ca8, g);
+  }
+
+  for (let i = 0; i < 8; i += 1) {
+    const x = -34 + i * 9.7;
+    mesh(
+      new THREE.BoxGeometry(0.45, 0.45, 0.45),
+      mat(0x8fdce0, 0.15, 0.4, 0x3a8990),
+      new THREE.Vector3(x, 4.5 + (i % 3) * 1.2, -141.5 + Math.sin(i) * 12),
+      g
+    );
+  }
+
+  const gateRing = mesh(
+    new THREE.TorusGeometry(3.2, 0.22, 10, 40),
+    mat(0x8de3e5, 0.18, 0.55, 0x58b6c1),
+    new THREE.Vector3(0, 3.8, -105.8),
+    g
+  );
+  gateRing.rotation.x = Math.PI / 2;
+}
 function buildPlayer() {
   const body = new THREE.Group();
 
@@ -714,8 +947,16 @@ function saveGame() {
     level: state.level,
     missionStep: state.missionStep,
     zoneMissionStep: state.zoneMissionStep,
+    basinMissionStep: state.basinMissionStep,
     activeZone: state.activeZone,
     relayCollected: state.relayCollected,
+    basinRelayCollected: state.basinRelayCollected,
+    basinSecretsCollected: state.basinSecretsCollected,
+    basinCheckpoint: {
+      x: state.basinCheckpoint.x,
+      y: state.basinCheckpoint.y,
+      z: state.basinCheckpoint.z
+    },
     secretsCollected: state.secretsCollected,
     checkpoint: { x: state.checkpoint.x, y: state.checkpoint.y, z: state.checkpoint.z },
     avatarStyleIndex: avatarStyleIndex,
@@ -755,10 +996,32 @@ function loadGame() {
     state.level = Math.max(1, Number(payload.level || 1));
     state.missionStep = THREE.MathUtils.clamp(Number(payload.missionStep || 0), 0, 2);
     state.zoneMissionStep = THREE.MathUtils.clamp(Number(payload.zoneMissionStep || 0), 0, 3);
-    state.activeZone = payload.activeZone === 'OUTPOST' && state.missionStep >= 2 ? 'OUTPOST' : 'HUB';
+    state.basinMissionStep = THREE.MathUtils.clamp(Number(payload.basinMissionStep || 0), 0, 3);
+    const requestedZone = payload.activeZone;
+    state.activeZone = requestedZone === 'BASIN' && state.zoneMissionStep >= 3
+      ? 'BASIN'
+      : requestedZone === 'OUTPOST' && state.missionStep >= 2
+        ? 'OUTPOST'
+        : 'HUB';
 
     if (Array.isArray(payload.relayCollected)) {
       state.relayCollected = [!!payload.relayCollected[0], !!payload.relayCollected[1], !!payload.relayCollected[2]];
+    }
+
+    if (Array.isArray(payload.basinRelayCollected)) {
+      state.basinRelayCollected = [
+        !!payload.basinRelayCollected[0],
+        !!payload.basinRelayCollected[1],
+        !!payload.basinRelayCollected[2],
+        !!payload.basinRelayCollected[3]
+      ];
+    }
+
+    if (Array.isArray(payload.basinSecretsCollected)) {
+      state.basinSecretsCollected = [
+        !!payload.basinSecretsCollected[0],
+        !!payload.basinSecretsCollected[1]
+      ];
     }
 
     if (Array.isArray(payload.secretsCollected)) {
@@ -769,6 +1032,12 @@ function loadGame() {
       const x = THREE.MathUtils.clamp(Number(payload.checkpoint.x), outpostBounds.minX, outpostBounds.maxX);
       const z = THREE.MathUtils.clamp(Number(payload.checkpoint.z), outpostBounds.minZ, outpostBounds.maxZ);
       state.checkpoint.set(x, 0, z);
+    }
+
+    if (payload.basinCheckpoint && Number.isFinite(payload.basinCheckpoint.x) && Number.isFinite(payload.basinCheckpoint.z)) {
+      const x = THREE.MathUtils.clamp(Number(payload.basinCheckpoint.x), basinBounds.minX, basinBounds.maxX);
+      const z = THREE.MathUtils.clamp(Number(payload.basinCheckpoint.z), basinBounds.minZ, basinBounds.maxZ);
+      state.basinCheckpoint.set(x, 0, z);
     }
 
     avatarStyleIndex = Number.isInteger(payload.avatarStyleIndex)
@@ -839,10 +1108,20 @@ function renderRadar() {
     ['RELAYS', 'Three offline nodes across the grove'],
     ['SHRINE', 'Repair destination on the east side'],
     ['CHECKPOINT', 'Safe respawn point in the south-west'],
-    ['SHARDS', 'Three optional discovery secrets']
+    ['SHARDS', 'Three optional discovery secrets'],
+    ['BASIN GATE', 'Second-world gate east of the Shrine']
   ];
-  const items = state.activeZone === 'HUB' ? hubItems : outpostItems;
-  radarTitle.textContent = (state.activeZone === 'HUB' ? 'CENTRAL HUB' : 'LUMEN WILDS') + ' • RADAR';
+  const basinItems = [
+    ['ARCHIVIST', 'Basin mission start near the northern approach'],
+    ['ANCHORS', 'Four resonance anchors across the basin'],
+    ['VAULT', 'Central resonance vault'],
+    ['CHECKPOINT', 'Safe respawn point in the west basin'],
+    ['SHARDS', 'Two optional basin discoveries'],
+    ['RETURN', 'Lift back to Lumen Wilds']
+  ];
+  const items = state.activeZone === 'HUB' ? hubItems : state.activeZone === 'OUTPOST' ? outpostItems : basinItems;
+  const labels = { HUB: 'CENTRAL HUB', OUTPOST: 'LUMEN WILDS', BASIN: 'AETHER BASIN' };
+  radarTitle.textContent = labels[state.activeZone] + ' • RADAR';
   radarContent.innerHTML = items.map((item) =>
     '<div class="radar-item"><i></i><div><b>' + item[0] + '</b><span>' + item[1] + '</span></div></div>'
   ).join('');
@@ -868,9 +1147,11 @@ function setZoneVisuals() {
   const visual = zoneVisuals[state.activeZone];
   scene.background.setHex(visual.background);
   scene.fog.color.setHex(visual.fog);
-  zoneLabel.textContent = state.activeZone === 'HUB' ? 'CENTRAL HUB' : 'LUMEN WILDS';
+  const labels = { HUB: 'CENTRAL HUB', OUTPOST: 'LUMEN WILDS', BASIN: 'AETHER BASIN' };
+  zoneLabel.textContent = labels[state.activeZone] || 'CENTRAL HUB';
   zoneGroups.HUB.visible = state.activeZone === 'HUB';
   zoneGroups.OUTPOST.visible = state.activeZone === 'OUTPOST';
+  zoneGroups.BASIN.visible = state.activeZone === 'BASIN';
 }
 
 function updateStatusUI() {
@@ -885,6 +1166,14 @@ function countRelays() {
 
 function countSecrets() {
   return state.secretsCollected.filter(Boolean).length;
+}
+
+function countBasinRelays() {
+  return state.basinRelayCollected.filter(Boolean).length;
+}
+
+function countBasinSecrets() {
+  return state.basinSecretsCollected.filter(Boolean).length;
 }
 
 function getNavigationTarget(nowSeconds) {
@@ -912,14 +1201,25 @@ function getNavigationTarget(nowSeconds) {
     return { label: 'LUMEN WILDS GATE', pos: new THREE.Vector3(0, 0, -31) };
   }
 
-  if (state.zoneMissionStep === 0) return { label: 'SCOUT', pos: new THREE.Vector3(-8, 0, -49) };
-  if (state.zoneMissionStep === 1) {
-    const nextIndex = state.relayCollected.findIndex((value) => !value);
-    const target = relays[Math.max(0, nextIndex)];
-    if (target) return { label: 'RELAY ' + (Math.max(0, nextIndex) + 1), pos: target.position };
+  if (state.activeZone === 'OUTPOST') {
+    if (state.zoneMissionStep === 0) return { label: 'SCOUT', pos: new THREE.Vector3(-8, 0, -49) };
+    if (state.zoneMissionStep === 1) {
+      const nextIndex = state.relayCollected.findIndex((value) => !value);
+      const target = relays[Math.max(0, nextIndex)];
+      if (target) return { label: 'RELAY ' + (Math.max(0, nextIndex) + 1), pos: target.position };
+    }
+    if (state.zoneMissionStep === 2) return { label: 'LUMEN SHRINE', pos: new THREE.Vector3(20, 0, -48) };
+    return { label: 'AETHER BASIN GATE', pos: new THREE.Vector3(31, 0, -42) };
   }
-  if (state.zoneMissionStep === 2) return { label: 'LUMEN SHRINE', pos: new THREE.Vector3(20, 0, -48) };
-  return { label: 'RETURN GATE', pos: new THREE.Vector3(0, 0, -30.5) };
+
+  if (state.basinMissionStep === 0) return { label: 'ARCHIVIST', pos: new THREE.Vector3(5, 0, -118) };
+  if (state.basinMissionStep === 1) {
+    const nextIndex = state.basinRelayCollected.findIndex((value) => !value);
+    const target = basinRelays[Math.max(0, nextIndex)];
+    if (target) return { label: 'ANCHOR ' + (Math.max(0, nextIndex) + 1), pos: target.position };
+  }
+  if (state.basinMissionStep === 2) return { label: 'RESONANCE VAULT', pos: new THREE.Vector3(0, 0, -141.5) };
+  return { label: 'BASIN RETURN', pos: new THREE.Vector3(0, 0, -105.8) };
 }
 
 let perfFrames = 0;
@@ -984,7 +1284,7 @@ function updateMissionUI() {
       progress = 0;
       total = 1;
     }
-  } else {
+  } else if (state.activeZone === 'OUTPOST') {
     if (state.zoneMissionStep === 0) {
       title = 'MEET THE SCOUT';
       description = 'Speak with the Scout to begin the zone mission.';
@@ -1001,8 +1301,30 @@ function updateMissionUI() {
       progress = 0;
       total = 1;
     } else {
-      title = 'RETURN GATE';
-      description = 'Reach the return gate to complete the vertical-slice chain.';
+      title = 'AETHER BASIN GATE';
+      description = 'Use the Basin Gate to enter the second world.';
+      progress = 0;
+      total = 1;
+    }
+  } else {
+    if (state.basinMissionStep === 0) {
+      title = 'MEET THE ARCHIVIST';
+      description = 'Speak with the Archivist at the Basin approach.';
+      progress = 0;
+      total = 1;
+    } else if (state.basinMissionStep === 1) {
+      title = 'ANCHOR ARRAY';
+      description = 'Calibrate the four resonance anchors.';
+      progress = countBasinRelays();
+      total = 4;
+    } else if (state.basinMissionStep === 2) {
+      title = 'RESONANCE VAULT';
+      description = 'Use the stabilized array at the central vault.';
+      progress = 0;
+      total = 1;
+    } else {
+      title = 'BASIN RETURN';
+      description = 'Reach the return lift to Lumen Wilds.';
       progress = 0;
       total = 1;
     }
@@ -1191,6 +1513,28 @@ function npcMessage(npc) {
     return;
   }
 
+  if (state.activeZone === 'BASIN') {
+    if (npc.userData.name === 'Archivist') {
+      if (state.basinMissionStep === 0) {
+        state.basinMissionStep = 1;
+        basinRelays.forEach((relay, index) => {
+          relay.visible = !state.basinRelayCollected[index];
+        });
+        updateMissionUI();
+        setWorldEvent('EVENT • ANCHOR ARRAY ACTIVE');
+        addAlert('BASIN MISSION', 'Four resonance anchors are offline. Calibrate all four before using the vault.', 3600);
+        beep('ok');
+        saveGame();
+      } else {
+        addAlert('ARCHIVIST', 'The vault listens only to a fully stabilized array.', 3000);
+      }
+      return;
+    }
+    addAlert('RUNNER', 'The basin rewards clean routes. Use the checkpoint before crossing the rift fields.', 3000);
+    beep('ui');
+    return;
+  }
+
   if (npc.userData.name === 'Scout') {
     if (state.zoneMissionStep === 0) {
       state.zoneMissionStep = 1;
@@ -1230,6 +1574,59 @@ function collectRelay(index) {
     relays.forEach((item) => { item.visible = false; });
     saveGame();
   }
+}
+
+function collectBasinRelay(index) {
+  if (state.activeZone !== 'BASIN' || state.basinMissionStep !== 1 || state.basinRelayCollected[index]) return;
+
+  state.basinRelayCollected[index] = true;
+  const relay = basinRelays[index];
+  relay.visible = false;
+  grantRewards(35, 25);
+  addAlert('ANCHOR CALIBRATED', 'Anchor ' + (index + 1) + ' stabilized. +35 XP • +25 CR');
+  updateMissionUI();
+  beep('ok');
+
+  if (countBasinRelays() === 4) {
+    state.basinMissionStep = 2;
+    setWorldEvent('WORLD STATUS • ARRAY STABLE');
+    addAlert('NEXT OBJECTIVE', 'Take the stabilized signal to the central Resonance Vault.', 3400);
+    basinRelays.forEach((item) => { item.visible = false; });
+    saveGame();
+  }
+}
+
+function collectBasinSecret(index) {
+  if (state.basinSecretsCollected[index]) return;
+
+  state.basinSecretsCollected[index] = true;
+  basinSecrets[index].visible = false;
+  grantRewards(30, 40);
+  addAlert('BASIN DISCOVERY', 'Resonance shard recovered. +30 XP • +40 CR • Secrets ' + countBasinSecrets() + '/2', 3000);
+  beep('secret');
+  saveGame();
+}
+
+function useBasinCheckpoint() {
+  state.basinCheckpoint.copy(player.pos);
+  state.basinCheckpoint.y = 0;
+  addAlert('CHECKPOINT', 'Aether Basin respawn point synchronized.', 2400);
+  beep('ok');
+  saveGame();
+}
+
+function activateBasinVault() {
+  if (state.basinMissionStep !== 2) {
+    addAlert('VAULT LOCKED', 'Stabilize all four resonance anchors first.');
+    return;
+  }
+  state.basinMissionStep = 3;
+  grantRewards(100, 220);
+  updateMissionUI();
+  setWorldEvent('WORLD STATUS • BASIN STABILIZED');
+  addAlert('SECOND WORLD READY', 'The return lift is active. Aether Basin exploration is now open-ended.', 3800);
+  beep('ok');
+  saveGame();
 }
 
 function collectSecret(index) {
@@ -1295,12 +1692,32 @@ function completeVerticalSlice() {
 }
 
 function transitionToZone(zone) {
-  state.activeZone = zone === 'OUTPOST' && state.missionStep >= 2 ? 'OUTPOST' : 'HUB';
+  const requested = zone;
+  if (requested === 'BASIN' && state.zoneMissionStep < 3) {
+    state.activeZone = 'OUTPOST';
+  } else if (requested === 'OUTPOST' && state.missionStep < 2) {
+    state.activeZone = 'HUB';
+  } else if (requested === 'HUB') {
+    state.activeZone = 'HUB';
+  } else {
+    state.activeZone = requested;
+  }
+
   state.challengeActive = false;
   state.actionLockUntil = performance.now() + ACTION_COOLDOWN_MS;
   resetChallengeVisuals();
 
-  if (state.activeZone === 'OUTPOST') {
+  if (state.activeZone === 'BASIN') {
+    if (state.basinMissionStep > 3) state.basinMissionStep = 3;
+    player.pos.copy(state.basinCheckpoint);
+    if (player.pos.z > basinBounds.maxZ || player.pos.z < basinBounds.minZ) {
+      player.pos.set(0, 0, -170);
+      state.basinCheckpoint.set(0, 0, -170);
+    }
+    basinRelays.forEach((relay, index) => {
+      relay.visible = state.basinMissionStep === 1 && !state.basinRelayCollected[index];
+    });
+  } else if (state.activeZone === 'OUTPOST') {
     if (state.zoneMissionStep > 3) state.zoneMissionStep = 3;
     player.pos.set(0, 0, -64);
     if (state.zoneMissionStep === 0) {
@@ -1320,15 +1737,25 @@ function transitionToZone(zone) {
   player.velY = 0;
   player.grounded = true;
   player.group.position.copy(player.pos);
-  cameraState.yaw = state.activeZone === 'OUTPOST' ? 0.02 : 0.68;
+  cameraState.yaw = state.activeZone === 'OUTPOST'
+    ? 0.02
+    : state.activeZone === 'BASIN'
+      ? 0.82
+      : 0.68;
   cameraState.pitch = 0.42;
   setZoneVisuals();
   updateMissionUI();
   updateStatusUI();
-  setWorldEvent(state.activeZone === 'OUTPOST' ? 'WORLD • LUMEN WILDS' : 'WORLD • CENTRAL HUB');
+
+  const labels = { HUB: 'CENTRAL HUB', OUTPOST: 'LUMEN WILDS', BASIN: 'AETHER BASIN' };
+  setWorldEvent('WORLD • ' + labels[state.activeZone]);
   addAlert(
     'ZONE TRANSITION',
-    state.activeZone === 'OUTPOST' ? 'Entered Lumen Wilds. The zone is live.' : 'Returned to the Central Hub.',
+    state.activeZone === 'BASIN'
+      ? 'Entered Aether Basin. The second world is live.'
+      : state.activeZone === 'OUTPOST'
+        ? 'Entered Lumen Wilds. The zone is live.'
+        : 'Returned to the Central Hub.',
     3000
   );
   beep('ok');
@@ -1409,10 +1836,46 @@ function handleAction() {
     return;
   }
 
+  if (type === 'basin-gate') {
+    if (state.activeZone === 'OUTPOST') {
+      if (state.zoneMissionStep >= 3) transitionToZone('BASIN');
+      else addAlert('BASIN GATE LOCKED', 'Awaken the Lumen Shrine before entering the second world.');
+    }
+    return;
+  }
+
+  if (type === 'basin-relay') {
+    collectBasinRelay(target.userData.index);
+    return;
+  }
+
+  if (type === 'basin-secret') {
+    collectBasinSecret(target.userData.index);
+    return;
+  }
+
+  if (type === 'basin-checkpoint') {
+    useBasinCheckpoint();
+    return;
+  }
+
+  if (type === 'basin-vault') {
+    activateBasinVault();
+    return;
+  }
+
   if (type === 'return-gate') {
     if (state.activeZone === 'OUTPOST') {
       if (state.zoneMissionStep >= 3) completeVerticalSlice();
       else addAlert('RETURN GATE', 'Complete the Lumen Shrine objective first.');
+    }
+    return;
+  }
+
+  if (type === 'basin-return-gate') {
+    if (state.activeZone === 'BASIN') {
+      if (state.basinMissionStep >= 3) transitionToZone('OUTPOST');
+      else addAlert('BASIN RETURN', 'Stabilize the Resonance Vault first.');
     }
   }
 }
@@ -1530,7 +1993,11 @@ function updatePlayer(dt) {
   if (magnitude > 0.01) move.normalize();
 
   const speed = player.baseSpeed * (input.sprint ? 1.6 : 1) * magnitude;
-  const bounds = state.activeZone === 'OUTPOST' ? outpostBounds : hubBounds;
+  const bounds = state.activeZone === 'OUTPOST'
+    ? outpostBounds
+    : state.activeZone === 'BASIN'
+      ? basinBounds
+      : hubBounds;
   const next = player.pos.clone();
   next.x = THREE.MathUtils.clamp(next.x + move.x * speed * dt, bounds.minX, bounds.maxX);
   if (!collidesAt(new THREE.Vector3(next.x, 0, player.pos.z))) player.pos.x = next.x;
@@ -1576,6 +2043,21 @@ function updatePlayer(dt) {
       for (const hazard of hazards) {
         if (player.pos.distanceTo(hazard.pos) < hazard.radius) {
           respawnToCheckpoint('Rift contact.');
+          break;
+        }
+      }
+    }
+  } else if (state.activeZone === 'BASIN') {
+    if (player.pos.distanceTo(state.basinCheckpoint) > 1.2) {
+      for (const hazard of basinHazards) {
+        if (player.pos.distanceTo(hazard.pos) < hazard.radius) {
+          player.pos.copy(state.basinCheckpoint);
+          player.velY = 0;
+          player.grounded = true;
+          player.group.position.copy(player.pos);
+          state.actionLockUntil = performance.now() + ACTION_COOLDOWN_MS;
+          addAlert('BASIN RECOVERY', 'Rift contact. Returned to your Basin checkpoint.', 2600);
+          beep('fail');
           break;
         }
       }
@@ -1656,10 +2138,22 @@ function updateWorld(nowSeconds) {
     relay.position.y = 1 + Math.sin(nowSeconds * 2 + index) * 0.16;
   });
 
+  basinRelays.forEach((relay, index) => {
+    if (!relay.visible) return;
+    relay.rotation.y += 0.014 + index * 0.0015;
+    relay.position.y = 1 + Math.sin(nowSeconds * 1.8 + index) * 0.16;
+  });
+
   secrets.forEach((secret, index) => {
     if (!secret.visible) return;
     secret.rotation.y += 0.018;
     secret.position.y = 0.62 + Math.sin(nowSeconds * 2.2 + index) * 0.12;
+  });
+
+  basinSecrets.forEach((secret, index) => {
+    if (!secret.visible) return;
+    secret.rotation.y += 0.022;
+    secret.position.y = 0.62 + Math.sin(nowSeconds * 2.0 + index) * 0.12;
   });
 
   const target = nearestInteractable();
@@ -1677,7 +2171,13 @@ function updateWorld(nowSeconds) {
     secret: 'ACTION • COLLECT LUMEN SHARD',
     checkpoint: 'ACTION • SET CHECKPOINT',
     shrine: 'ACTION • AWAKEN SHRINE',
-    'return-gate': 'ACTION • COMPLETE ZONE CHAIN'
+    'return-gate': 'ACTION • COMPLETE ZONE CHAIN',
+    'basin-gate': 'ACTION • ENTER AETHER BASIN',
+    'basin-relay': 'ACTION • CALIBRATE ANCHOR',
+    'basin-secret': 'ACTION • COLLECT RESONANCE SHARD',
+    'basin-checkpoint': 'ACTION • SET BASIN CHECKPOINT',
+    'basin-vault': 'ACTION • STABILIZE VAULT',
+    'basin-return-gate': 'ACTION • RETURN TO LUMEN'
   };
 
   interactionPrompt.textContent = labels[target.userData.type] || 'ACTION';
@@ -1710,8 +2210,18 @@ function restoreMissionWorld() {
       !state.relayCollected[index];
   });
 
+  basinRelays.forEach((relay, index) => {
+    relay.visible = state.activeZone === 'BASIN' &&
+      state.basinMissionStep === 1 &&
+      !state.basinRelayCollected[index];
+  });
+
   secrets.forEach((secret, index) => {
     secret.visible = !state.secretsCollected[index];
+  });
+
+  basinSecrets.forEach((secret, index) => {
+    secret.visible = !state.basinSecretsCollected[index];
   });
 }
 
@@ -1728,7 +2238,10 @@ function startGame() {
   setZoneVisuals();
   restoreMissionWorld();
 
-  if (state.activeZone === 'OUTPOST') {
+  if (state.activeZone === 'BASIN') {
+    player.pos.copy(state.basinCheckpoint);
+    if (player.pos.z > basinBounds.maxZ || player.pos.z < basinBounds.minZ) player.pos.set(0, 0, -170);
+  } else if (state.activeZone === 'OUTPOST') {
     player.pos.copy(state.checkpoint);
     if (player.pos.z > -29 || player.pos.z < -98) player.pos.set(0, 0, -64);
   } else {
@@ -1743,7 +2256,13 @@ function startGame() {
   updateMissionUI();
 
   let message = '';
-  if (state.activeZone === 'OUTPOST') {
+  if (state.activeZone === 'BASIN') {
+    message = state.basinMissionStep === 0
+      ? 'Welcome to Aether Basin. Find the Archivist.'
+      : state.basinMissionStep === 1
+        ? 'Welcome back to Aether Basin. The anchor array is ready.'
+        : 'Welcome back to Aether Basin. Continue the resonance mission.';
+  } else if (state.activeZone === 'OUTPOST') {
     message = state.zoneMissionStep === 0
       ? 'Welcome to Lumen Wilds. Find the Scout.'
       : 'Welcome back to Lumen Wilds. Your zone mission is ready.';
@@ -1756,7 +2275,15 @@ function startGame() {
   }
 
   addAlert('SYSTEM ONLINE', message, 3400);
-  setWorldEvent(state.activeZone === 'OUTPOST' ? 'WORLD • LUMEN WILDS' : state.missionStep === 1 ? 'EVENT • SIGNAL RUN AVAILABLE' : 'WORLD STATUS • STABLE');
+  setWorldEvent(
+    state.activeZone === 'BASIN'
+      ? 'WORLD • AETHER BASIN'
+      : state.activeZone === 'OUTPOST'
+        ? 'WORLD • LUMEN WILDS'
+        : state.missionStep === 1
+          ? 'EVENT • SIGNAL RUN AVAILABLE'
+          : 'WORLD STATUS • STABLE'
+  );
   ensureAudio();
   saveGame();
 }
@@ -1796,6 +2323,7 @@ continueBtn.addEventListener('click', () => {
 
 buildHub();
 buildOutpost();
+buildBasin();
 buildPlayer();
 applyAvatarStyle();
 setupControls();
