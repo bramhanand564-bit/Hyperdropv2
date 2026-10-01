@@ -89,3 +89,5 @@ Never claim VERIFIED or LOCKED without target-device evidence.
 - 2026-10-01: NPC prototype and three challenge types added; V0.3 vertical slice started.
 - 2026-10-01: Added three original avatar style variants and persistent avatar selection.
 - 2026-10-01: Built Lumen Wilds, first zone transition, full zone mission chain, relay system, three secrets, checkpoint/respawn, radar panel, audio cues and graphics/sound controls.
+- 2026-10-01: Added standalone NEXUS CI syntax workflow and V0.3 mobile test plan.
+- 2026-10-01: Added local-progress reset control to make repeat Android testing safer and faster.
