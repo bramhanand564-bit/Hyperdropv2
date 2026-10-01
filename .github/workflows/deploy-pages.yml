@@ -1,4 +1,4 @@
-name: Deploy NAX World
+name: Deploy NEXUS World
 
 on:
   push:
