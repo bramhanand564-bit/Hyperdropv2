@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#07111f" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>NAX World — 3D Foundation</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./src/styles.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main id="game-root">
+    <canvas id="game-canvas" aria-label="NAX World 3D game"></canvas>
+
+    <section id="boot-screen" class="overlay">
+      <div class="panel boot-panel">
+        <div class="brand-mark">NAX</div>
+        <p class="eyebrow">WORLD / 3D FOUNDATION</p>
+        <h1>Enter the World</h1>
+        <p class="muted">A small playable slice of the original NAX World universe.</p>
+        <label class="name-field">
+          <span>Player name</span>
+          <input id="player-name" maxlength="18" value="Explorer" autocomplete="off" />
+        </label>
+        <button id="start-button" class="primary-button">START EXPLORING</button>
+        <p id="boot-status" class="tiny">Ready for mobile testing.</p>
+      </div>
+    </section>
+
+    <section id="hud" class="hud hidden">
+      <div class="hud-top">
+        <div class="pill"><strong id="hud-name">Explorer</strong><span id="hud-status">ONLINE • LOCAL</span></div>
+        <div class="stats">
+          <span>XP <strong id="hud-xp">0</strong></span>
+          <span>ZONE <strong id="hud-zone">01</strong></span>
+        </div>
+      </div>
+
+      <div id="interaction-prompt" class="interaction-prompt hidden">Tap INTERACT</div>
+
+      <div class="mini-map">
+        <div class="map-label">NAX ZONE 01</div>
+        <div class="map-grid"></div>
+        <div id="map-dot" class="map-dot"></div>
+      </div>
+
+      <div class="controls">
+        <div id="joystick" class="joystick" aria-label="Movement joystick">
+          <div class="joystick-ring"></div>
+          <div id="joystick-knob" class="joystick-knob"></div>
+        </div>
+
+        <div class="action-stack">
+          <button id="interact-button" class="action-button" type="button">INTERACT</button>
+          <button id="jump-button" class="action-button" type="button">JUMP</button>
+          <button id="sprint-button" class="action-button accent" type="button">SPRINT</button>
+        </div>
+      </div>
+
+      <div class="hint">Drag anywhere on the world to rotate camera • Move with the left stick</div>
+    </section>
+
+    <section id="toast" class="toast hidden"></section>
+  </main>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

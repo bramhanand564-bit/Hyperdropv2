@@ -5,61 +5,65 @@ This file is the persistent project memory for NAX World in `bramhanand564-bit/H
 Update it after major architecture decisions, verified fixes, milestones, tests, and breaking changes.
 
 ## Project Vision
-Build an original, mobile-first, fully 3D virtual-world game with a persistent player identity, explorable worlds, social systems, gameplay, creator systems, AI features, and a future NAX ecosystem.
+Build an original, mobile-first, fully 3D virtual-world game with persistent player identity, explorable worlds, social systems, gameplay, creator systems, AI features, and a future NAX ecosystem.
 
-This is inspired by the broad idea of a connected virtual world, but it must use original IP, original names, original assets, original maps, original UI, and original implementation.
+The project may be broadly inspired by the concept of a connected virtual world, but must use original IP, names, maps, assets, music, UI, and implementation.
 
 ## Locked Decisions
 - Repository: `bramhanand564-bit/Hyperdropv2`
-- Target: Android-first, mobile-first
-- Game: fully 3D; no 2.5D substitute
-- Camera: third-person for the first playable slice
-- Controls: touch-first
-- Development workflow: GitHub/cloud/mobile-friendly
-- Current constraint: no PC/computer available to the user
-- Architecture: modular and expandable
-- Performance: target 30 FPS baseline, 60 FPS on capable devices
+- Android-first / mobile-first
+- Fully 3D; no 2.5D substitute
+- Third-person camera for the first playable slice
+- Touch-first controls
+- GitHub/cloud/mobile-friendly workflow
+- User currently has no PC/computer workflow requirement
+- Modular architecture
+- Performance target: 30 FPS baseline; 60 FPS on capable devices
 - Build rule: BUILD SMALL -> TEST -> RECORD -> LOCK -> EXPAND
 
-## Current State
-Status: FOUNDATION RESET COMPLETE
-Legacy Hyperdropv2 application files have been removed from the default branch.
-The repository is intentionally starting clean for NAX World.
+## Engine Decision
+- Foundation engine: **Three.js r0.186.0**
+- Delivery model for Phase 1: static browser build, suitable for Android browser testing
+- Future packaging: evaluate native Android packaging after the web vertical slice is stable
+- Source: official three.js release/site information; r186 is the current release at project start.
 
-Engine decision: PENDING FINAL VALIDATION
-Initial candidate direction: browser-based full 3D engine suitable for Android-first testing and later packaging.
+## Current Status
+**IN PROGRESS — 3D FOUNDATION**
+Implemented in this reset:
+1. Three.js 3D scene
+2. Third-person camera
+3. Procedural fully 3D player avatar
+4. Touch joystick
+5. Swipe camera
+6. Jump
+7. Sprint
+8. Small explorable 3D zone
+9. Discovery/interact points
+10. Local save/load
+11. Mobile HUD + mini-map
+12. GitHub Pages deployment workflow
+
+Not yet verified on a physical Android device.
 
 ## First Playable Vertical Slice
-1. Start screen
-2. Player identity
-3. One small 3D environment
-4. Fully 3D player avatar
-5. Third-person camera
-6. Touch movement / virtual joystick
-7. Swipe camera
-8. Jump
-9. Basic interaction
-10. Basic save/load
-11. Mobile HUD
-12. Mobile performance test
+- [x] Start screen
+- [x] Player identity input
+- [x] One 3D environment
+- [x] One 3D avatar
+- [x] Third-person camera
+- [x] Touch movement
+- [x] Camera swipe
+- [x] Jump
+- [x] Basic interaction
+- [x] Basic local save/load
+- [x] Mobile HUD
+- [ ] Physical mobile performance test
+- [ ] Lock foundation after test
 
 ## Planned Modules
-- Account / NAX ID
-- Player / Avatar / Inventory / Progression / Achievements
-- World / Zones / Buildings / NPCs / Interactive Objects
-- Movement / Jump / Sprint / Climb / Swim
-- Vehicles
-- Social / Friends / Chat / Voice / Party / Guild
-- Quests / Combat / Racing / Mini-games
-- Economy / Currency / Inventory / Shops / Trading
-- Creator Studio
-- AI systems
-- NAX Store
-- Events
-- Multiplayer
-- Security / Moderation / Analytics
+Account / NAX ID / Avatar / Inventory / Progression / Achievements / World / Zones / Buildings / NPCs / Interactive Objects / Movement / Vehicles / Social / Chat / Voice / Party / Guild / Quests / Combat / Racing / Mini-games / Economy / Creator Studio / AI / NAX Store / Events / Multiplayer / Security / Analytics.
 
-## Development Phases
+## Phase Roadmap
 1. Foundation
 2. Player
 3. World
@@ -70,81 +74,30 @@ Initial candidate direction: browser-based full 3D engine suitable for Android-f
 8. Creator Studio
 9. AI
 10. NAX Store
-11. Scale / Optimization / Security
+11. Scale / optimization / security
 
-## Testing Status Legend
-- PLANNED
-- IN PROGRESS
-- TESTING
-- WORKING
-- LOCKED
-- BLOCKED
-- DEPRECATED
+## Testing Status
+PLANNED / IN PROGRESS / TESTING / WORKING / LOCKED / BLOCKED / DEPRECATED
 
 Never mark WORKING or LOCKED without actual test evidence.
 
 ## Mobile Requirements
-- Landscape gameplay
-- Responsive HUD and menus
-- Virtual joystick
-- Touch camera
-- Jump / sprint / interact / action controls
-- Low / medium / high graphics profiles
-- Battery-aware behavior
-- Low-memory handling
-- Asset streaming
-- Network reconnect handling
-- Avoid unnecessary high-resolution assets
+Landscape gameplay, responsive HUD, virtual joystick, touch camera, jump/sprint/interact/action controls, low/medium/high profiles, battery-aware behavior, low-memory handling, asset streaming, network reconnect handling.
 
 ## Networking Principles
-Important game state must be server-authoritative when multiplayer is introduced:
-- Currency
-- Inventory ownership
-- Competitive scores
-- Damage/results
-- Rewards
-- Match results
-- Progression
-
-Never trust the mobile client for authoritative economy or competitive results.
+When multiplayer is added, server-authoritative state will cover currency, inventory ownership, competitive scores, damage/results, rewards, match results, and progression.
 
 ## Security
-- Never commit API keys, tokens, passwords, private credentials, or secrets.
-- Use environment variables / platform secrets.
-- Record variable names and purpose only.
-- Validate important server-side actions.
+Never commit API keys, tokens, passwords, credentials, or secrets. Use environment variables / platform secrets. Record variable names and purpose only.
 
 ## Memory Rules
-Record:
-- Major architecture decisions
-- Engine and tooling decisions
-- Repo structure changes
-- Modules and APIs
-- Database/network decisions
-- Security/performance decisions
-- Completed features
-- Verified bugs and fixes
-- Build/deployment process
-- Important commands
-- Test results
-- Milestones
-- Breaking changes
-- Locked components
-- Rationale for major decisions
+Record major architecture decisions, tooling decisions, repo changes, systems, APIs, database/network decisions, security/performance decisions, completed features, verified bugs/fixes, build/deployment, tests, milestones, breaking changes, locked components, and rationale.
 
-Do NOT record:
-- Passwords, API keys, tokens, private credentials
-- Sensitive personal information
-- Temporary chat noise
-- Unverified assumptions as facts
-- Duplicate information
-- Huge source-code copies
-- Generated build output
-- Temporary debug logs unless reproducible and useful
+Do not record secrets, sensitive personal data, temporary chat noise, unverified assumptions as facts, duplicate information, huge source copies, generated build output, or temporary logs without reproducible value.
 
 ## Golden Rule
-Do not build hundreds of untested systems at once.
-BUILD SMALL -> TEST -> RECORD -> LOCK -> EXPAND.
+**BUILD SMALL -> TEST -> RECORD -> LOCK -> EXPAND**
 
 ## Change Log
-- 2026-10-01: Legacy Hyperdropv2 application code and old CI workflow removed. Repository reset for NAX World.
+- 2026-10-01: Legacy Hyperdropv2 application files and old CI workflow removed.
+- 2026-10-01: NAX World Three.js r0.186.0 foundation and mobile vertical slice committed.

@@ -2,15 +2,26 @@
 
 Original mobile-first, fully 3D virtual-world game project.
 
-## Repository
-`bramhanand564-bit/Hyperdropv2`
+## Current build
+**Phase 1 — 3D Foundation / Vertical Slice — IN PROGRESS**
 
-## Status
-Foundation reset complete. Legacy application code removed.
+The repository now contains a clean browser-playable Three.js foundation with:
+- Fully 3D third-person player avatar
+- Small 3D exploration zone
+- Virtual joystick movement
+- Swipe camera
+- Jump and sprint
+- Discovery/interact points
+- Local save/load
+- Mobile HUD and mini-map
+- GitHub Pages deployment workflow
 
-See [memory.md](./memory.md) for the persistent project state, locked decisions, roadmap, testing rules, and next actions.
+Three.js is pinned to **r0.186.0** for this foundation.
 
-## Development Principle
+## Test
+Open the deployed GitHub Pages site on an Android phone in landscape orientation.
+
+## Development principle
 **BUILD SMALL -> TEST -> RECORD -> LOCK -> EXPAND**
 
-The project is designed Android-first and must remain fully 3D.
+See [memory.md](./memory.md) for the persistent project state and rules.
