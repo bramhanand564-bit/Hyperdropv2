@@ -118,6 +118,7 @@ const basinRelays = [];
 const basinSecrets = [];
 const basinHazards = [];
 const basinChallengeTargets = [];
+const basinEventNodes = [];
 const collisionBoxes = [];
 const zoneGroups = {
   HUB: new THREE.Group(),
@@ -150,9 +151,9 @@ const palette = {
 };
 
 const zoneVisuals = {
-  HUB: { background: 0x050914, fog: 0x07101b },
-  OUTPOST: { background: 0x0b0812, fog: 0x130c1c },
-  BASIN: { background: 0x061018, fog: 0x0a1b22 }
+  HUB: { background: 0x050914, fog: 0x07101b, density: 0.019 },
+  OUTPOST: { background: 0x0b0812, fog: 0x130c1c, density: 0.022 },
+  BASIN: { background: 0x061018, fog: 0x0a1b22, density: 0.017 }
 };
 
 const hubBounds = { minX: -35, maxX: 35, minZ: -35, maxZ: 35 };
@@ -861,6 +862,24 @@ function buildBasin() {
     marker.userData.index = index;
     basinChallengeTargets.push(marker);
   });
+
+  const eventPoints = [
+    new THREE.Vector3(-29, 0.2, -144), new THREE.Vector3(-16, 0.2, -122),
+    new THREE.Vector3(1, 0.2, -162), new THREE.Vector3(19, 0.2, -132),
+    new THREE.Vector3(35, 0.2, -151), new THREE.Vector3(21, 0.2, -174),
+    new THREE.Vector3(-4, 0.2, -176), new THREE.Vector3(-33, 0.2, -168)
+  ];
+  eventPoints.forEach((p, index) => {
+    const node = mesh(
+      new THREE.TorusGeometry(0.42, 0.07, 7, 20),
+      mat(0x76dce2, 0.18, 0.35, 0x2d7c84),
+      p.clone(),
+      g
+    );
+    node.rotation.x = Math.PI / 2;
+    node.userData.index = index;
+    basinEventNodes.push(node);
+  });
 }
 function buildPlayer() {
   const body = new THREE.Group();
@@ -1172,6 +1191,7 @@ function setZoneVisuals() {
   const visual = zoneVisuals[state.activeZone];
   scene.background.setHex(visual.background);
   scene.fog.color.setHex(visual.fog);
+  if (visual.density) scene.fog.density = visual.density;
   const labels = { HUB: 'CENTRAL HUB', OUTPOST: 'LUMEN WILDS', BASIN: 'AETHER BASIN' };
   zoneLabel.textContent = labels[state.activeZone] || 'CENTRAL HUB';
   zoneGroups.HUB.visible = state.activeZone === 'HUB';
@@ -2292,6 +2312,14 @@ function updateWorld(nowSeconds) {
       if (!marker.visible) return;
       marker.rotation.z += 0.018;
       marker.position.y = 0.18 + Math.sin(nowSeconds * 2.4 + index) * 0.06;
+    });
+
+    const phase = (nowSeconds % 18) / 18;
+    basinEventNodes.forEach((node, index) => {
+      const wave = Math.max(0, 1 - Math.abs(((phase * 8 + index) % 8) - 4) / 4);
+      node.rotation.z += 0.006;
+      node.scale.setScalar(1 + wave * 0.35);
+      node.material.emissiveIntensity = 0.8 + wave * 2.0;
     });
   }
 
