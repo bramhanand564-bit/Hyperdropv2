@@ -12,6 +12,35 @@
 </head>
 <body>
 <main id="game">
+<div id="boot-diagnostic" class="boot-diagnostic" role="status">
+  <div class="boot-mark">NX</div>
+  <b id="boot-title">NEXUS WORLD</b>
+  <span id="boot-status">LOADING 3D WORLD…</span>
+  <small id="boot-detail"></small>
+</div>
+<script>
+  window.__nexusBoot = { ok: false };
+  window.addEventListener('error', function (event) {
+    var box = document.getElementById('boot-diagnostic');
+    var detail = document.getElementById('boot-detail');
+    var status = document.getElementById('boot-status');
+    if (box && detail && status) {
+      status.textContent = 'STARTUP ERROR';
+      detail.textContent = String(event.message || 'Unknown WebView error').slice(0, 180);
+      box.classList.add('boot-error');
+    }
+  });
+  window.addEventListener('unhandledrejection', function (event) {
+    var box = document.getElementById('boot-diagnostic');
+    var detail = document.getElementById('boot-detail');
+    var status = document.getElementById('boot-status');
+    if (box && detail && status) {
+      status.textContent = 'STARTUP ERROR';
+      detail.textContent = String(event.reason || 'Unhandled promise rejection').slice(0, 180);
+      box.classList.add('boot-error');
+    }
+  });
+</script>
   <canvas id="game-canvas"></canvas>
 
 
