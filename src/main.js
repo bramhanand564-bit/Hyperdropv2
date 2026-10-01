@@ -2262,8 +2262,18 @@ function updatePlayer(dt) {
     p.coatR.rotation.z = 0.06 - Math.sin(player.walkPhase * 0.5) * 0.06;
     p.sword.rotation.z = -0.22 + Math.sin(player.walkPhase * 0.5) * 0.025;
     p.chestCore.rotation.y += 0.035;
+    p.chestCore.scale.setScalar(1 + Math.sin(player.walkPhase * 2) * 0.05);
     p.coatHemL.rotation.z = Math.sin(player.walkPhase) * 0.08;
     p.coatHemR.rotation.z = -Math.sin(player.walkPhase) * 0.08;
+    if (p.hands) p.hands.forEach((hand, i) => {
+      hand.rotation.z = Math.sin(player.walkPhase + i) * 0.035;
+    });
+    if (p.fingers) p.fingers.forEach((finger, i) => {
+      finger.rotation.x = Math.sin(player.walkPhase * 1.4 + i * 0.7) * 0.12;
+    });
+    if (p.hairSpikes) p.hairSpikes.forEach((spike, i) => {
+      spike.rotation.z += Math.sin(player.walkPhase * 0.7 + i) * 0.003;
+    });
   } else {
     // Simple idle pose so the opening scene feels alive.
     const idle = Math.sin(performance.now() * 0.0022) * 0.045;
@@ -2280,6 +2290,18 @@ function updatePlayer(dt) {
     p.chestCore.scale.setScalar(1 + Math.sin(performance.now() * 0.004) * 0.08);
     p.coatHemL.rotation.z = THREE.MathUtils.lerp(p.coatHemL.rotation.z, idle * 0.8, Math.min(1, dt * 4));
     p.coatHemR.rotation.z = THREE.MathUtils.lerp(p.coatHemR.rotation.z, -idle * 0.8, Math.min(1, dt * 4));
+    if (p.eyes) p.eyes.forEach((eye, i) => {
+      eye.scale.y = 0.72 + Math.sin(performance.now() * 0.003 + i) * 0.12;
+    });
+    if (p.hands) p.hands.forEach((hand, i) => {
+      hand.rotation.z = THREE.MathUtils.lerp(hand.rotation.z, (i ? -idle : idle) * 0.7, Math.min(1, dt * 3));
+    });
+    if (p.fingers) p.fingers.forEach((finger, i) => {
+      finger.rotation.x = THREE.MathUtils.lerp(finger.rotation.x, Math.sin(performance.now() * 0.0015 + i) * 0.035, Math.min(1, dt * 2));
+    });
+    if (p.hairSpikes) p.hairSpikes.forEach((spike, i) => {
+      spike.rotation.z += Math.sin(performance.now() * 0.001 + i * 0.6) * 0.0015;
+    });
     p.torso.position.y = 1.3 + Math.sin(performance.now() * 0.0022) * 0.018;
   }
 
