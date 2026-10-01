@@ -169,3 +169,5 @@ Before changing a LOCKED system:
 - Basin has hazard recovery, collision geometry, radar entries, navigation targets, save/load state and a timed Resonance Surge world event.
 - V0.4 remains at 20% total-project progress until the milestone is completed and verified; no percentage inflation is used for partial implementation.
 - Opening experience foundation: permanent NEXUS Home spawn pad at the Central Hub, framed opening camera, and a lightweight player idle pose so a new session begins with the avatar visibly standing in a defined home location.
+- Opening boot hardening: removed the blocking start-card flow so the app boots directly into the 3D Home lobby; Android packaging now rewrites the Three.js import to a local relative module for WebView/file-asset reliability.
+- Android QA evidence: APK build succeeds after the direct-boot/module-loading fix. Physical device gameplay verification is still pending.
