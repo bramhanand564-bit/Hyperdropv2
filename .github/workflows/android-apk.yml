@@ -75,19 +75,13 @@ jobs:
           rm -rf android/app/src/main/assets
           mkdir -p android/app/src/main/assets/src
           cp index.html android/app/src/main/assets/index.html
-          cp src/main.js android/app/src/main/assets/src/main.js
           cp src/styles.css android/app/src/main/assets/src/styles.css
-          # Use classic scripts in Android WebView to eliminate file:// ES-module/import-map failures.
-          curl -fsSL https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.min.js -o android/app/src/main/assets/src/three.min.js
+          # Bundle Three.js + game code into one classic script for Android WebView.
+          # This removes both file:// ES-module resolution and import-map dependency.
+          npm install --no-audit --no-fund
+          npx esbuild src/main.js --bundle --format=iife --outfile=android/app/src/main/assets/src/game.bundle.js
           python3 - <<'PY'
           from pathlib import Path
-
-          main = Path("android/app/src/main/assets/src/main.js")
-          s = main.read_text()
-          import_line = "import * as THREE from 'three';"
-          if import_line not in s:
-              raise SystemExit("Three.js source import not found")
-          main.write_text(s.replace(import_line + "\n", "", 1))
 
           index = Path("android/app/src/main/assets/index.html")
           html = index.read_text()
@@ -98,7 +92,7 @@ jobs:
                   raise SystemExit("Import-map closing tag not found")
               html = html[:start] + html[end + len('  </script>'):]
           marker = '<script type="module" src="./src/main.js"></script>'
-          replacement = '<script src="./src/three.min.js"></script>\\n<script src="./src/main.js"></script>'
+          replacement = '<script src="./src/game.bundle.js"></script>'
           if marker not in html:
               raise SystemExit("Main module script tag not found")
           index.write_text(html.replace(marker, replacement))
