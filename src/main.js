@@ -62,6 +62,9 @@ const state = {
   basinRelayCollected: [false, false, false, false],
   basinSecretsCollected: [false, false],
   basinCheckpoint: new THREE.Vector3(0, 0, -170),
+  basinChallengeActive: false,
+  basinChallengeStart: 0,
+  basinChallengeIndex: 0,
   challengeActive: false,
   challengeType: 'signal',
   challengeStart: 0,
@@ -78,7 +81,8 @@ const state = {
   challengeRecords: {
     signal: { clears: 0, bestSeconds: null },
     memory: { clears: 0, bestSeconds: null },
-    delivery: { clears: 0, bestSeconds: null }
+    delivery: { clears: 0, bestSeconds: null },
+    basinSprint: { clears: 0, bestSeconds: null }
   }
 };
 
@@ -113,6 +117,7 @@ const hazards = [];
 const basinRelays = [];
 const basinSecrets = [];
 const basinHazards = [];
+const basinChallengeTargets = [];
 const collisionBoxes = [];
 const zoneGroups = {
   HUB: new THREE.Group(),
@@ -837,6 +842,25 @@ function buildBasin() {
     g
   );
   gateRing.rotation.x = Math.PI / 2;
+
+  const sprintPoints = [
+    new THREE.Vector3(-9, 0.18, -132),
+    new THREE.Vector3(18, 0.18, -150),
+    new THREE.Vector3(30, 0.18, -169),
+    new THREE.Vector3(-24, 0.18, -159)
+  ];
+  sprintPoints.forEach((p, index) => {
+    const marker = mesh(
+      new THREE.TorusGeometry(1.05, 0.12, 8, 28),
+      mat(0x8bdfe4, 0.18, 0.45, 0x3ea0aa),
+      p.clone(),
+      g
+    );
+    marker.rotation.x = Math.PI / 2;
+    marker.visible = false;
+    marker.userData.index = index;
+    basinChallengeTargets.push(marker);
+  });
 }
 function buildPlayer() {
   const body = new THREE.Group();
@@ -1051,7 +1075,7 @@ function loadGame() {
     const recordSource = payload.challengeRecords && typeof payload.challengeRecords === 'object'
       ? payload.challengeRecords
       : {};
-    for (const key of ['signal', 'memory', 'delivery']) {
+    for (const key of ['signal', 'memory', 'delivery', 'basinSprint']) {
       const record = recordSource[key];
       if (!record || typeof record !== 'object') continue;
       state.challengeRecords[key].clears = Math.max(0, Math.floor(Number(record.clears || 0)));
@@ -1213,6 +1237,10 @@ function getNavigationTarget(nowSeconds) {
     return { label: 'AETHER BASIN GATE', pos: new THREE.Vector3(31, 0, -42) };
   }
 
+  if (state.basinChallengeActive) {
+    const target = basinChallengeTargets[state.basinChallengeIndex];
+    if (target) return { label: 'SPRINT GATE ' + (state.basinChallengeIndex + 1), pos: target.position };
+  }
   if (state.basinMissionStep === 0) return { label: 'ARCHIVIST', pos: new THREE.Vector3(5, 0, -118) };
   if (state.basinMissionStep === 1) {
     const nextIndex = state.basinRelayCollected.findIndex((value) => !value);
@@ -1531,8 +1559,7 @@ function npcMessage(npc) {
       }
       return;
     }
-    addAlert('RUNNER', 'The basin rewards clean routes. Use the checkpoint before crossing the rift fields.', 3000);
-    beep('ui');
+    startBasinSprint();
     return;
   }
 
@@ -1614,6 +1641,85 @@ function useBasinCheckpoint() {
   addAlert('CHECKPOINT', 'Aether Basin respawn point synchronized.', 2400);
   beep('ok');
   saveGame();
+}
+
+function startBasinSprint() {
+  if (state.basinMissionStep < 1) {
+    addAlert('RUNNER', 'Calibrate the anchor array before taking the Resonance Sprint.', 3000);
+    return;
+  }
+  if (state.basinChallengeActive) {
+    addAlert('RESONANCE SPRINT', 'The sprint is already active. Follow the lit route.', 2200);
+    return;
+  }
+
+  state.basinChallengeActive = true;
+  state.basinChallengeStart = performance.now() / 1000;
+  state.basinChallengeIndex = 0;
+  basinChallengeTargets.forEach((marker, index) => {
+    marker.visible = index === 0;
+  });
+  setWorldEvent('EVENT • RESONANCE SPRINT • 30.0s');
+  addAlert('RESONANCE SPRINT', 'Pass through all four resonance gates before time expires.', 3200);
+  beep('ok');
+}
+
+function finishBasinSprint() {
+  const elapsed = Math.max(0, performance.now() / 1000 - state.basinChallengeStart);
+  state.basinChallengeActive = false;
+  state.basinChallengeStart = 0;
+  state.basinChallengeIndex = 0;
+  basinChallengeTargets.forEach((marker) => { marker.visible = false; });
+
+  const record = state.challengeRecords.basinSprint;
+  record.clears += 1;
+  if (record.bestSeconds === null || elapsed < record.bestSeconds) {
+    record.bestSeconds = Number(elapsed.toFixed(2));
+    addAlert('NEW RECORD', 'RESONANCE SPRINT • ' + record.bestSeconds.toFixed(2) + 's', 2400);
+  }
+
+  grantRewards(70, 150);
+  setWorldEvent('WORLD STATUS • RESONANCE SPRINT CLEARED');
+  addAlert('SPRINT CLEARED', '+70 XP • +150 CR', 2800);
+  beep('ok');
+  saveGame();
+}
+
+function failBasinSprint() {
+  state.basinChallengeActive = false;
+  state.basinChallengeStart = 0;
+  state.basinChallengeIndex = 0;
+  basinChallengeTargets.forEach((marker) => { marker.visible = false; });
+  setWorldEvent('WORLD • AETHER BASIN');
+  addAlert('SPRINT FAILED', 'Time expired. Talk to the Runner to retry.', 2800);
+  beep('fail');
+}
+
+function updateBasinSprint(nowSeconds) {
+  if (!state.basinChallengeActive || state.activeZone !== 'BASIN') return;
+
+  const elapsed = nowSeconds - state.basinChallengeStart;
+  const remaining = Math.max(0, 30 - elapsed);
+  const index = state.basinChallengeIndex;
+  const target = basinChallengeTargets[index];
+
+  setWorldEvent('EVENT • RESONANCE SPRINT • ' + remaining.toFixed(1) + 's');
+
+  basinChallengeTargets.forEach((marker, markerIndex) => {
+    marker.visible = markerIndex === index;
+  });
+
+  if (target && player.pos.distanceTo(target.position) < 2.2) {
+    if (index >= basinChallengeTargets.length - 1) {
+      finishBasinSprint();
+      return;
+    }
+    state.basinChallengeIndex += 1;
+    addAlert('SPRINT NODE', 'Gate ' + (state.basinChallengeIndex) + '/4 reached.', 1600);
+    beep('ui');
+  }
+
+  if (remaining <= 0) failBasinSprint();
 }
 
 function activateBasinVault() {
@@ -2161,6 +2267,14 @@ function updateWorld(nowSeconds) {
     secret.position.y = 0.62 + Math.sin(nowSeconds * 2.0 + index) * 0.12;
   });
 
+  if (state.activeZone === 'BASIN') {
+    basinChallengeTargets.forEach((marker, index) => {
+      if (!marker.visible) return;
+      marker.rotation.z += 0.018;
+      marker.position.y = 0.18 + Math.sin(nowSeconds * 2.4 + index) * 0.06;
+    });
+  }
+
   if (state.activeZone === 'BASIN' && state.started) {
     const cycle = Math.floor(nowSeconds / 18);
     if (cycle !== basinEventCycle) {
@@ -2238,6 +2352,13 @@ function restoreMissionWorld() {
   basinSecrets.forEach((secret, index) => {
     secret.visible = !state.basinSecretsCollected[index];
   });
+
+  basinChallengeTargets.forEach((marker) => {
+    marker.visible = false;
+  });
+  state.basinChallengeActive = false;
+  state.basinChallengeStart = 0;
+  state.basinChallengeIndex = 0;
 }
 
 function startGame() {
@@ -2359,6 +2480,7 @@ function loop(now) {
 
   if (state.started && !state.completed) updatePlayer(dt);
   updateChallenge(now * 0.001);
+  updateBasinSprint(now * 0.001);
   updateNavigationUI(now * 0.001);
   updatePerformanceUI(dt);
   updateWorld(now * 0.001);
