@@ -1950,8 +1950,9 @@ function transitionToZone(zone) {
     ? 0.02
     : state.activeZone === 'BASIN'
       ? 0.82
-      : 0.68;
-  cameraState.pitch = 0.42;
+      : Math.PI;
+  cameraState.pitch = state.activeZone === 'HUB' ? 0.26 : 0.42;
+  cameraState.distance = state.activeZone === 'HUB' ? 6.8 : 9.4;
   setZoneVisuals();
   updateMissionUI();
   updateStatusUI();
@@ -2434,7 +2435,8 @@ function updateWorld(nowSeconds) {
 }
 
 function updateCamera(dt) {
-  const target = player.pos.clone().add(new THREE.Vector3(0, 1.35, 0));
+  const targetHeight = state.activeZone === 'HUB' ? 1.1 : 1.35;
+  const target = player.pos.clone().add(new THREE.Vector3(0, targetHeight, 0));
   const offset = new THREE.Vector3(
     Math.sin(cameraState.yaw) * Math.cos(cameraState.pitch) * cameraState.distance,
     Math.sin(cameraState.pitch) * cameraState.distance,
@@ -2509,9 +2511,10 @@ function startGame() {
   } else {
     // New sessions always begin at the permanent NEXUS Home pad.
     player.pos.set(0, 0, 8);
-    cameraState.yaw = 0.18;
-    cameraState.pitch = 0.34;
-    cameraState.distance = 7.8;
+    player.group.rotation.y = Math.PI;
+    cameraState.yaw = Math.PI;
+    cameraState.pitch = 0.26;
+    cameraState.distance = 6.8;
   }
 
   player.group.position.copy(player.pos);
@@ -2583,7 +2586,20 @@ window.addEventListener('pagehide', () => {
   if (state.started) saveGame();
 });
 
-startBtn.addEventListener('click', startGame);
+let startTapLocked = false;
+
+const launchFromStart = (event) => {
+  if (event) event.preventDefault();
+  if (startTapLocked) return;
+  startTapLocked = true;
+  window.setTimeout(() => { startTapLocked = false; }, 650);
+  startGame();
+};
+
+// Mobile WebView friendly: pointer + touch + click, with a short duplicate-tap guard.
+startBtn.addEventListener('pointerup', launchFromStart, { passive: false });
+startBtn.addEventListener('touchend', launchFromStart, { passive: false });
+startBtn.addEventListener('click', launchFromStart);
 
 continueBtn.addEventListener('click', () => {
   complete.classList.add('hidden');
