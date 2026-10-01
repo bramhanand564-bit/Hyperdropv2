@@ -95,3 +95,4 @@ Never claim VERIFIED or LOCKED without target-device evidence.
 - 2026-10-01: Added mobile lifecycle recovery so hidden/blurred pages release joystick, sprint and camera transient input safely.
 - 2026-10-01: V0.3 implementation milestone advanced to 20% development progress; Android verification remains explicitly pending.
 - 2026-10-01: Started V0.4 world expansion with the original Aether Basin second zone, four-anchor mission chain, two secrets, checkpoint/respawn, Basin Gate transition, radar/navigation integration, save/load integration and Resonance Surge world events.
+- 2026-10-01: Added the replayable Aether Basin Resonance Sprint with four route gates, a 30-second timer, rewards and persistent clear/best-time record.
