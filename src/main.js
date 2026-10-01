@@ -84,6 +84,8 @@ const beacons = [];
 const worldProps = [];
 const npcs = [];
 const challengePads = [];
+const challengeTargets = [];
+const deliveryTarget = new THREE.Vector3(-16, 0.12, -18);
 const SAVE_KEY = 'nexus-world-v02-save';
 
 const palette = {
@@ -241,6 +243,20 @@ function buildHub() {
     beacons.push(beacon);
     addGlow(p.clone().add(new THREE.Vector3(0, 0.65, 0)), 0.9);
   }
+
+  const memoryPoints = [new THREE.Vector3(2, 0.08, 7), new THREE.Vector3(-4, 0.08, 10), new THREE.Vector3(-6, 0.08, 3), new THREE.Vector3(3, 0.08, 1)];
+  memoryPoints.forEach((p, index) => {
+    const marker = mesh(new THREE.TorusGeometry(0.65, 0.1, 8, 24), mat(0x8de0b7, 0.25, 0.4, 0x4a9f75), p.clone());
+    marker.rotation.x = Math.PI / 2;
+    marker.visible = false;
+    marker.userData.index = index;
+    challengeTargets.push(marker);
+  });
+  const deliveryMarker = mesh(new THREE.TorusGeometry(1.1, 0.14, 8, 28), mat(0xd09aff, 0.22, 0.45, 0x8152aa), deliveryTarget.clone());
+  deliveryMarker.rotation.x = Math.PI / 2;
+  deliveryMarker.visible = false;
+  deliveryMarker.userData.delivery = true;
+  challengeTargets.push(deliveryMarker);
 
   const skylineRings = [12, 16, 20];
   skylineRings.forEach((radius, ringIndex) => {
@@ -415,6 +431,7 @@ function finishChallenge() {
     addAlert('LEVEL UP', `Level ${state.level} reached.`, 3000);
   }
   beacons.forEach((b) => { b.visible = false; b.userData.active = false; });
+  challengeTargets.forEach((marker) => { marker.visible = false; });
   updateStatusUI();
   updateMissionUI();
   setWorldEvent('WORLD STATUS • SIGNAL RUN CLEARED');
@@ -424,8 +441,9 @@ function finishChallenge() {
 
 function failChallenge() {
   state.challengeActive = false;
+  challengeTargets.forEach((marker) => { marker.visible = false; });
   beacons.forEach((b) => { b.visible = true; b.userData.active = false; });
-  setWorldEvent('EVENT • SIGNAL RUN RESET');
+  setWorldEvent('EVENT • CHALLENGE RESET');
   addAlert('CHALLENGE RESET', 'Time expired. Try again from the launch pad.', 2800);
 }
 
@@ -478,7 +496,7 @@ function handleAction() {
       complete.classList.remove('hidden');
       hud.classList.add('hidden');
       state.completed = true;
-      $('#complete-copy').textContent = 'V0.2 playable core cleared. This is the first locked foundation for the larger world roadmap.';
+      $('#complete-copy').textContent = 'Playable core cleared. NPCs and multiple challenge prototypes are now part of the V0.3 vertical-slice build.';
     } else {
       addAlert('GATE LOCKED', 'Finish the Signal Run before using the central gate.');
     }
@@ -526,7 +544,7 @@ function setupControls() {
 
   $('#interact').addEventListener('pointerdown', handleAction);
   $('#map').addEventListener('pointerdown', () => {
-    addAlert('RADAR', 'Current zone: Central Hub. Main signal terminal is west; challenge pad is east.', 3000);
+    addAlert('RADAR', 'Central Hub: terminal west • three challenge pads east/south • guide near the terminal.', 3000);
   });
 
   canvas.addEventListener('pointerdown', (event) => {
@@ -623,6 +641,7 @@ function updateChallenge(nowSeconds) {
     const points = [new THREE.Vector3(2,0,7),new THREE.Vector3(-4,0,10),new THREE.Vector3(-6,0,3),new THREE.Vector3(3,0,1)];
     const targetIndex = Math.min(3, Math.floor(elapsed / 5));
     const target = points[targetIndex];
+    challengeTargets.forEach((marker, index) => { marker.visible = index === targetIndex; });
     if (player.pos.distanceTo(target) < 2) {
       state.xp += 15; state.credits += 10;
       addAlert('GRID NODE', `Node ${targetIndex + 1} reached. +15 XP • +10 CR`);
@@ -630,7 +649,8 @@ function updateChallenge(nowSeconds) {
       else state.challengeStart = performance.now() / 1000 - (targetIndex + 1) * 5;
     }
   } else {
-    const target = new THREE.Vector3(-16,0,-18);
+    challengeTargets.forEach((marker, index) => { marker.visible = index === challengeTargets.length - 1; });
+    const target = deliveryTarget;
     if (player.pos.distanceTo(target) < 2.4) finishGenericChallenge('CORE DELIVERY', 55, 110);
   }
 
@@ -687,6 +707,7 @@ function restoreMissionWorld() {
 
   if (state.missionStep >= 2) {
     beacons.forEach((beacon) => { beacon.visible = false; });
+    challengeTargets.forEach((marker) => { marker.visible = false; });
     setWorldEvent('WORLD STATUS • SIGNAL RUN CLEARED');
   }
 }
