@@ -6,7 +6,7 @@ This project uses the high-level design language of large virtual-world adventur
 
 ## Current stage
 
-V0.4 — WORLD EXPANSION READY
+V0.4 — WORLD EXPANSION IN PROGRESS
 
 Total game development completion: 20%
 
@@ -39,6 +39,17 @@ Total game development completion: 20%
 - Checkpoint synchronization
 - Hazard respawn
 - Radar panel
+
+### Aether Basin — V0.4 second world
+- Original teal/indigo Basin environment
+- Lumen Wilds -> Basin Gate transition
+- Archivist + Runner NPCs
+- Four-anchor resonance mission
+- Resonance Vault objective
+- Two optional Basin discovery shards
+- Basin checkpoint + hazard recovery
+- Resonance Surge timed world event
+- Basin radar + navigation integration
 
 ### System polish
 - Signal Run, Memory Grid and Core Delivery challenge types
@@ -74,3 +85,8 @@ This is a browser-based Three.js prototype. Use a static server or GitHub Pages.
 
 The V0.3 implementation is complete and tracked at 20% development progress. Physical Android verification and formal V0.3 LOCKED sign-off remain pending.
 
+
+
+## V0.4 verification
+
+Aether Basin implementation is present, but V0.4 browser/device QA and target-device verification are still pending.
