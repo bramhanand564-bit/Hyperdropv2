@@ -1,45 +1,51 @@
-# TIME LOCK — NAX World
+# ORIGINAL VIRTUAL-WORLD 3D GAME
 
-A standalone, original, mobile-first **fully 3D single-player** puzzle adventure.
+A standalone, mobile-first, fully 3D virtual-world game prototype.
 
-## Direct game
-The player launches the game and enters the 3D world directly.
+This project uses the **high-level design language** of large virtual-world adventure/tournament games as a reference while keeping the game's characters, story, worlds, mechanics, UI, art and code original.
 
-This repository does **not** contain:
-- Chat
-- Store
-- Portal
-- Community channels
-- Social feed
-- Multiplayer-first systems
+## Current stage
 
-## Chapter 1 prototype
-**The First Fracture**
+**V0.2 — PLAYABLE CORE**
 
-Current gameplay:
-- Third-person 3D player
+**Total game completion: 10%**
+
+90% remains on the master roadmap.
+
+## Current build
+- Third-person 3D avatar
 - Touch joystick
 - Swipe camera
 - Jump
-- Walk animation
-- Rewind
-- Freeze
-- Forward
-- Time Fragment objective
-- Time Gate
-- Animated hazards
-- Chapter completion flow
-
-## Chapter roadmap
-- World 1 — Time Basics: Chapters 1–10
-- World 2 — Broken Time: Chapters 11–20
-- World 3 — Paradox: Chapters 21–30
-- World 4 — Collapse: Chapters 31–40
-- World 5 — Time Zero: Chapters 41–50
-
-All characters, environments, animations, story, levels, UI, audio and code are intended to be original.
+- Sprint
+- Original procedural character
+- Futuristic 3D hub
+- Interactable mission terminal
+- Signal beacons
+- Timed challenge
+- XP / credits
+- Alerts / notifications
+- Local save
+- Mobile HUD
 
 ## Development rule
+
 **BUILD SMALL -> TEST -> RECORD -> LOCK -> EXPAND**
 
-See [memory.md](./memory.md) for the persistent project state and rules.
+## Roadmap
+
+See [docs/GAME_ROADMAP.md](./docs/GAME_ROADMAP.md)
+
+## Design Bible
+
+See [docs/GAME_DESIGN.md](./docs/GAME_DESIGN.md)
+
+## Project memory
+
+See [memory.md](./memory.md)
+
+## Scope exclusions
+The standalone core game does not depend on NAX Chat, NAX Store, NAX Portal, social feeds, guilds or multiplayer.
+
+## Run
+This is a browser-based Three.js prototype. Use a static server or GitHub Pages. Three.js is loaded from the pinned CDN import map in `index.html`.
