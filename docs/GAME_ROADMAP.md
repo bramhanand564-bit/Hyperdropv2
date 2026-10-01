@@ -23,7 +23,7 @@ The total-game percentage is a project-management milestone metric, not a percen
 - V0.9 Polish + Optimization = 85%
 - V1.0 Complete Core Game = 100%
 
-Current project target after this implementation: V0.2 = 10%.
+Current project target after this implementation: V0.3 is IN PROGRESS; total-game percentage remains **10%** until the V0.3 milestone is completed and tested.
 
 ## 01 — V0.1 FOUNDATION — 0% -> 5%
 - [x] Three.js runtime foundation
@@ -53,9 +53,9 @@ Current project target after this implementation: V0.2 = 10%.
 ## 03 — V0.3 VERTICAL SLICE — 10% -> 20%
 - [ ] One polished playable zone
 - [ ] Full first mission chain
-- [ ] Three challenge types
+- [x] Three challenge types
 - [ ] Better avatar customization
-- [ ] NPC prototype
+- [x] NPC prototype
 - [ ] Sound pass
 - [ ] Map/radar pass
 - [ ] Settings/graphics controls
