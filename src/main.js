@@ -51,6 +51,7 @@ const state = {
   level: 1,
   missionStep: 0,
   challengeActive: false,
+  challengeType: 'signal',
   challengeStart: 0,
   challengeTime: 42,
   completed: false,
@@ -81,6 +82,8 @@ const player = {
 const interactables = [];
 const beacons = [];
 const worldProps = [];
+const npcs = [];
+const challengePads = [];
 const SAVE_KEY = 'nexus-world-v02-save';
 
 const palette = {
@@ -187,13 +190,42 @@ function buildHub() {
 
   mesh(new THREE.BoxGeometry(0.8, 0.08, 0.18), mat(0xcfe2ff, 0.18, 0.5, 0x9ec9ff), new THREE.Vector3(-7, 1.18, -6.35));
 
-  const launchPad = mesh(
-    new THREE.CylinderGeometry(2.4, 2.4, 0.22, 36),
-    mat(0x20344b, 0.35, 0.45, 0x527ca5),
-    new THREE.Vector3(9, 0.11, -3)
-  );
-  launchPad.userData.type = 'challenge-pad';
-  interactables.push(launchPad);
+  const padData = [
+    { x: 9, z: -3, type: 'signal', label: 'SIGNAL RUN' },
+    { x: 14, z: 4, type: 'memory', label: 'MEMORY GRID' },
+    { x: 8, z: 12, type: 'delivery', label: 'CORE DELIVERY' }
+  ];
+  padData.forEach((data, index) => {
+    const launchPad = mesh(
+      new THREE.CylinderGeometry(2.1, 2.1, 0.22, 36),
+      mat(index === 0 ? 0x20344b : index === 1 ? 0x263b32 : 0x3a2d48, 0.35, 0.45, index === 0 ? 0x527ca5 : index === 1 ? 0x4e9a72 : 0x9a68b9),
+      new THREE.Vector3(data.x, 0.11, data.z)
+    );
+    launchPad.userData.type = 'challenge-pad';
+    launchPad.userData.challenge = data.type;
+    launchPad.userData.label = data.label;
+    challengePads.push(launchPad);
+    interactables.push(launchPad);
+  });
+
+  const npcData = [
+    { x: -2, z: -8, name: 'Guide', role: 'WORLD GUIDE' },
+    { x: 4, z: -7, name: 'Rival', role: 'CHALLENGER' }
+  ];
+  npcData.forEach((data, index) => {
+    const group = new THREE.Group();
+    const npcBody = mesh(new THREE.CapsuleGeometry(0.42, 0.9, 6, 10), mat(index ? 0xb88fe0 : 0x6fa7d8, 0.6, 0.25), new THREE.Vector3(0, 1.25, 0), group);
+    mesh(new THREE.SphereGeometry(0.34, 14, 10), mat(0xd6dce5, 0.72), new THREE.Vector3(0, 2.25, 0), group);
+    mesh(new THREE.BoxGeometry(0.5, 0.12, 0.1), mat(0x08101b, 0.3, 0.4), new THREE.Vector3(0, 2.24, -0.31), group);
+    group.position.set(data.x, 0, data.z);
+    group.userData.type = 'npc';
+    group.userData.name = data.name;
+    group.userData.role = data.role;
+    scene.add(group);
+    npcs.push(group);
+    interactables.push(group);
+    npcBody.userData.npc = true;
+  });
 
   for (let i = 0; i < 3; i += 1) {
     const angle = (Math.PI * 2 * i) / 3;
@@ -336,12 +368,23 @@ function startMission() {
   saveGame();
 }
 
-function beginChallenge() {
-  if (state.missionStep !== 1 || state.challengeActive) return;
+function beginChallenge(type = 'signal') {
+  if (state.challengeActive) return;
   state.challengeActive = true;
   state.challengeStart = performance.now() / 1000;
-  setWorldEvent('EVENT • SIGNAL RUN • 42s');
-  addAlert('CHALLENGE STARTED', 'Touch the three active beacons in any order before time expires.', 3200);
+  state.challengeType = type;
+
+  if (type === 'signal') {
+    beacons.forEach((b) => { b.visible = true; b.userData.active = false; });
+    setWorldEvent('EVENT • SIGNAL RUN • 42s');
+    addAlert('CHALLENGE STARTED', 'Touch the three active beacons in any order before time expires.', 3200);
+  } else if (type === 'memory') {
+    setWorldEvent('EVENT • MEMORY GRID • 25s');
+    addAlert('CHALLENGE STARTED', 'Reach the four illuminated grid points before the timer expires.', 3200);
+  } else {
+    setWorldEvent('EVENT • CORE DELIVERY • 35s');
+    addAlert('CHALLENGE STARTED', 'Reach the marked delivery gate before time expires.', 3200);
+  }
 }
 
 function countCollected() {
@@ -386,6 +429,14 @@ function failChallenge() {
   addAlert('CHALLENGE RESET', 'Time expired. Try again from the launch pad.', 2800);
 }
 
+function npcMessage(npc) {
+  if (npc.userData.name === 'Guide') {
+    addAlert('WORLD GUIDE', 'Three challenge pads are active. Master different skills to unlock deeper zones.', 3200);
+  } else {
+    addAlert('CHALLENGER', 'Speed is only one path. The world rewards players who learn different challenge types.', 3200);
+  }
+}
+
 function nearestInteractable() {
   let best = null;
   let bestDistance = Infinity;
@@ -411,8 +462,13 @@ function handleAction() {
     return;
   }
 
+  if (target?.userData.type === 'npc') {
+    npcMessage(target);
+    return;
+  }
+
   if (target?.userData.type === 'challenge-pad') {
-    if (state.missionStep === 1) beginChallenge();
+    if (state.missionStep === 1) beginChallenge(target.userData.challenge);
     else addAlert('CHALLENGE PAD', 'Complete the current mission objective first.');
     return;
   }
@@ -551,20 +607,45 @@ function updateChallenge(nowSeconds) {
   if (!state.challengeActive) return;
 
   const elapsed = nowSeconds - state.challengeStart;
-  const remaining = Math.max(0, state.challengeTime - elapsed);
-  setWorldEvent(`EVENT • SIGNAL RUN • ${remaining.toFixed(1)}s`);
+  const limit = state.challengeType === 'signal' ? 42 : state.challengeType === 'memory' ? 25 : 35;
+  const remaining = Math.max(0, limit - elapsed);
+  const label = state.challengeType === 'signal' ? 'SIGNAL RUN' : state.challengeType === 'memory' ? 'MEMORY GRID' : 'CORE DELIVERY';
+  setWorldEvent(`EVENT • ${label} • ${remaining.toFixed(1)}s`);
 
-  for (const beacon of beacons) {
-    if (!beacon.visible) continue;
-    beacon.rotation.y += 0.02;
-    beacon.position.y = 0.75 + Math.sin(nowSeconds * 2.5 + beacon.userData.index) * 0.16;
-
-    if (player.pos.distanceTo(beacon.position) < 1.8) {
-      collectBeacon(beacon);
+  if (state.challengeType === 'signal') {
+    for (const beacon of beacons) {
+      if (!beacon.visible) continue;
+      beacon.rotation.y += 0.02;
+      beacon.position.y = 0.75 + Math.sin(nowSeconds * 2.5 + beacon.userData.index) * 0.16;
+      if (player.pos.distanceTo(beacon.position) < 1.8) collectBeacon(beacon);
     }
+  } else if (state.challengeType === 'memory') {
+    const points = [new THREE.Vector3(2,0,7),new THREE.Vector3(-4,0,10),new THREE.Vector3(-6,0,3),new THREE.Vector3(3,0,1)];
+    const targetIndex = Math.min(3, Math.floor(elapsed / 5));
+    const target = points[targetIndex];
+    if (player.pos.distanceTo(target) < 2) {
+      state.xp += 15; state.credits += 10;
+      addAlert('GRID NODE', `Node ${targetIndex + 1} reached. +15 XP • +10 CR`);
+      if (targetIndex === 3) finishGenericChallenge('MEMORY GRID', 45, 90);
+      else state.challengeStart = performance.now() / 1000 - (targetIndex + 1) * 5;
+    }
+  } else {
+    const target = new THREE.Vector3(-16,0,-18);
+    if (player.pos.distanceTo(target) < 2.4) finishGenericChallenge('CORE DELIVERY', 55, 110);
   }
 
   if (remaining <= 0 && state.challengeActive) failChallenge();
+}
+
+function finishGenericChallenge(name, xp, credits) {
+  state.challengeActive = false;
+  state.xp += xp;
+  state.credits += credits;
+  if (state.xp >= 100) { state.level += 1; state.xp -= 100; addAlert('LEVEL UP', `Level ${state.level} reached.`, 3000); }
+  updateStatusUI();
+  setWorldEvent(`WORLD STATUS • ${name} CLEARED`);
+  addAlert('CHALLENGE CLEARED', `+${xp} XP • +${credits} CR`, 3200);
+  saveGame();
 }
 
 function updateWorld(nowSeconds) {
@@ -615,6 +696,8 @@ function startGame() {
   state.savedName = (nameInput.value || state.savedName || 'Explorer').trim().slice(0, 18) || 'Explorer';
   state.started = true;
   state.completed = false;
+  state.challengeActive = false;
+  state.challengeType = 'signal';
   player.pos.set(0, 0, 12);
   player.group.position.copy(player.pos);
   startScreen.classList.add('hidden');
