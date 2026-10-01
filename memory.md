@@ -1,100 +1,71 @@
-# NAX World — Project Memory
+# PROJECT MEMORY — ORIGINAL VIRTUAL-WORLD 3D GAME
 
 ## Product Direction — LOCKED
-NAX World is a **standalone single-player, fully 3D mobile game**.
-The player opens the game and enters gameplay directly.
+Standalone, mobile-first, fully 3D virtual-world adventure/game.
+The reference is the *design/experience category* of large virtual-world tournament games; it is not a story or asset copy.
 
-### Explicitly NOT part of this game
+## Explicit exclusions — LOCKED
 - NAX Chat
 - NAX Store
 - NAX Portal
-- Social feed/community channels
+- Social feed/community systems
 - Guilds
-- Multiplayer-first systems
+- Multiplayer-first architecture
 - Creator marketplace
 
-Those are separate ecosystem ideas and must not be mixed into the core game.
+## Original-IP rule — LOCKED
+Original characters, character designs, 3D models, animations, environments, challenges, levels, UI, audio, story and code.
+High-level genre/gameplay ideas may overlap with the category; protected expression must not be copied.
 
-## Original-IP Rule — LOCKED
-Use original story, characters, character designs, 3D models, animations, environments, puzzles, level layouts, UI, sound/music and code.
+## Master source of truth
+See:
+- `docs/GAME_ROADMAP.md`
+- `docs/GAME_DESIGN.md`
 
-Broad genre/gameplay ideas may be used, but do not copy protected characters, dialogue, maps, logos, music, assets or source code from another game.
+## Completion metric
+Current roadmap stage: **V0.2 PLAYABLE CORE**
+Current total-game progress: **10%**
+Remaining: **90%**
 
-## Core Single-Player Concept
-A mobile-first, third-person sci-fi mystery/puzzle adventure using time manipulation.
+This percentage is based on milestone completion, not code size.
 
-Core mechanics:
-- Rewind
-- Freeze
-- Forward
-- Puzzle rooms
-- Moving hazards/traps
-- Time fragments
-- Future Time Echo mechanic
-- Chapter progression
-- Animated player/world
-- Story snippets/cinematics
-- Later stars, hints and achievements
-
-## Chapter Plan
-World 1 — Time Basics: Chapters 1–10
-World 2 — Broken Time: Chapters 11–20
-World 3 — Paradox: Chapters 21–30
-World 4 — Collapse: Chapters 31–40
-World 5 — Time Zero: Chapters 41–50
-
-### Chapter 1 — The First Fracture
-Current prototype objective:
-1. Enter the 3D room
-2. Explore
-3. Use Rewind / Freeze / Forward
-4. Reach the Time Fragment
-5. Collect it
-6. Reach the Time Gate
-7. Complete the chapter
-
-## Current Status
-**IN PROGRESS — SOLO 3D CHAPTER PROTOTYPE**
-
-Implemented:
-- Fully 3D scene
-- Third-person procedural player
+## Current playable scope
+- Central 3D hub
+- Third-person player
 - Touch joystick
 - Swipe camera
 - Jump
-- Procedural walk animation
-- Rewind movement history
-- Freeze mode for hazards
-- Forward mode for faster hazards/player movement
-- Time Fragment objective
-- Chapter 1 completion flow
+- Sprint
+- Original stylized avatar
+- World interaction
+- Mission framework
+- Alert/notification system
+- Timed signal challenge
+- XP and credits
+- Local save
 - Mobile HUD
-- No chat/store/portal systems
+- No chat/store/portal
 
-Not yet verified on a physical Android device.
+## Not yet verified
+Physical Android target-device testing has not been completed yet.
 
-## Development Rule
-**BUILD SMALL -> TEST -> RECORD -> LOCK -> EXPAND**
+## Next locked development order
+1. Test V0.2 on Android.
+2. Fix movement/camera/UI issues.
+3. Build NPC prototype.
+4. Build three challenge types.
+5. Build first polished vertical-slice zone.
+6. Add audio + map/radar.
+7. Add performance controls.
+8. Only then expand to the next world.
 
-Never mark WORKING or LOCKED without target-device test evidence.
+## Change rule
+BUILD SMALL -> TEST -> RECORD -> LOCK -> EXPAND.
+Never claim VERIFIED or LOCKED without target-device evidence.
 
-## Mobile Requirements
-Android-first, landscape gameplay, touch controls, practical large touch targets, 30 FPS baseline, 60 FPS on capable devices, low-memory/battery awareness, scalable graphics and asset streaming as chapters grow.
-
-## Architecture
-Phase 1: Chapter 1 vertical slice
-Phase 2: player animation/save/progression
-Phase 3: chapters and environments
-Phase 4: advanced time mechanics + Time Echo
-Phase 5: story/cinematics
-Phase 6: optimization/accessibility/polish
-Future systems must directly support the standalone game.
-
-## Security
-Never commit API keys, tokens, passwords, credentials or secrets.
-
-## Change Log
-- 2026-10-01: Legacy Hyperdropv2 application reset.
-- 2026-10-01: First Three.js foundation created.
-- 2026-10-01: Product direction clarified as standalone single-player 3D chapter game; social/store/portal removed from scope.
-- 2026-10-01: Chapter 1 solo prototype and time-control mechanics added.
+## Changelog
+- 2026-10-01: Hyperdropv2 legacy application reset.
+- 2026-10-01: Three.js mobile 3D foundation created.
+- 2026-10-01: Standalone virtual-world direction selected.
+- 2026-10-01: TIME LOCK prototype superseded by original virtual-world game architecture.
+- 2026-10-01: V0.2 playable core rebuilt with hub, avatar, interaction, challenge, alerts, progression and save prototype.
