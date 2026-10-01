@@ -86,6 +86,7 @@ Optional discovery:
 - [x] Lightweight world event cycle: Resonance Surge
 - [x] Environmental secrets expansion: two Basin discovery shards
 - [x] Multiple quest chains across Lumen Wilds and Aether Basin
+- [x] Replayable Basin side activity with best-time tracking
 - [ ] Better world streaming
 
 ## 05 — V0.5 VEHICLE LAYER — 30% -> 40%
