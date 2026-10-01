@@ -24,6 +24,9 @@ const interactionPrompt = $('#interaction-prompt');
 const joystick = $('#joystick');
 const stick = $('#stick');
 const controlsRoot = document.querySelector('.right-controls');
+const radarPanel = $('#radar-panel');
+const radarContent = $('#radar-content');
+const radarTitle = $('#radar-title');
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x050914);
@@ -757,6 +760,34 @@ function cycleQuality() {
   saveGame();
 }
 
+function renderRadar() {
+  const hubItems = [
+    ['SIGNAL', 'Terminal west / challenge network'],
+    ['TRIALS', 'Three challenge pads in the east sector'],
+    ['GATE', 'Lumen Wilds access at the north road'],
+    ['GUIDE', 'World Guide near the signal terminal']
+  ];
+  const outpostItems = [
+    ['SCOUT', 'Start the zone mission in the north-west'],
+    ['RELAYS', 'Three offline nodes across the grove'],
+    ['SHRINE', 'Repair destination on the east side'],
+    ['CHECKPOINT', 'Safe respawn point in the south-west'],
+    ['SHARDS', 'Three optional discovery secrets']
+  ];
+  const items = state.activeZone === 'HUB' ? hubItems : outpostItems;
+  radarTitle.textContent = (state.activeZone === 'HUB' ? 'CENTRAL HUB' : 'LUMEN WILDS') + ' • RADAR';
+  radarContent.innerHTML = items.map((item) =>
+    '<div class="radar-item"><i></i><div><b>' + item[0] + '</b><span>' + item[1] + '</span></div></div>'
+  ).join('');
+}
+
+function toggleRadar() {
+  const opening = radarPanel.classList.contains('hidden');
+  if (opening) renderRadar();
+  radarPanel.classList.toggle('hidden');
+  if (opening) beep('ui');
+}
+
 function toggleSound() {
   state.soundOn = !state.soundOn;
   const button = $('#sound');
@@ -1274,18 +1305,8 @@ function setupControls() {
 
   setupHudButton('avatar-cycle', 'AVATAR', cycleAvatarStyle);
 
-  $('#map').addEventListener('pointerdown', () => {
-    if (state.activeZone === 'HUB') {
-      addAlert('RADAR', 'Hub: terminal west • challenge pads east/south • gate north • guide near terminal.', 3400);
-    } else {
-      addAlert(
-        'RADAR',
-        'Lumen Wilds: Scout north-west • relays across the grove • Shrine east • checkpoint south-west • return gate north.',
-        3600
-      );
-    }
-    beep('ui');
-  });
+  $('#map').addEventListener('pointerdown', toggleRadar);
+  $('#radar-close').addEventListener('pointerdown', () => radarPanel.classList.add('hidden'));
 
   setupHudButton('sound', 'SOUND ON', toggleSound);
   setupHudButton('graphics', 'GRAPHICS HIGH', cycleQuality);
@@ -1440,9 +1461,7 @@ function updateWorld(nowSeconds) {
     npc.rotation.y = Math.sin(nowSeconds * 0.35 + index) * 0.12;
   });
 
-  worldProps.forEach((object, index) => {
-    if (index % 3 === 0) object.position.y += Math.sin(nowSeconds * 0.6 + index) * 0.0007;
-  });
+
 
   relays.forEach((relay, index) => {
     if (!relay.visible) return;
@@ -1560,6 +1579,7 @@ continueBtn.addEventListener('click', () => {
   complete.classList.add('hidden');
   hud.classList.remove('hidden');
   state.completed = false;
+  radarPanel.classList.add('hidden');
   transitionToZone('HUB');
   addAlert('VERTICAL SLICE', 'Returned to the Central Hub. Progress is saved.', 3000);
 });
