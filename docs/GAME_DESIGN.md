@@ -142,3 +142,18 @@ The game systems are being built so that the user's original story can later sit
 - No NAX Portal
 - No social feed
 - No multiplayer-first dependency
+
+
+## V0.4 — AETHER BASIN EXPANSION
+
+Aether Basin is the second substantial zone. Its identity uses a cool resonance/river environment with monoliths, causeways and luminous anchors rather than repeating the Lumen Wilds visual language.
+
+Core chain:
+Lumen Wilds -> Basin Gate -> Archivist -> four resonance anchors -> Resonance Vault -> Basin Return Lift.
+
+Optional discovery:
+- two Resonance Shards
+- Basin checkpoint and hazard recovery
+- timed Resonance Surge world events
+
+V0.4 remains development-in-progress at 20% total project progress. Story content is still intentionally not locked.
