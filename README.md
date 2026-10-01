@@ -6,11 +6,11 @@ This project uses the high-level design language of large virtual-world adventur
 
 ## Current stage
 
-V0.3 — VERTICAL SLICE IN PROGRESS
+V0.4 — WORLD EXPANSION READY
 
-Total game completion: 10%
+Total game development completion: 20%
 
-90% remains on the master roadmap.
+80% remains on the master roadmap.
 
 ## Current build
 
@@ -72,5 +72,5 @@ This is a browser-based Three.js prototype. Use a static server or GitHub Pages.
 
 ## Verification status
 
-The current code contains the V0.3 slice, but physical Android verification and formal LOCKED sign-off are still pending.
+The V0.3 implementation is complete and tracked at 20% development progress. Physical Android verification and formal V0.3 LOCKED sign-off remain pending.
 
