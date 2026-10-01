@@ -1,103 +1,100 @@
 # NAX World — Project Memory
 
-## Source of Truth
-This file is the persistent project memory for NAX World in `bramhanand564-bit/Hyperdropv2`.
-Update it after major architecture decisions, verified fixes, milestones, tests, and breaking changes.
+## Product Direction — LOCKED
+NAX World is a **standalone single-player, fully 3D mobile game**.
+The player opens the game and enters gameplay directly.
 
-## Project Vision
-Build an original, mobile-first, fully 3D virtual-world game with persistent player identity, explorable worlds, social systems, gameplay, creator systems, AI features, and a future NAX ecosystem.
+### Explicitly NOT part of this game
+- NAX Chat
+- NAX Store
+- NAX Portal
+- Social feed/community channels
+- Guilds
+- Multiplayer-first systems
+- Creator marketplace
 
-The project may be broadly inspired by the concept of a connected virtual world, but must use original IP, names, maps, assets, music, UI, and implementation.
+Those are separate ecosystem ideas and must not be mixed into the core game.
 
-## Locked Decisions
-- Repository: `bramhanand564-bit/Hyperdropv2`
-- Android-first / mobile-first
-- Fully 3D; no 2.5D substitute
-- Third-person camera for the first playable slice
-- Touch-first controls
-- GitHub/cloud/mobile-friendly workflow
-- User currently has no PC/computer workflow requirement
-- Modular architecture
-- Performance target: 30 FPS baseline; 60 FPS on capable devices
-- Build rule: BUILD SMALL -> TEST -> RECORD -> LOCK -> EXPAND
+## Original-IP Rule — LOCKED
+Use original story, characters, character designs, 3D models, animations, environments, puzzles, level layouts, UI, sound/music and code.
 
-## Engine Decision
-- Foundation engine: **Three.js r0.186.0**
-- Delivery model for Phase 1: static browser build, suitable for Android browser testing
-- Future packaging: evaluate native Android packaging after the web vertical slice is stable
-- Source: official three.js release/site information; r186 is the current release at project start.
+Broad genre/gameplay ideas may be used, but do not copy protected characters, dialogue, maps, logos, music, assets or source code from another game.
+
+## Core Single-Player Concept
+A mobile-first, third-person sci-fi mystery/puzzle adventure using time manipulation.
+
+Core mechanics:
+- Rewind
+- Freeze
+- Forward
+- Puzzle rooms
+- Moving hazards/traps
+- Time fragments
+- Future Time Echo mechanic
+- Chapter progression
+- Animated player/world
+- Story snippets/cinematics
+- Later stars, hints and achievements
+
+## Chapter Plan
+World 1 — Time Basics: Chapters 1–10
+World 2 — Broken Time: Chapters 11–20
+World 3 — Paradox: Chapters 21–30
+World 4 — Collapse: Chapters 31–40
+World 5 — Time Zero: Chapters 41–50
+
+### Chapter 1 — The First Fracture
+Current prototype objective:
+1. Enter the 3D room
+2. Explore
+3. Use Rewind / Freeze / Forward
+4. Reach the Time Fragment
+5. Collect it
+6. Reach the Time Gate
+7. Complete the chapter
 
 ## Current Status
-**IN PROGRESS — 3D FOUNDATION**
-Implemented in this reset:
-1. Three.js 3D scene
-2. Third-person camera
-3. Procedural fully 3D player avatar
-4. Touch joystick
-5. Swipe camera
-6. Jump
-7. Sprint
-8. Small explorable 3D zone
-9. Discovery/interact points
-10. Local save/load
-11. Mobile HUD + mini-map
-12. GitHub Pages deployment workflow
+**IN PROGRESS — SOLO 3D CHAPTER PROTOTYPE**
+
+Implemented:
+- Fully 3D scene
+- Third-person procedural player
+- Touch joystick
+- Swipe camera
+- Jump
+- Procedural walk animation
+- Rewind movement history
+- Freeze mode for hazards
+- Forward mode for faster hazards/player movement
+- Time Fragment objective
+- Chapter 1 completion flow
+- Mobile HUD
+- No chat/store/portal systems
 
 Not yet verified on a physical Android device.
 
-## First Playable Vertical Slice
-- [x] Start screen
-- [x] Player identity input
-- [x] One 3D environment
-- [x] One 3D avatar
-- [x] Third-person camera
-- [x] Touch movement
-- [x] Camera swipe
-- [x] Jump
-- [x] Basic interaction
-- [x] Basic local save/load
-- [x] Mobile HUD
-- [ ] Physical mobile performance test
-- [ ] Lock foundation after test
-
-## Planned Modules
-Account / NAX ID / Avatar / Inventory / Progression / Achievements / World / Zones / Buildings / NPCs / Interactive Objects / Movement / Vehicles / Social / Chat / Voice / Party / Guild / Quests / Combat / Racing / Mini-games / Economy / Creator Studio / AI / NAX Store / Events / Multiplayer / Security / Analytics.
-
-## Phase Roadmap
-1. Foundation
-2. Player
-3. World
-4. Multiplayer
-5. Social
-6. Gameplay
-7. Economy
-8. Creator Studio
-9. AI
-10. NAX Store
-11. Scale / optimization / security
-
-## Testing Status
-PLANNED / IN PROGRESS / TESTING / WORKING / LOCKED / BLOCKED / DEPRECATED
-
-Never mark WORKING or LOCKED without actual test evidence.
-
-## Mobile Requirements
-Landscape gameplay, responsive HUD, virtual joystick, touch camera, jump/sprint/interact/action controls, low/medium/high profiles, battery-aware behavior, low-memory handling, asset streaming, network reconnect handling.
-
-## Networking Principles
-When multiplayer is added, server-authoritative state will cover currency, inventory ownership, competitive scores, damage/results, rewards, match results, and progression.
-
-## Security
-Never commit API keys, tokens, passwords, credentials, or secrets. Use environment variables / platform secrets. Record variable names and purpose only.
-
-## Memory Rules
-Record major architecture decisions, tooling decisions, repo changes, systems, APIs, database/network decisions, security/performance decisions, completed features, verified bugs/fixes, build/deployment, tests, milestones, breaking changes, locked components, and rationale.
-
-Do not record secrets, sensitive personal data, temporary chat noise, unverified assumptions as facts, duplicate information, huge source copies, generated build output, or temporary logs without reproducible value.
-
-## Golden Rule
+## Development Rule
 **BUILD SMALL -> TEST -> RECORD -> LOCK -> EXPAND**
 
+Never mark WORKING or LOCKED without target-device test evidence.
+
+## Mobile Requirements
+Android-first, landscape gameplay, touch controls, practical large touch targets, 30 FPS baseline, 60 FPS on capable devices, low-memory/battery awareness, scalable graphics and asset streaming as chapters grow.
+
+## Architecture
+Phase 1: Chapter 1 vertical slice
+Phase 2: player animation/save/progression
+Phase 3: chapters and environments
+Phase 4: advanced time mechanics + Time Echo
+Phase 5: story/cinematics
+Phase 6: optimization/accessibility/polish
+Future systems must directly support the standalone game.
+
+## Security
+Never commit API keys, tokens, passwords, credentials or secrets.
+
 ## Change Log
-- 2026-10-01: Legacy Hyperdropv2 application files and old CI workflow removed.
-- 2026-10-01: NAX World Three.js r0.186.0 foundation and mobile vertical slice committed.
+- 2026-10-01: Legacy Hyperdropv2 application reset.
+- 2026-10-01: First Three.js foundation created.
+- 2026-10-01: Product direction clarified as standalone single-player 3D chapter game; social/store/portal removed from scope.
+- 2026-10-01: Chapter 1 solo prototype and time-control mechanics added.
