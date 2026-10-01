@@ -2395,6 +2395,9 @@ function updatePlayer(dt) {
     p.ra.rotation.x = -swing;
     p.ll.rotation.x = -swing;
     p.rl.rotation.x = swing;
+    p.coatL.rotation.z = -0.06 + Math.sin(player.walkPhase * 0.5) * 0.06;
+    p.coatR.rotation.z = 0.06 - Math.sin(player.walkPhase * 0.5) * 0.06;
+    p.sword.rotation.z = -0.22 + Math.sin(player.walkPhase * 0.5) * 0.025;
   } else {
     // Simple idle pose so the opening scene feels alive.
     const idle = Math.sin(performance.now() * 0.0022) * 0.045;
@@ -2402,6 +2405,9 @@ function updatePlayer(dt) {
     p.ra.rotation.x = THREE.MathUtils.lerp(p.ra.rotation.x, -idle, Math.min(1, dt * 5));
     p.ll.rotation.x = THREE.MathUtils.lerp(p.ll.rotation.x, -idle * 0.35, Math.min(1, dt * 5));
     p.rl.rotation.x = THREE.MathUtils.lerp(p.rl.rotation.x, idle * 0.35, Math.min(1, dt * 5));
+    p.coatL.rotation.z = THREE.MathUtils.lerp(p.coatL.rotation.z, -0.06 + idle * 0.7, Math.min(1, dt * 4));
+    p.coatR.rotation.z = THREE.MathUtils.lerp(p.coatR.rotation.z, 0.06 - idle * 0.7, Math.min(1, dt * 4));
+    p.sword.rotation.z = THREE.MathUtils.lerp(p.sword.rotation.z, -0.22 + idle * 0.3, Math.min(1, dt * 4));
     p.torso.position.y = 1.3 + Math.sin(performance.now() * 0.0022) * 0.018;
   }
 
