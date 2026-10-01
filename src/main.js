@@ -1248,6 +1248,12 @@ function updateStatusUI() {
   playerLabel.textContent = state.savedName;
   levelLabel.textContent = 'LEVEL ' + state.level;
   creditsLabel.textContent = 'CR ' + state.credits;
+  const lobbyName = $('#lobby-player-name');
+  const lobbyLevel = $('#lobby-level');
+  const lobbyCredits = $('#lobby-credits');
+  if (lobbyName) lobbyName.textContent = (state.savedName || 'NEXPLORER').toUpperCase();
+  if (lobbyLevel) lobbyLevel.textContent = state.level;
+  if (lobbyCredits) lobbyCredits.textContent = state.credits;
 }
 
 function setLobbyVisibility() {
