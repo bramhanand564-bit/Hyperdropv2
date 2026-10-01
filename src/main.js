@@ -1427,6 +1427,19 @@ function setupHudButton(id, label, handler) {
   controlsRoot.appendChild(button);
 }
 
+function resetTransientInputState() {
+  input.x = 0;
+  input.y = 0;
+  input.jump = false;
+  input.sprint = false;
+  cameraState.dragging = false;
+  cameraState.x = 0;
+  cameraState.y = 0;
+  const sprintBtn = $('#sprint');
+  if (sprintBtn) sprintBtn.classList.remove('active');
+  if (stick) stick.style.transform = 'translate(-50%,-50%)';
+}
+
 function setupControls() {
   const joystickMove = (clientX, clientY) => {
     const rect = joystick.getBoundingClientRect();
@@ -1756,6 +1769,18 @@ $('#reset-save').addEventListener('click', () => {
     for (const legacyKey of LEGACY_SAVE_KEYS) localStorage.removeItem(legacyKey);
   } catch {}
   window.location.reload();
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    resetTransientInputState();
+    state.actionLockUntil = 0;
+  }
+});
+
+window.addEventListener('blur', () => {
+  resetTransientInputState();
+  state.actionLockUntil = 0;
 });
 
 startBtn.addEventListener('click', startGame);
