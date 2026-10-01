@@ -41,14 +41,18 @@ export function buildHeroRig({ scene, player, mat }) {
   M(new THREE.SphereGeometry(.39, 24, 18), skin, new THREE.Vector3(0, .22, 0), head);
   const visor = M(new THREE.BoxGeometry(.5, .13, .12), black, new THREE.Vector3(0, .22, -.36), head);
   const visorGlow = M(new THREE.BoxGeometry(.36, .035, .025), blue, new THREE.Vector3(0, .23, -.425), head);
+  const eyeL = M(new THREE.SphereGeometry(.035, 10, 8), blue, new THREE.Vector3(-.11, .26, -.43), head);
+  const eyeR = M(new THREE.SphereGeometry(.035, 10, 8), blue, new THREE.Vector3(.11, .26, -.43), head);
 
   const hair = G('hair', new THREE.Vector3(0, .46, 0), head);
   M(new THREE.SphereGeometry(.43, 20, 14), black, new THREE.Vector3(), hair);
+  const hairSpikes = [];
   for (let i = 0; i < 15; i += 1) {
     const a = i / 15 * Math.PI * 2;
     const s = M(new THREE.ConeGeometry(.065, .45 + (i % 4) * .08, 5), black, new THREE.Vector3(Math.cos(a) * .25, .12, Math.sin(a) * .23), hair);
     s.rotation.z = Math.cos(a) * .75;
     s.rotation.x = -Math.sin(a) * .75;
+    hairSpikes.push(s);
   }
 
   const makeArm = (side) => {
@@ -65,11 +69,13 @@ export function buildHeroRig({ scene, player, mat }) {
     M(new THREE.BoxGeometry(.16, .055, .05), blue, new THREE.Vector3(0, -.58, -.16), fore);
     const hand = G(`hand-${side < 0 ? 'L' : 'R'}`, new THREE.Vector3(0, -.63, 0), fore);
     M(new THREE.SphereGeometry(.16, 12, 10), skin, new THREE.Vector3(0, -.07, 0), hand);
+    const fingers = [];
     for (let i = 0; i < 5; i += 1) {
       const finger = G(`finger-${side < 0 ? 'L' : 'R'}-${i + 1}`, new THREE.Vector3((i - 2) * .045, -.17, -.07), hand);
       M(new THREE.CapsuleGeometry(.022, .11, 4, 6), black, new THREE.Vector3(0, -.06, 0), finger);
+      fingers.push(finger);
     }
-    return { arm: upper, hand };
+    return { arm: upper, hand, fingers };
   };
 
   const Larm = makeArm(-1);
@@ -112,7 +118,9 @@ export function buildHeroRig({ scene, player, mat }) {
     la: Larm.arm, ra: Rarm.arm, ll: Lleg.leg, rl: Rleg.leg,
     torso, head, bootL: Lleg.boot, bootR: Rleg.boot, backpack,
     accent: core, coatL, coatR, sword, visorGlow, chestCore: core,
-    coatHemL: coatL, coatHemR: coatR, hands: [Larm.hand, Rarm.hand]
+    coatHemL: coatL, coatHemR: coatL, hands: [Larm.hand, Rarm.hand],
+    fingers: [...Larm.fingers, ...Rarm.fingers],
+    eyes: [eyeL, eyeR], hairSpikes, microDetails: { eyeL, eyeR, hairSpikes }
   };
   player.group.add(body);
   player.group.position.copy(player.pos);
