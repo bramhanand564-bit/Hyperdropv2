@@ -12,6 +12,7 @@ export function updateHeroMicroAnimation(player, dt, timeMs, moving, sprinting) 
   const t = timeMs * 0.001;
   const speed = moving ? (sprinting ? 1.65 : 1) : 0.45;
   const phase = player.walkPhase;
+  const smooth = (current, target, rate) => THREE.MathUtils.lerp(current, target, Math.min(1, dt * rate));
 
   // Face / eyes: tiny focus movement instead of a static head.
   if (p.eyes) {
@@ -54,10 +55,38 @@ export function updateHeroMicroAnimation(player, dt, timeMs, moving, sprinting) 
     p.chestCore.scale.lerp(new THREE.Vector3(pulse, pulse, pulse), Math.min(1, dt * 8));
   }
 
+  // Breathing, shoulder counter-sway and pelvis weight shift.
+  if (p.torso) {
+    const breath = Math.sin(t * 2.15) * (moving ? 0.012 : 0.02);
+    p.torso.scale.y = smooth(p.torso.scale.y, 1 + breath, 7);
+  }
+  if (p.hips) {
+    const weight = moving ? Math.sin(phase * 0.5) * 0.025 : Math.sin(t * 1.7) * 0.012;
+    p.hips.rotation.z = smooth(p.hips.rotation.z, weight, 6);
+  }
+  if (p.shoulders) {
+    p.shoulders.rotation.z = smooth(p.shoulders.rotation.z, moving ? -Math.sin(phase * 0.5) * 0.018 : 0, 6);
+  }
+
   // Subtle boot lift gives the stride more weight.
   if (moving && p.bootL && p.bootR) {
     const foot = Math.sin(phase) * 0.035;
-    p.bootL.rotation.x = THREE.MathUtils.lerp(p.bootL.rotation.x, foot, Math.min(1, dt * 8));
-    p.bootR.rotation.x = THREE.MathUtils.lerp(p.bootR.rotation.x, -foot, Math.min(1, dt * 8));
+    p.bootL.rotation.x = smooth(p.bootL.rotation.x, foot, 8);
+    p.bootR.rotation.x = smooth(p.bootR.rotation.x, -foot, 8);
+  }
+
+  // Sword follows body inertia rather than moving as a rigid decoration.
+  if (p.sword) {
+    const swordTarget = moving ? -0.22 + Math.sin(phase * 0.55) * 0.045 : -0.22 + Math.sin(t * 1.2) * 0.012;
+    p.sword.rotation.z = smooth(p.sword.rotation.z, swordTarget, 5);
+    p.sword.rotation.x = smooth(p.sword.rotation.x, moving ? Math.cos(phase) * 0.018 : 0, 5);
+  }
+
+  // Hand/finger secondary follow-through.
+  if (p.hands) {
+    p.hands.forEach((hand, i) => {
+      const target = moving ? Math.sin(phase + i * Math.PI) * 0.045 : Math.sin(t * 1.1 + i) * 0.018;
+      hand.rotation.z = smooth(hand.rotation.z, target, 8);
+    });
   }
 }
