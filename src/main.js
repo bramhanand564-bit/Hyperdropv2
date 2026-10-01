@@ -86,7 +86,13 @@ const npcs = [];
 const challengePads = [];
 const challengeTargets = [];
 const deliveryTarget = new THREE.Vector3(-16, 0.12, -18);
-const SAVE_KEY = 'nexus-world-v02-save';
+const SAVE_KEY = 'nexus-world-v03-save';
+const avatarStyles = [
+  { name: 'AURORA', body: 0xe9f0f9, suit: 0x5e88bd, accent: 0xb8d8ff },
+  { name: 'EMBER', body: 0xf0d6c4, suit: 0x9a4f45, accent: 0xffc08a },
+  { name: 'VOLT', body: 0xd8e1ee, suit: 0x6b58a6, accent: 0xdec9ff }
+];
+let avatarStyleIndex = 0;
 
 const palette = {
   ground: 0x121d2b,
@@ -301,11 +307,31 @@ function buildPlayer() {
   const ll = mesh(new THREE.BoxGeometry(0.25, 0.88, 0.25), leg, new THREE.Vector3(-0.2, 0.52, 0), body);
   const rl = mesh(new THREE.BoxGeometry(0.25, 0.88, 0.25), leg, new THREE.Vector3(0.2, 0.52, 0), body);
 
+  const accent = mesh(new THREE.BoxGeometry(0.34, 0.08, 0.12), mat(0xb8d8ff, 0.3, 0.5), new THREE.Vector3(0, 1.55, -0.43), body);
   player.group.userData.torso = torso;
-  player.group.userData.parts = { la, ra, ll, rl };
+  player.group.userData.parts = { la, ra, ll, rl, torso, accent };
   player.group.add(body);
   player.group.position.copy(player.pos);
   scene.add(player.group);
+}
+
+function applyAvatarStyle() {
+  const style = avatarStyles[avatarStyleIndex];
+  const p = player.group.userData.parts;
+  if (!p) return;
+  p.torso.material.color.setHex(style.body);
+  p.la.material.color.setHex(style.suit);
+  p.ra.material.color.setHex(style.suit);
+  p.ll.material.color.setHex(style.suit);
+  p.rl.material.color.setHex(style.suit);
+  p.accent.material.color.setHex(style.accent);
+}
+
+function cycleAvatarStyle() {
+  avatarStyleIndex = (avatarStyleIndex + 1) % avatarStyles.length;
+  applyAvatarStyle();
+  addAlert('AVATAR', `Style changed to ${avatarStyles[avatarStyleIndex].name}.`);
+  saveGame();
 }
 
 function saveGame() {
@@ -314,7 +340,8 @@ function saveGame() {
     xp: state.xp,
     credits: state.credits,
     level: state.level,
-    missionStep: state.missionStep
+    missionStep: state.missionStep,
+    avatarStyleIndex
   };
   try {
     localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
@@ -334,6 +361,8 @@ function loadGame() {
     state.credits = Number(payload.credits || 0);
     state.level = Number(payload.level || 1);
     state.missionStep = Number(payload.missionStep || 0);
+    avatarStyleIndex = Number.isInteger(payload.avatarStyleIndex) ? THREE.MathUtils.clamp(payload.avatarStyleIndex, 0, avatarStyles.length - 1) : 0;
+    applyAvatarStyle();
     nameInput.value = state.savedName;
   } catch {
     // Ignore invalid local save data.
@@ -543,6 +572,12 @@ function setupControls() {
   });
 
   $('#interact').addEventListener('pointerdown', handleAction);
+  const avatarButton = document.createElement('button');
+  avatarButton.id = 'avatar-cycle';
+  avatarButton.textContent = 'AVATAR';
+  avatarButton.className = 'hud-extra';
+  avatarButton.addEventListener('pointerdown', cycleAvatarStyle);
+  document.querySelector('.right-controls').appendChild(avatarButton);
   $('#map').addEventListener('pointerdown', () => {
     addAlert('RADAR', 'Central Hub: terminal west • three challenge pads east/south • guide near the terminal.', 3000);
   });
@@ -669,6 +704,10 @@ function finishGenericChallenge(name, xp, credits) {
 }
 
 function updateWorld(nowSeconds) {
+  npcs.forEach((npc, index) => {
+    npc.position.y = Math.sin(nowSeconds * 1.4 + index) * 0.025;
+    npc.rotation.y = Math.sin(nowSeconds * 0.35 + index) * 0.12;
+  });
   worldProps.forEach((object, index) => {
     if (index % 3 === 0) object.position.y += Math.sin(nowSeconds * 0.6 + index) * 0.0007;
   });
@@ -751,6 +790,7 @@ continueBtn.addEventListener('click', () => {
 
 buildHub();
 buildPlayer();
+applyAvatarStyle();
 setupControls();
 
 let last = performance.now();
