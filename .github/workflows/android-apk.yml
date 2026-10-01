@@ -77,25 +77,31 @@ jobs:
           cp index.html android/app/src/main/assets/index.html
           cp src/main.js android/app/src/main/assets/src/main.js
           cp src/styles.css android/app/src/main/assets/src/styles.css
-          curl -fsSL https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js -o android/app/src/main/assets/src/three.module.js
+          # Use classic scripts in Android WebView to eliminate file:// ES-module/import-map failures.
+          curl -fsSL https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.min.js -o android/app/src/main/assets/src/three.min.js
           python3 - <<'PY'
           from pathlib import Path
-          # Android WebView is more reliable with a direct relative ES-module import
-          # than an import-map dependency under file:// URLs.
+
           main = Path("android/app/src/main/assets/src/main.js")
           s = main.read_text()
-          old_import = "import * as THREE from 'three';"
-          new_import = "import * as THREE from './three.module.js';"
-          if old_import not in s:
+          import_line = "import * as THREE from 'three';"
+          if import_line not in s:
               raise SystemExit("Three.js source import not found")
-          main.write_text(s.replace(old_import, new_import, 1))
+          main.write_text(s.replace(import_line + "\n", "", 1))
 
           index = Path("android/app/src/main/assets/index.html")
           html = index.read_text()
-          old_map = '"three":"https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js"'
-          new_map = '"three":"./src/three.module.js"'
-          if old_map in html:
-              index.write_text(html.replace(old_map, new_map))
+          start = html.find('  <script type="importmap">')
+          if start >= 0:
+              end = html.find('  </script>', start)
+              if end < 0:
+                  raise SystemExit("Import-map closing tag not found")
+              html = html[:start] + html[end + len('  </script>'):]
+          marker = '<script type="module" src="./src/main.js"></script>'
+          replacement = '<script src="./src/three.min.js"></script>\\n<script src="./src/main.js"></script>'
+          if marker not in html:
+              raise SystemExit("Main module script tag not found")
+          index.write_text(html.replace(marker, replacement))
           PY
 
       - name: Build debug APK
