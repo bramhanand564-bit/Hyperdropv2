@@ -2619,12 +2619,12 @@ buildPlayer();
 // Keep the avatar visible beside the landscape start card so the opening
 // feels like a real 3D game lobby rather than a flat menu.
 state.activeZone = 'HUB';
-player.pos.set(6.2, 0, 8);
+player.pos.set(10.5, 0, 8);
 player.group.position.copy(player.pos);
 player.group.rotation.y = Math.PI;
 cameraState.yaw = Math.PI;
-cameraState.pitch = 0.30;
-cameraState.distance = 8.2;
+cameraState.pitch = 0.27;
+cameraState.distance = 10.0;
 applyAvatarStyle();
 setZoneVisuals();
 setupControls();
