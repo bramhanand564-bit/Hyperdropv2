@@ -75,12 +75,12 @@ export function buildHeroRig({ scene, player, mat }) {
       M(new THREE.CapsuleGeometry(.022, .11, 4, 6), black, new THREE.Vector3(0, -.06, 0), finger);
       fingers.push(finger);
     }
-    return { arm: upper, hand, fingers };
+    return { arm: upper, shoulder, hand, fingers };
   };
 
   const Larm = makeArm(-1);
   const Rarm = makeArm(1);
-  const shoulders = G('shoulders', new THREE.Vector3(0, 1.72, 0));
+  const shoulders = [Larm.shoulder, Rarm.shoulder];
 
   const makeLeg = (side) => {
     const x = side * .22;
