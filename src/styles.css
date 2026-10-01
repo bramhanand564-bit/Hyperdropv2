@@ -88,3 +88,33 @@ header{position:absolute;top:max(10px,env(safe-area-inset-top));left:0;right:0;p
 
 .secondary{width:100%;margin-top:8px;padding:12px;border:1px solid rgba(255,255,255,.11);border-radius:14px;background:rgba(255,255,255,.035);color:#9daabe;font-size:10px;font-weight:850;letter-spacing:.05em}
 .secondary:active{background:rgba(255,255,255,.08);color:#eef4ff}
+
+
+@media (orientation:landscape){
+  .screen{place-items:center;padding:24px 7vw;background:linear-gradient(90deg,rgba(2,5,10,.74),rgba(2,5,10,.12) 58%,rgba(2,5,10,.38))}
+  .start-card{width:min(430px,42vw);padding:22px;border-radius:24px}
+  .start-card h1{font-size:clamp(48px,7vw,76px)}
+  .start-card p{font-size:13px}
+  .start-card label{margin:14px 0 10px}
+  #mission-card{top:92px;left:18px;width:min(310px,34vw)}
+  #nav-hint{top:250px;left:18px;max-width:34vw}
+  #perf-hint{top:276px;left:18px}
+  #interaction-prompt{bottom:120px}
+  #joystick{left:22px;bottom:20px;width:128px;height:128px}
+  .right-controls{right:22px;bottom:18px;grid-template-columns:repeat(2,84px);gap:9px}
+  .right-controls button{height:58px}
+}
+@media (orientation:landscape) and (max-height:500px){
+  header{padding:8px 14px}
+  #event-pill{top:52px}
+  #mission-card{top:70px}
+  #nav-hint{top:226px}
+  #perf-hint{top:252px}
+  .start-card{padding:16px;width:min(420px,44vw)}
+  .start-card .logo{width:48px;height:48px;margin-bottom:10px}
+  .start-card h1{margin:4px 0 10px}
+  .start-card label{margin:10px 0 7px}
+  .start-card input{padding:11px}
+  .primary{padding:12px}
+  .secondary{padding:9px}
+}
