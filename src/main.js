@@ -3,11 +3,8 @@ import * as THREE from 'three';
 const $ = (s) => document.querySelector(s);
 
 const canvas = $('#game-canvas');
-const startScreen = $('#start-screen');
 const hud = $('#hud');
 const complete = $('#complete');
-const nameInput = $('#player-name');
-const startBtn = $('#start-btn');
 const continueBtn = $('#continue-btn');
 
 const zoneLabel = $('#zone-label');
@@ -2486,7 +2483,7 @@ function restoreMissionWorld() {
 function startGame() {
   state.actionLockUntil = 0;
   loadGame();
-  state.savedName = (nameInput.value || state.savedName || 'Explorer').trim().slice(0, 18) || 'Explorer';
+  state.savedName = (state.savedName || 'Explorer').trim().slice(0, 18) || 'Explorer';
   state.started = true;
   state.completed = false;
   state.challengeActive = false;
@@ -2518,7 +2515,6 @@ function startGame() {
   }
 
   player.group.position.copy(player.pos);
-  startScreen.classList.add('hidden');
   hud.classList.remove('hidden');
 
   updateStatusUI();
@@ -2586,21 +2582,6 @@ window.addEventListener('pagehide', () => {
   if (state.started) saveGame();
 });
 
-let startTapLocked = false;
-
-const launchFromStart = (event) => {
-  if (event) event.preventDefault();
-  if (startTapLocked) return;
-  startTapLocked = true;
-  window.setTimeout(() => { startTapLocked = false; }, 650);
-  startGame();
-};
-
-// Mobile WebView friendly: pointer + touch + click, with a short duplicate-tap guard.
-startBtn.addEventListener('pointerup', launchFromStart, { passive: false });
-startBtn.addEventListener('touchend', launchFromStart, { passive: false });
-startBtn.addEventListener('click', launchFromStart);
-
 continueBtn.addEventListener('click', () => {
   complete.classList.add('hidden');
   hud.classList.remove('hidden');
@@ -2615,9 +2596,8 @@ buildOutpost();
 buildBasin();
 buildPlayer();
 
-// Render the Home lobby before the player presses ENTER WORLD.
-// Keep the avatar visible beside the landscape start card so the opening
-// feels like a real 3D game lobby rather than a flat menu.
+// Boot directly into the permanent NEXUS Home lobby.
+// There is no start-screen card or extra tap gate; the world opens immediately.
 state.activeZone = 'HUB';
 player.pos.set(10.5, 0, 8);
 player.group.position.copy(player.pos);
@@ -2629,6 +2609,9 @@ applyAvatarStyle();
 setZoneVisuals();
 setupControls();
 applyQuality();
+
+// Permanent boot: open directly into the playable 3D Home lobby.
+startGame();
 
 let last = performance.now();
 
