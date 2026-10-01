@@ -23,7 +23,7 @@ The total-game percentage is a project-management milestone metric, not a percen
 - V0.9 Polish + Optimization = 85%
 - V1.0 Complete Core Game = 100%
 
-Current project target: **V0.4 WORLD EXPANSION READY**
+Current project target: **V0.4 WORLD EXPANSION IN PROGRESS**
 Current total-game development percentage: **20%**
 Remaining: **80%**
 
@@ -80,12 +80,12 @@ Optional discovery:
 - replayable challenge pads
 - local progression/save
 
-## 04 — V0.4 WORLD EXPANSION — 20% -> 30% — NEXT BLOCK
-- [ ] Second large zone
-- [ ] Zone transitions beyond the first slice
-- [ ] World event manager
-- [ ] Environmental secrets expansion
-- [ ] Multiple quest chains
+## 04 — V0.4 WORLD EXPANSION — 20% -> 30% — IN PROGRESS
+- [x] Second large zone: Aether Basin
+- [x] Zone transition beyond the first slice (Lumen Wilds -> Aether Basin -> Lumen Wilds)
+- [x] Lightweight world event cycle: Resonance Surge
+- [x] Environmental secrets expansion: two Basin discovery shards
+- [x] Multiple quest chains across Lumen Wilds and Aether Basin
 - [ ] Better world streaming
 
 ## 05 — V0.5 VEHICLE LAYER — 30% -> 40%
@@ -157,3 +157,12 @@ Before changing a LOCKED system:
 3. Make the smallest safe change.
 4. Retest the affected system.
 5. Update this roadmap and memory.
+
+
+### V0.4 work log — Aether Basin foundation
+- Second substantial 3D zone added with a distinct visual identity.
+- Basin mission chain: Archivist -> four resonance anchors -> Resonance Vault -> return lift.
+- Two optional Basin discovery shards and a zone-specific checkpoint were added.
+- Lumen Wilds now has a Basin Gate that unlocks after the Shrine objective.
+- Basin has hazard recovery, collision geometry, radar entries, navigation targets, save/load state and a timed Resonance Surge world event.
+- V0.4 remains at 20% total-project progress until the milestone is completed and verified; no percentage inflation is used for partial implementation.
