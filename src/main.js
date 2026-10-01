@@ -1384,7 +1384,11 @@ function addAlert(title, textValue, duration) {
   }, duration || 2200);
 }
 
+let lastWorldEventText = '';
+
 function setWorldEvent(textValue) {
+  if (textValue === lastWorldEventText) return;
+  lastWorldEventText = textValue;
   eventPill.textContent = textValue;
 }
 
@@ -1416,6 +1420,9 @@ function startMission() {
   saveGame();
 }
 
+let lastChallengeUiTick = -1;
+let lastBasinSprintUiTick = -1;
+
 function beginChallenge(type) {
   if (state.activeZone !== 'HUB') {
     addAlert('CHALLENGE PAD', 'Challenges are available from the Central Hub.');
@@ -1430,6 +1437,7 @@ function beginChallenge(type) {
   state.challengeActive = true;
   state.challengeStart = performance.now() / 1000;
   state.challengeType = type;
+  lastChallengeUiTick = -1;
 
   if (type === 'signal') {
     beacons.forEach((beacon) => {
@@ -1490,6 +1498,7 @@ function finishSignalChallenge() {
 function failChallenge() {
   state.challengeActive = false;
   state.challengeStart = 0;
+  lastChallengeUiTick = -1;
   challengeTargets.forEach((marker) => { marker.visible = false; });
   beacons.forEach((beacon) => {
     beacon.visible = false;
@@ -1656,6 +1665,7 @@ function startBasinSprint() {
   state.basinChallengeActive = true;
   state.basinChallengeStart = performance.now() / 1000;
   state.basinChallengeIndex = 0;
+  lastBasinSprintUiTick = -1;
   basinChallengeTargets.forEach((marker, index) => {
     marker.visible = index === 0;
   });
@@ -1669,6 +1679,7 @@ function finishBasinSprint() {
   state.basinChallengeActive = false;
   state.basinChallengeStart = 0;
   state.basinChallengeIndex = 0;
+  lastBasinSprintUiTick = -1;
   basinChallengeTargets.forEach((marker) => { marker.visible = false; });
 
   const record = state.challengeRecords.basinSprint;
@@ -1689,6 +1700,7 @@ function failBasinSprint() {
   state.basinChallengeActive = false;
   state.basinChallengeStart = 0;
   state.basinChallengeIndex = 0;
+  lastBasinSprintUiTick = -1;
   basinChallengeTargets.forEach((marker) => { marker.visible = false; });
   setWorldEvent('WORLD • AETHER BASIN');
   addAlert('SPRINT FAILED', 'Time expired. Talk to the Runner to retry.', 2800);
@@ -1703,7 +1715,11 @@ function updateBasinSprint(nowSeconds) {
   const index = state.basinChallengeIndex;
   const target = basinChallengeTargets[index];
 
-  setWorldEvent('EVENT • RESONANCE SPRINT • ' + remaining.toFixed(1) + 's');
+  const uiTick = Math.floor(remaining * 10);
+  if (uiTick !== lastBasinSprintUiTick) {
+    lastBasinSprintUiTick = uiTick;
+    setWorldEvent('EVENT • RESONANCE SPRINT • ' + remaining.toFixed(1) + 's');
+  }
 
   basinChallengeTargets.forEach((marker, markerIndex) => {
     marker.visible = markerIndex === index;
@@ -2188,7 +2204,11 @@ function updateChallenge(nowSeconds) {
       ? 'MEMORY GRID'
       : 'CORE DELIVERY';
 
-  setWorldEvent('EVENT • ' + label + ' • ' + remaining.toFixed(1) + 's');
+  const uiTick = Math.floor(remaining * 10);
+  if (uiTick !== lastChallengeUiTick) {
+    lastChallengeUiTick = uiTick;
+    setWorldEvent('EVENT • ' + label + ' • ' + remaining.toFixed(1) + 's');
+  }
 
   if (state.challengeType === 'signal') {
     for (const beacon of beacons) {
@@ -2450,6 +2470,13 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('blur', () => {
   resetTransientInputState();
   state.actionLockUntil = 0;
+  if (state.started) saveGame();
+});
+
+window.addEventListener('pagehide', () => {
+  resetTransientInputState();
+  state.actionLockUntil = 0;
+  if (state.started) saveGame();
 });
 
 startBtn.addEventListener('click', startGame);
