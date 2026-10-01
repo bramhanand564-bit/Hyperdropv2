@@ -5,7 +5,7 @@
   "description": "NEXUS World — original mobile-first 3D virtual-world foundation.",
   "type": "module",
   "scripts": {
-    "check": "node --check src/main.js"
+    "check": "node --check src/main.js && node --check src/lobby.js"
   },
   "engines": {
     "node": ">=20"
