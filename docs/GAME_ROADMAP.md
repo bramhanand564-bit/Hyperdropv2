@@ -87,7 +87,8 @@ Optional discovery:
 - [x] Environmental secrets expansion: two Basin discovery shards
 - [x] Multiple quest chains across Lumen Wilds and Aether Basin
 - [x] Replayable Basin side activity with best-time tracking
-- [ ] Better world streaming
+- [x] Better world streaming foundation: distance-based decorative culling
+- [ ] Production-grade asset/zone streaming
 
 ## 05 — V0.5 VEHICLE LAYER — 30% -> 40%
 - [ ] Vehicle controller
