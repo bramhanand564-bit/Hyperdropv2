@@ -80,3 +80,7 @@ header{position:absolute;top:max(10px,env(safe-area-inset-top));left:0;right:0;p
   .right-controls{right:30px;grid-template-columns:repeat(3,78px)}
   #mission-card{left:24px}
 }
+
+
+.secondary{width:100%;margin-top:8px;padding:12px;border:1px solid rgba(255,255,255,.11);border-radius:14px;background:rgba(255,255,255,.035);color:#9daabe;font-size:10px;font-weight:850;letter-spacing:.05em}
+.secondary:active{background:rgba(255,255,255,.08);color:#eef4ff}
