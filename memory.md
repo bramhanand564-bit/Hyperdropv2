@@ -92,3 +92,5 @@ Never claim VERIFIED or LOCKED without target-device evidence.
 - 2026-10-01: Added standalone NEXUS CI syntax workflow and V0.3 mobile test plan.
 - 2026-10-01: Added local-progress reset control to make repeat Android testing safer and faster.
 - 2026-10-01: Hardened V0.3 state handling with action cooldowns, legacy-save migration and impossible-state normalization.
+- 2026-10-01: Added quality presets for camera/fog/pixel ratio plus lightweight FPS/draw-call telemetry for mobile performance testing.
+- 2026-10-01: Fixed local reset so both current and legacy saves are cleared.
