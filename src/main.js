@@ -98,6 +98,7 @@ const challengeTargets = [];
 const relays = [];
 const secrets = [];
 const hazards = [];
+const collisionBoxes = [];
 const zoneGroups = {
   HUB: new THREE.Group(),
   OUTPOST: new THREE.Group()
@@ -178,6 +179,23 @@ function registerInteractable(object, type, zone, extra) {
   return object;
 }
 
+function addCollisionBox(x, z, halfX, halfZ, zone) {
+  collisionBoxes.push({ x: x, z: z, halfX: halfX, halfZ: halfZ, zone: zone });
+}
+
+function collidesAt(position) {
+  const radius = 0.55;
+  for (const box of collisionBoxes) {
+    if (box.zone !== state.activeZone) continue;
+    const nearestX = THREE.MathUtils.clamp(position.x, box.x - box.halfX, box.x + box.halfX);
+    const nearestZ = THREE.MathUtils.clamp(position.z, box.z - box.halfZ, box.z + box.halfZ);
+    const dx = position.x - nearestX;
+    const dz = position.z - nearestZ;
+    if ((dx * dx) + (dz * dz) < radius * radius) return true;
+  }
+  return false;
+}
+
 function buildHub() {
   const g = zoneGroups.HUB;
 
@@ -216,6 +234,7 @@ function buildHub() {
       g
     );
     worldProps.push(b);
+    addCollisionBox(item[0], item[1], item[2] / 2 + 0.45, item[4] / 2 + 0.45, 'HUB');
     for (let row = 0; row < Math.max(2, Math.floor(item[3] / 4)); row += 1) {
       const side = row % 2 ? -1 : 1;
       mesh(
@@ -432,6 +451,7 @@ function buildOutpost() {
       );
       tree.rotation.y = a;
       worldProps.push(tree);
+      addCollisionBox(x, z, 1.35, 1.35, 'OUTPOST');
     }
   });
 
@@ -1349,8 +1369,11 @@ function updatePlayer(dt) {
 
   const speed = player.baseSpeed * (input.sprint ? 1.6 : 1) * magnitude;
   const bounds = state.activeZone === 'OUTPOST' ? outpostBounds : hubBounds;
-  player.pos.x = THREE.MathUtils.clamp(player.pos.x + move.x * speed * dt, bounds.minX, bounds.maxX);
-  player.pos.z = THREE.MathUtils.clamp(player.pos.z + move.z * speed * dt, bounds.minZ, bounds.maxZ);
+  const next = player.pos.clone();
+  next.x = THREE.MathUtils.clamp(next.x + move.x * speed * dt, bounds.minX, bounds.maxX);
+  if (!collidesAt(new THREE.Vector3(next.x, 0, player.pos.z))) player.pos.x = next.x;
+  next.z = THREE.MathUtils.clamp(player.pos.z + move.z * speed * dt, bounds.minZ, bounds.maxZ);
+  if (!collidesAt(new THREE.Vector3(player.pos.x, 0, next.z))) player.pos.z = next.z;
 
   if (input.jump && player.grounded) {
     player.velY = 7.0;
@@ -1387,10 +1410,12 @@ function updatePlayer(dt) {
   p.rl.rotation.x = swing;
 
   if (state.activeZone === 'OUTPOST') {
-    for (const hazard of hazards) {
-      if (player.pos.distanceTo(hazard.pos) < hazard.radius) {
-        respawnToCheckpoint('Rift contact.');
-        break;
+    if (player.pos.distanceTo(state.checkpoint) > 1.2) {
+      for (const hazard of hazards) {
+        if (player.pos.distanceTo(hazard.pos) < hazard.radius) {
+          respawnToCheckpoint('Rift contact.');
+          break;
+        }
       }
     }
   }
