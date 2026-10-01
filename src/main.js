@@ -1951,8 +1951,8 @@ function transitionToZone(zone) {
     : state.activeZone === 'BASIN'
       ? 0.82
       : Math.PI;
-  cameraState.pitch = state.activeZone === 'HUB' ? 0.26 : 0.42;
-  cameraState.distance = state.activeZone === 'HUB' ? 6.8 : 9.4;
+  cameraState.pitch = state.activeZone === 'HUB' ? 0.30 : 0.42;
+  cameraState.distance = state.activeZone === 'HUB' ? 8.6 : 10.5;
   setZoneVisuals();
   updateMissionUI();
   updateStatusUI();
@@ -2513,8 +2513,8 @@ function startGame() {
     player.pos.set(0, 0, 8);
     player.group.rotation.y = Math.PI;
     cameraState.yaw = Math.PI;
-    cameraState.pitch = 0.26;
-    cameraState.distance = 6.8;
+    cameraState.pitch = 0.30;
+    cameraState.distance = 8.6;
   }
 
   player.group.position.copy(player.pos);
