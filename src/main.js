@@ -964,7 +964,7 @@ function buildPlayer() {
 
   const hair = new THREE.Group();
   hair.position.set(0, 2.56, -0.01);
-  body.mesh(hair);
+  body.add(hair);
   const hairMat = mat(0x070a10, 0.4, 0.55, 0x07172a);
   mesh(new THREE.SphereGeometry(0.43, 18, 12), hairMat, new THREE.Vector3(0, 0, 0), hair);
 
@@ -1041,7 +1041,7 @@ function buildPlayer() {
   const sword = new THREE.Group();
   sword.position.set(0.43, 1.6, 0.42);
   sword.rotation.z = -0.22;
-  body.mesh(sword);
+  body.add(sword);
   mesh(new THREE.BoxGeometry(0.12, 1.45, 0.12), black, new THREE.Vector3(0, 0.18, 0), sword);
   mesh(new THREE.BoxGeometry(0.08, 1.22, 0.06), blue, new THREE.Vector3(0, 0.72, 0), sword);
   mesh(new THREE.BoxGeometry(0.34, 0.08, 0.08), silver, new THREE.Vector3(0, -0.55, 0), sword);
@@ -1089,9 +1089,9 @@ function buildPlayer() {
     backpack, backpackLight, accent, coatL, coatR, sword, visorGlow,
     seamL, seamR, shoulderLightL, shoulderLightR, chestCore, coatHemL, coatHemR, energyNodes
   };
-  player.group.mesh(body);
+  player.group.add(body);
   player.group.position.copy(player.pos);
-  scene.mesh(player.group);
+  scene.add(player.group);
 }
 function applyAvatarStyle() {
   const style = avatarStyles[avatarStyleIndex];
