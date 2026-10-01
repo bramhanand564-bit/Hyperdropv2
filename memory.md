@@ -23,12 +23,11 @@ See:
 - docs/GAME_DESIGN.md
 
 ## Completion metric
-Current roadmap stage: V0.3 VERTICAL SLICE IN PROGRESS
-Current total-game progress: 10%
-Remaining: 90%
+Current roadmap stage: V0.4 WORLD EXPANSION READY
+Current total-game development progress: 20%
+Remaining: 80%
 
-This percentage is based on milestone completion, not code size.
-The project remains at 10% until the V0.3 milestone is completed and target-device testing is recorded.
+This percentage tracks development milestone completion, not code size. V0.3 implementation is complete. Physical Android verification remains a separate release-readiness gate and is not claimed as complete.
 
 ## Current playable scope
 - Central 3D Hub
@@ -67,14 +66,11 @@ The project remains at 10% until the V0.3 milestone is completed and target-devi
 Physical Android target-device testing and formal V0.3 LOCKED sign-off have not been completed.
 
 ## Next locked development order
-1. Run syntax/static checks.
-2. Open the GitHub Pages build.
-3. Test the hub -> gate -> Lumen Wilds route on Android.
-4. Test movement/camera/interactions and all three challenge types.
-5. Test relay chain, secrets, checkpoint/respawn, radar, sound and graphics controls.
-6. Fix regressions without rewriting stable systems.
-7. Record Android test evidence and lock V0.3.
-8. Begin V0.4 second-world expansion.
+1. Complete V0.3 Android/device verification when a target device is available.
+2. Record any device regressions and patch only affected systems.
+3. Formalize V0.3 LOCKED status after evidence exists.
+4. Begin V0.4 second-world expansion.
+5. Build the second zone with reusable world-event and streaming foundations.
 
 ## Change rule
 BUILD SMALL -> TEST -> RECORD -> LOCK -> EXPAND.
@@ -95,3 +91,6 @@ Never claim VERIFIED or LOCKED without target-device evidence.
 - 2026-10-01: Added quality presets for camera/fog/pixel ratio plus lightweight FPS/draw-call telemetry for mobile performance testing.
 - 2026-10-01: Fixed local reset so both current and legacy saves are cleared.
 - 2026-10-01: Added persistent challenge-clear and best-time records for Signal Run, Memory Grid and Core Delivery.
+
+- 2026-10-01: Added mobile lifecycle recovery so hidden/blurred pages release joystick, sprint and camera transient input safely.
+- 2026-10-01: V0.3 implementation milestone advanced to 20% development progress; Android verification remains explicitly pending.
