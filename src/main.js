@@ -119,6 +119,7 @@ const basinSecrets = [];
 const basinHazards = [];
 const basinChallengeTargets = [];
 const basinEventNodes = [];
+const streamedDecor = [];
 const collisionBoxes = [];
 const zoneGroups = {
   HUB: new THREE.Group(),
@@ -209,6 +210,16 @@ function registerInteractable(object, type, zone, extra) {
 
 function addCollisionBox(x, z, halfX, halfZ, zone) {
   collisionBoxes.push({ x: x, z: z, halfX: halfX, halfZ: halfZ, zone: zone });
+}
+
+function registerStreamedDecor(object, zone, radius) {
+  streamedDecor.push({
+    object,
+    zone,
+    radius: radius || 58,
+    baseVisible: object.visible
+  });
+  return object;
 }
 
 function collidesAt(position) {
@@ -687,6 +698,7 @@ function buildBasin() {
       g
     );
     pillar.rotation.y = index * 0.31;
+    registerStreamedDecor(pillar, 'BASIN', 62);
     addCollisionBox(item[0], item[1], 1.8, 1.8, 'BASIN');
     addGlow(new THREE.Vector3(item[0], h + 0.4, item[1]), 0.55, index % 2 ? 0x79d4d9 : 0x8ab4ff, g);
   });
@@ -703,6 +715,7 @@ function buildBasin() {
       g
     );
     tree.rotation.y = index * 0.5;
+    registerStreamedDecor(tree, 'BASIN', 52);
     addCollisionBox(p[0], p[1], 1.15, 1.15, 'BASIN');
   });
 
@@ -878,6 +891,7 @@ function buildBasin() {
     );
     node.rotation.x = Math.PI / 2;
     node.userData.index = index;
+    registerStreamedDecor(node, 'BASIN', 58);
     basinEventNodes.push(node);
   });
 }
@@ -1273,6 +1287,25 @@ function getNavigationTarget(nowSeconds) {
 
 let perfFrames = 0;
 let perfElapsed = 0;
+let streamElapsed = 0;
+
+function updateZoneStreaming(dt) {
+  streamElapsed += dt;
+  if (streamElapsed < 0.25) return;
+  streamElapsed = 0;
+
+  for (const entry of streamedDecor) {
+    if (entry.zone !== state.activeZone) {
+      entry.object.visible = false;
+      continue;
+    }
+
+    const dx = entry.object.position.x - player.pos.x;
+    const dz = entry.object.position.z - player.pos.z;
+    const distanceSq = (dx * dx) + (dz * dz);
+    entry.object.visible = entry.baseVisible && distanceSq <= entry.radius * entry.radius;
+  }
+}
 
 function updatePerformanceUI(dt) {
   if (!perfHint || !state.started || state.completed) return;
@@ -2538,6 +2571,7 @@ function loop(now) {
   updateBasinSprint(now * 0.001);
   updateNavigationUI(now * 0.001);
   updatePerformanceUI(dt);
+  updateZoneStreaming(dt);
   updateWorld(now * 0.001);
   updateCamera(dt);
   renderer.render(scene, camera);
