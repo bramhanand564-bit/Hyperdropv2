@@ -104,6 +104,19 @@ Later:
 - 60 FPS target on capable devices
 - Avoid memory-heavy assets in the first vertical slice
 
+## V0.3 first playable zone — Lumen Wilds
+Lumen Wilds is the first distinct zone beyond the Central Hub. It uses a darker luminous-grove identity, relay nodes, a Shrine landmark, optional discovery shards, a checkpoint and hazard recovery.
+
+Playable chain:
+Central Hub -> Signal Run -> Central Gate -> Scout -> 3 Relay Nodes -> Lumen Shrine -> Return Gate.
+
+Optional systems in the zone:
+- 3 Lumen shard secrets
+- Checkpoint synchronization
+- Hazard respawn
+- Radar panel
+- Replayable hub challenges
+
 ## Current vertical slice
 V0.2 prototype contains:
 - Central 3D hub
