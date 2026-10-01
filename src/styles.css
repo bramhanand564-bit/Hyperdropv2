@@ -62,3 +62,6 @@ header{position:absolute;top:max(10px,env(safe-area-inset-top));left:0;right:0;p
   .right-controls{right:30px}
   #mission-card{left:24px}
 }
+.hud-extra{height:56px!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:15px!important;background:rgba(5,10,18,.72)!important;color:#eef4ff!important;font-size:9px!important;font-weight:950!important;letter-spacing:.06em!important;backdrop-filter:blur(10px)}
+.right-controls{grid-template-columns:repeat(3,78px)}
+@media(max-width:520px){.right-controls{grid-template-columns:repeat(2,78px)}}
