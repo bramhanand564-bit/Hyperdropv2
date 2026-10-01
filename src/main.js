@@ -122,6 +122,7 @@ const zoneGroups = {
 const SAVE_KEY = 'nexus-world-v04-save';
 const LEGACY_SAVE_KEYS = ['nexus-world-v03-save'];
 const ACTION_COOLDOWN_MS = 280;
+let basinEventCycle = -1;
 
 scene.add(zoneGroups.HUB);
 scene.add(zoneGroups.OUTPOST);
@@ -1709,11 +1710,15 @@ function transitionToZone(zone) {
 
   if (state.activeZone === 'BASIN') {
     if (state.basinMissionStep > 3) state.basinMissionStep = 3;
+    if (state.basinMissionStep === 0) {
+      state.basinCheckpoint.set(0, 0, -102.8);
+    }
     player.pos.copy(state.basinCheckpoint);
     if (player.pos.z > basinBounds.maxZ || player.pos.z < basinBounds.minZ) {
-      player.pos.set(0, 0, -170);
-      state.basinCheckpoint.set(0, 0, -170);
+      player.pos.set(0, 0, -102.8);
+      state.basinCheckpoint.set(0, 0, -102.8);
     }
+    basinEventCycle = Math.floor(performance.now() / 1000 / 18);
     basinRelays.forEach((relay, index) => {
       relay.visible = state.basinMissionStep === 1 && !state.basinRelayCollected[index];
     });
@@ -2156,6 +2161,16 @@ function updateWorld(nowSeconds) {
     secret.position.y = 0.62 + Math.sin(nowSeconds * 2.0 + index) * 0.12;
   });
 
+  if (state.activeZone === 'BASIN' && state.started) {
+    const cycle = Math.floor(nowSeconds / 18);
+    if (cycle !== basinEventCycle) {
+      basinEventCycle = cycle;
+      setWorldEvent('WORLD EVENT • RESONANCE SURGE');
+      addAlert('WORLD EVENT', 'A resonance surge swept across the Basin. The anchor field is energized.', 2400);
+      beep('ui');
+    }
+  }
+
   const target = nearestInteractable();
   if (!target) {
     interactionPrompt.classList.add('hidden');
@@ -2239,8 +2254,14 @@ function startGame() {
   restoreMissionWorld();
 
   if (state.activeZone === 'BASIN') {
+    if (state.basinMissionStep === 0) {
+      state.basinCheckpoint.set(0, 0, -102.8);
+    }
     player.pos.copy(state.basinCheckpoint);
-    if (player.pos.z > basinBounds.maxZ || player.pos.z < basinBounds.minZ) player.pos.set(0, 0, -170);
+    if (player.pos.z > basinBounds.maxZ || player.pos.z < basinBounds.minZ) {
+      player.pos.set(0, 0, -102.8);
+      state.basinCheckpoint.set(0, 0, -102.8);
+    }
   } else if (state.activeZone === 'OUTPOST') {
     player.pos.copy(state.checkpoint);
     if (player.pos.z > -29 || player.pos.z < -98) player.pos.set(0, 0, -64);
