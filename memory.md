@@ -108,3 +108,5 @@ Never claim VERIFIED or LOCKED without target-device evidence.
 - 2026-10-01: Android Build #50 was triggered from the startup-crash fix commit; physical Android verification remains pending until the APK is installed on the target device.
 
 - 2026-10-01: LOCKED animation architecture rule: every animated object is decomposed into 100 primary modules, and every primary module into 100 micro-modules (10,000 addressable units per character). Added docs/ANIMATION_ARCHITECTURE_LOCKED.md, animation/characters/nexus-hero/character-100x100.json, and tools/generate-100x100-animation-tree.mjs. Runtime remains modular without committing 10,000 hand-written JS files.
+
+- 2026-10-01: The locked 100×100 rule is now physically materialized in the repository for NEXUS Hero: 100 primary directories × 100 micro-module files = 10,000 addressable animation/detail files under animation/characters/nexus-hero/. Commit 08f454bdb29ca6725fc6c42456322d24a3931720.
