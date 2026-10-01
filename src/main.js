@@ -930,83 +930,166 @@ function buildBasin() {
 function buildPlayer() {
   const body = new THREE.Group();
 
+  // Hero avatar inspired by the supplied NEXUS character reference:
+  // dark futuristic streetwear, long asymmetric coat, blue energy accents,
+  // armored shoulders/gloves/boots, spiky hair and a back-mounted energy blade.
+  const skin = mat(0xd8c0b4, 0.72, 0.05);
+  const suit = mat(0x101722, 0.48, 0.62, 0x0a3150);
+  const suit2 = mat(0x202a37, 0.52, 0.5, 0x102f4a);
+  const blue = mat(0x62dcff, 0.22, 0.55, 0x20c8ff);
+  const blueSoft = mat(0x2d83b5, 0.28, 0.5, 0x14557d);
+  const silver = mat(0xb9c7d5, 0.34, 0.7, 0x193e5a);
+  const black = mat(0x050a10, 0.34, 0.72, 0x071d30);
+
   const torso = mesh(
-    new THREE.CapsuleGeometry(0.48, 0.92, 7, 14),
-    mat(0x172536, 0.48, 0.55, 0x0d3150),
-    new THREE.Vector3(0, 1.32, 0),
+    new THREE.CapsuleGeometry(0.5, 0.9, 7, 14),
+    suit,
+    new THREE.Vector3(0, 1.38, 0),
+    body
+  );
+
+  const chest = mesh(
+    new THREE.BoxGeometry(0.68, 0.62, 0.18),
+    suit2,
+    new THREE.Vector3(0, 1.48, -0.43),
     body
   );
 
   const head = mesh(
-    new THREE.SphereGeometry(0.37, 20, 14),
-    mat(0xdce5ee, 0.68),
-    new THREE.Vector3(0, 2.28, 0),
+    new THREE.SphereGeometry(0.39, 22, 16),
+    skin,
+    new THREE.Vector3(0, 2.35, -0.01),
     body
   );
+
+  const hair = new THREE.Group();
+  hair.position.set(0, 2.56, -0.01);
+  body.add(hair);
+  const hairMat = mat(0x070a10, 0.4, 0.55, 0x07172a);
+  add(new THREE.SphereGeometry(0.43, 18, 12), hairMat, new THREE.Vector3(0, 0, 0), hair);
+
+  // Spiky silhouette.
+  for (let i = 0; i < 11; i += 1) {
+    const a = (i / 11) * Math.PI * 2;
+    const spike = add(
+      new THREE.ConeGeometry(0.075, 0.46 + (i % 3) * 0.12, 5),
+      hairMat,
+      new THREE.Vector3(Math.cos(a) * 0.25, 0.15 + (i % 3) * 0.035, Math.sin(a) * 0.23),
+      hair
+    );
+    spike.rotation.z = Math.cos(a) * 0.7;
+    spike.rotation.x = Math.sin(a) * -0.7;
+  }
 
   const visor = mesh(
-    new THREE.BoxGeometry(0.52, 0.15, 0.11),
-    mat(0x06111d, 0.18, 0.5, 0x1676aa),
-    new THREE.Vector3(0, 2.28, -0.34),
+    new THREE.BoxGeometry(0.5, 0.13, 0.12),
+    black,
+    new THREE.Vector3(0, 2.34, -0.36),
+    body
+  );
+  const visorGlow = mesh(
+    new THREE.BoxGeometry(0.36, 0.035, 0.025),
+    blue,
+    new THREE.Vector3(0, 2.35, -0.425),
     body
   );
 
-  const shoulder = mat(0x355a7e, 0.42, 0.45, 0x163f63);
-  const leg = mat(0x202f40, 0.65, 0.35);
-  const boot = mat(0x07101a, 0.35, 0.65, 0x0c4e78);
-  const la = mesh(new THREE.BoxGeometry(0.24, 0.84, 0.28), shoulder, new THREE.Vector3(-0.61, 1.38, 0), body);
-  const ra = mesh(new THREE.BoxGeometry(0.24, 0.84, 0.28), shoulder, new THREE.Vector3(0.61, 1.38, 0), body);
-  const ll = mesh(new THREE.BoxGeometry(0.27, 0.9, 0.3), leg, new THREE.Vector3(-0.21, 0.53, 0), body);
-  const rl = mesh(new THREE.BoxGeometry(0.27, 0.9, 0.3), leg, new THREE.Vector3(0.21, 0.53, 0), body);
-  const bootL = mesh(new THREE.BoxGeometry(0.34, 0.22, 0.58), boot, new THREE.Vector3(-0.21, 0.1, -0.08), body);
-  const bootR = mesh(new THREE.BoxGeometry(0.34, 0.22, 0.58), boot, new THREE.Vector3(0.21, 0.1, -0.08), body);
+  // High collar.
+  add(new THREE.BoxGeometry(0.3, 0.48, 0.24), suit2, new THREE.Vector3(-0.36, 1.82, 0.02), body);
+  add(new THREE.BoxGeometry(0.3, 0.48, 0.24), suit2, new THREE.Vector3(0.36, 1.82, 0.02), body);
+
+  const shoulderL = mesh(new THREE.SphereGeometry(0.28, 12, 10), silver, new THREE.Vector3(-0.62, 1.73, 0), body);
+  const shoulderR = mesh(new THREE.SphereGeometry(0.28, 12, 10), silver, new THREE.Vector3(0.62, 1.73, 0), body);
+  shoulderL.scale.set(1.25, 0.72, 1.05);
+  shoulderR.scale.set(1.25, 0.72, 1.05);
+
+  const la = mesh(new THREE.CapsuleGeometry(0.13, 0.68, 5, 8), suit2, new THREE.Vector3(-0.66, 1.34, 0), body);
+  const ra = mesh(new THREE.CapsuleGeometry(0.13, 0.68, 5, 8), suit2, new THREE.Vector3(0.66, 1.34, 0), body);
+
+  // Arm guards and glowing wrist plates.
+  add(new THREE.BoxGeometry(0.25, 0.22, 0.32), black, new THREE.Vector3(-0.68, 0.94, -0.04), body);
+  add(new THREE.BoxGeometry(0.25, 0.22, 0.32), black, new THREE.Vector3(0.68, 0.94, -0.04), body);
+  add(new THREE.BoxGeometry(0.15, 0.055, 0.05), blue, new THREE.Vector3(-0.68, 0.94, -0.2), body);
+  add(new THREE.BoxGeometry(0.15, 0.055, 0.05), blue, new THREE.Vector3(0.68, 0.94, -0.2), body);
+
+  // Long split coat tails.
+  const coatL = mesh(new THREE.BoxGeometry(0.52, 1.45, 0.12), suit, new THREE.Vector3(-0.31, 0.93, 0.34), body);
+  const coatR = mesh(new THREE.BoxGeometry(0.52, 1.45, 0.12), suit, new THREE.Vector3(0.31, 0.93, 0.34), body);
+  coatL.rotation.z = -0.06;
+  coatR.rotation.z = 0.06;
+  const coatAccentL = mesh(new THREE.BoxGeometry(0.08, 1.32, 0.04), blueSoft, new THREE.Vector3(-0.58, 0.93, 0.27), body);
+  const coatAccentR = mesh(new THREE.BoxGeometry(0.08, 1.32, 0.04), blueSoft, new THREE.Vector3(0.58, 0.93, 0.27), body);
+
+  // Belt / utility straps.
+  add(new THREE.BoxGeometry(0.94, 0.12, 0.55), black, new THREE.Vector3(0, 0.94, 0), body);
+  add(new THREE.BoxGeometry(0.18, 0.14, 0.08), silver, new THREE.Vector3(0, 0.94, -0.31), body);
+
+  const leg = mat(0x111822, 0.58, 0.5);
+  const laLeg = mesh(new THREE.CapsuleGeometry(0.16, 0.72, 5, 8), leg, new THREE.Vector3(-0.22, 0.43, 0), body);
+  const raLeg = mesh(new THREE.CapsuleGeometry(0.16, 0.72, 5, 8), leg, new THREE.Vector3(0.22, 0.43, 0), body);
+
+  // Tactical knee armor.
+  add(new THREE.BoxGeometry(0.34, 0.22, 0.32), silver, new THREE.Vector3(-0.22, 0.63, -0.16), body);
+  add(new THREE.BoxGeometry(0.34, 0.22, 0.32), silver, new THREE.Vector3(0.22, 0.63, -0.16), body);
+
+  const bootL = mesh(new THREE.BoxGeometry(0.39, 0.28, 0.72), black, new THREE.Vector3(-0.22, 0.12, -0.1), body);
+  const bootR = mesh(new THREE.BoxGeometry(0.39, 0.28, 0.72), black, new THREE.Vector3(0.22, 0.12, -0.1), body);
+  add(new THREE.BoxGeometry(0.4, 0.065, 0.1), blue, new THREE.Vector3(-0.22, 0.08, -0.43), body);
+  add(new THREE.BoxGeometry(0.4, 0.065, 0.1), blue, new THREE.Vector3(0.22, 0.08, -0.43), body);
+
+  // Back-mounted original energy blade.
+  const sword = new THREE.Group();
+  sword.position.set(0.43, 1.6, 0.42);
+  sword.rotation.z = -0.22;
+  body.add(sword);
+  add(new THREE.BoxGeometry(0.12, 1.45, 0.12), black, new THREE.Vector3(0, 0.18, 0), sword);
+  add(new THREE.BoxGeometry(0.08, 1.22, 0.06), blue, new THREE.Vector3(0, 0.72, 0), sword);
+  add(new THREE.BoxGeometry(0.34, 0.08, 0.08), silver, new THREE.Vector3(0, -0.55, 0), sword);
+  add(new THREE.BoxGeometry(0.12, 0.22, 0.12), silver, new THREE.Vector3(0, -0.38, 0), sword);
 
   const backpack = mesh(
-    new THREE.BoxGeometry(0.7, 0.92, 0.28),
-    mat(0x0b1623, 0.4, 0.55, 0x103d5c),
-    new THREE.Vector3(0, 1.35, 0.42),
+    new THREE.BoxGeometry(0.72, 0.92, 0.3),
+    black,
+    new THREE.Vector3(0, 1.36, 0.43),
     body
   );
   const backpackLight = mesh(
-    new THREE.BoxGeometry(0.34, 0.07, 0.06),
-    mat(0x6ee2ff, 0.2, 0.5, 0x2ccaff),
-    new THREE.Vector3(0, 1.5, 0.58),
+    new THREE.BoxGeometry(0.36, 0.07, 0.06),
+    blue,
+    new THREE.Vector3(0, 1.52, 0.59),
     body
   );
 
-  // Original NEXUS chest/back identity mark.
   const accent = mesh(
-    new THREE.BoxGeometry(0.38, 0.1, 0.08),
-    mat(0x8fe8ff, 0.25, 0.55, 0x27c9ff),
-    new THREE.Vector3(0, 1.5, -0.47),
+    new THREE.BoxGeometry(0.42, 0.11, 0.06),
+    blue,
+    new THREE.Vector3(0, 1.52, -0.51),
     body
   );
 
   player.group.userData.parts = {
-    la, ra, ll, rl, torso, head, visor, bootL, bootR, backpack, backpackLight, accent
+    la, ra, ll: laLeg, rl: raLeg, torso, head, visor, bootL, bootR,
+    backpack, backpackLight, accent, coatL, coatR, sword, visorGlow
   };
   player.group.add(body);
   player.group.position.copy(player.pos);
   scene.add(player.group);
 }
-
 function applyAvatarStyle() {
   const style = avatarStyles[avatarStyleIndex];
   const parts = player.group.userData.parts;
   if (!parts) return;
-  parts.torso.material.color.setHex(style.suit);
+  parts.torso.material.color.setHex(0x101722);
   parts.head.material.color.setHex(style.body);
   parts.la.material.color.setHex(style.suit);
   parts.ra.material.color.setHex(style.suit);
-  parts.ll.material.color.setHex(style.suit);
-  parts.rl.material.color.setHex(style.suit);
-  parts.bootL.material.color.setHex(0x07101a);
-  parts.bootR.material.color.setHex(0x07101a);
-  parts.backpack.material.color.setHex(style.suit);
-  parts.backpackLight.material.color.setHex(style.accent);
+  parts.ll.material.color.setHex(0x111822);
+  parts.rl.material.color.setHex(0x111822);
+  parts.backpack.material.color.setHex(0x050a10);
   parts.accent.material.color.setHex(style.accent);
+  parts.backpackLight.material.color.setHex(style.accent);
+  parts.visorGlow.material.color.setHex(style.accent);
 }
-
 function cycleAvatarStyle() {
   avatarStyleIndex = (avatarStyleIndex + 1) % avatarStyles.length;
   applyAvatarStyle();
