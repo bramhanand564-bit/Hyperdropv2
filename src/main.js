@@ -2614,7 +2614,18 @@ buildHub();
 buildOutpost();
 buildBasin();
 buildPlayer();
+
+// Render the Home lobby before the player presses ENTER WORLD.
+// This keeps the first screen a real 3D mobile-game lobby instead of a flat menu.
+state.activeZone = 'HUB';
+player.pos.set(0, 0, 8);
+player.group.position.copy(player.pos);
+player.group.rotation.y = 0;
+cameraState.yaw = Math.PI;
+cameraState.pitch = 0.26;
+cameraState.distance = 6.8;
 applyAvatarStyle();
+setZoneVisuals();
 setupControls();
 applyQuality();
 
