@@ -1694,7 +1694,10 @@ function startGame() {
 $('#reset-save').addEventListener('click', () => {
   const confirmed = window.confirm('Reset all local NEXUS progress on this device?');
   if (!confirmed) return;
-  try { localStorage.removeItem(SAVE_KEY); } catch {}
+  try {
+    localStorage.removeItem(SAVE_KEY);
+    for (const legacyKey of LEGACY_SAVE_KEYS) localStorage.removeItem(legacyKey);
+  } catch {}
   window.location.reload();
 });
 
