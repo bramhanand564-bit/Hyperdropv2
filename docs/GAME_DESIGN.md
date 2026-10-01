@@ -157,3 +157,5 @@ Optional discovery:
 - timed Resonance Surge world events
 
 V0.4 remains development-in-progress at 20% total project progress. Story content is still intentionally not locked.
+
+V0.4 side activity: **Resonance Sprint** — an optional replayable four-gate timed route in Aether Basin with a persistent clear count and best-time record. It is independent of the main anchor/vault mission progression.
