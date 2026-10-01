@@ -15,4 +15,4 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: JavaScript syntax check
-        run: node --check src/main.js
+        run: node --check src/main.js && node --check src/lobby.js
