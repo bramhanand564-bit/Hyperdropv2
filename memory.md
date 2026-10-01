@@ -42,6 +42,7 @@ This percentage is based on milestone completion, not code size.
 - Alert/notification system
 - Timed signal challenge
 - NPC prototype with guide/challenger interactions
+- Avatar customization prototype with three original styles
 - Three challenge prototypes: Signal Run, Memory Grid, Core Delivery
 - XP and credits
 - Local save
@@ -56,6 +57,7 @@ Physical Android target-device testing has not been completed yet.
 2. Fix movement/camera/UI issues.
 3. Polish NPC interactions.
 4. Polish and balance the three challenge types.
+5. Polish avatar customization and first vertical-slice zone.
 5. Build first polished vertical-slice zone.
 6. Add audio + map/radar.
 7. Add performance controls.
@@ -72,3 +74,4 @@ Never claim VERIFIED or LOCKED without target-device evidence.
 - 2026-10-01: TIME LOCK prototype superseded by original virtual-world game architecture.
 - 2026-10-01: V0.2 playable core rebuilt with hub, avatar, interaction, challenge, alerts, progression and save prototype.
 - 2026-10-01: NPC prototype and three challenge types added; V0.3 vertical slice is now in progress.
+- 2026-10-01: Added three original avatar style variants and persistent avatar selection.
