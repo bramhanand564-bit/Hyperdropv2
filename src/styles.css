@@ -176,3 +176,14 @@ header{position:absolute;top:max(10px,env(safe-area-inset-top));left:0;right:0;p
   .lobby-start{height:48px;font-size:16px}
   .lobby-chat{bottom:7px;padding:7px 9px;font-size:7px}
 }
+
+.boot-diagnostic{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:#04070d;color:#eaf4ff;font-family:Inter,system-ui,sans-serif;text-align:center;transition:opacity .25s ease}
+.boot-diagnostic.boot-ready{opacity:0;pointer-events:none}
+.boot-diagnostic.boot-error{background:#0d0709}
+.boot-diagnostic>div{display:grid;justify-items:center;gap:10px;max-width:min(420px,82vw);padding:28px}
+.boot-mark{width:62px;height:62px;border:1px solid rgba(111,220,255,.6);border-radius:18px;display:grid;place-items:center;background:rgba(28,86,122,.25);font-weight:1000;font-size:20px;box-shadow:0 0 42px rgba(48,188,255,.14)}
+.boot-diagnostic>b{font-size:20px;letter-spacing:.12em}
+.boot-diagnostic>span{font-size:10px;color:#72d9ff;letter-spacing:.12em}
+.boot-diagnostic small{min-height:16px;max-width:360px;color:#9caabc;font-size:9px;line-height:1.45}
+.boot-error .boot-mark{border-color:rgba(255,120,120,.65);box-shadow:0 0 42px rgba(255,70,70,.12)}
+.boot-error>span{color:#ff9d9d}
