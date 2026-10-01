@@ -80,6 +80,7 @@ export function buildHeroRig({ scene, player, mat }) {
 
   const Larm = makeArm(-1);
   const Rarm = makeArm(1);
+  const shoulders = G('shoulders', new THREE.Vector3(0, 1.72, 0));
 
   const makeLeg = (side) => {
     const x = side * .22;
@@ -120,7 +121,9 @@ export function buildHeroRig({ scene, player, mat }) {
     accent: core, coatL, coatR, sword, visorGlow, chestCore: core,
     coatHemL: coatL, coatHemR: coatL, hands: [Larm.hand, Rarm.hand],
     fingers: [...Larm.fingers, ...Rarm.fingers],
-    eyes: [eyeL, eyeR], hairSpikes, microDetails: { eyeL, eyeR, hairSpikes }
+    eyes: [eyeL, eyeR],
+    shoulders,
+    hips, hairSpikes, microDetails: { eyeL, eyeR, hairSpikes }
   };
   player.group.add(body);
   player.group.position.copy(player.pos);
