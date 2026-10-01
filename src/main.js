@@ -70,7 +70,12 @@ const state = {
   soundOn: true,
   quality: 'HIGH',
   lastAlertAt: 0,
-  actionLockUntil: 0
+  actionLockUntil: 0,
+  challengeRecords: {
+    signal: { clears: 0, bestSeconds: null },
+    memory: { clears: 0, bestSeconds: null },
+    delivery: { clears: 0, bestSeconds: null }
+  }
 };
 
 const input = { x: 0, y: 0, jump: false, sprint: false };
@@ -715,7 +720,8 @@ function saveGame() {
     checkpoint: { x: state.checkpoint.x, y: state.checkpoint.y, z: state.checkpoint.z },
     avatarStyleIndex: avatarStyleIndex,
     soundOn: state.soundOn,
-    quality: state.quality
+    quality: state.quality,
+    challengeRecords: state.challengeRecords
   };
 
   try {
@@ -760,11 +766,9 @@ function loadGame() {
     }
 
     if (payload.checkpoint && Number.isFinite(payload.checkpoint.x) && Number.isFinite(payload.checkpoint.z)) {
-      state.checkpoint.set(
-        Number(payload.checkpoint.x),
-        Number(payload.checkpoint.y || 0),
-        Number(payload.checkpoint.z)
-      );
+      const x = THREE.MathUtils.clamp(Number(payload.checkpoint.x), outpostBounds.minX, outpostBounds.maxX);
+      const z = THREE.MathUtils.clamp(Number(payload.checkpoint.z), outpostBounds.minZ, outpostBounds.maxZ);
+      state.checkpoint.set(x, 0, z);
     }
 
     avatarStyleIndex = Number.isInteger(payload.avatarStyleIndex)
@@ -773,6 +777,18 @@ function loadGame() {
 
     state.soundOn = payload.soundOn !== false;
     state.quality = payload.quality === 'LOW' || payload.quality === 'MEDIUM' ? payload.quality : 'HIGH';
+
+    const recordSource = payload.challengeRecords && typeof payload.challengeRecords === 'object'
+      ? payload.challengeRecords
+      : {};
+    for (const key of ['signal', 'memory', 'delivery']) {
+      const record = recordSource[key];
+      if (!record || typeof record !== 'object') continue;
+      state.challengeRecords[key].clears = Math.max(0, Math.floor(Number(record.clears || 0)));
+      state.challengeRecords[key].bestSeconds = Number.isFinite(Number(record.bestSeconds))
+        ? Math.max(0, Number(record.bestSeconds))
+        : null;
+    }
     if (state.relayCollected.every(Boolean) && state.zoneMissionStep < 2) {
       state.zoneMissionStep = 2;
     }
@@ -1099,7 +1115,10 @@ function collectBeacon(beacon) {
 }
 
 function finishSignalChallenge() {
+  const elapsed = Math.max(0, (performance.now() / 1000) - state.challengeStart);
   state.challengeActive = false;
+  state.challengeStart = 0;
+  recordChallengeClear('signal', elapsed);
   if (state.missionStep < 2) state.missionStep = 2;
 
   grantRewards(60, 120);
@@ -1130,9 +1149,22 @@ function failChallenge() {
   beep('fail');
 }
 
-function finishGenericChallenge(name, xp, credits) {
+function recordChallengeClear(type, elapsedSeconds) {
+  const record = state.challengeRecords[type];
+  if (!record) return;
+  record.clears += 1;
+  if (record.bestSeconds === null || elapsedSeconds < record.bestSeconds) {
+    record.bestSeconds = Number(elapsedSeconds.toFixed(2));
+    addAlert('NEW RECORD', type.toUpperCase() + ' • ' + record.bestSeconds.toFixed(2) + 's', 2400);
+  }
+}
+
+function finishGenericChallenge(name, type, xp, credits) {
+  const elapsed = Math.max(0, (performance.now() / 1000) - state.challengeStart);
   state.challengeActive = false;
+  state.challengeStart = 0;
   challengeTargets.forEach((marker) => { marker.visible = false; });
+  recordChallengeClear(type, elapsed);
   grantRewards(xp, credits);
   setWorldEvent('WORLD STATUS • ' + name + ' CLEARED');
   addAlert('CHALLENGE CLEARED', '+' + xp + ' XP • +' + credits + ' CR');
@@ -1578,7 +1610,7 @@ function updateChallenge(nowSeconds) {
       addAlert('GRID NODE', 'Node ' + (targetIndex + 1) + ' reached. +15 XP • +10 CR');
 
       if (targetIndex === 3) {
-        finishGenericChallenge('MEMORY GRID', 45, 90);
+        finishGenericChallenge('MEMORY GRID', 'memory', 45, 90);
       } else {
         state.challengeStart = performance.now() / 1000 - (targetIndex + 1) * 5;
       }
@@ -1590,7 +1622,7 @@ function updateChallenge(nowSeconds) {
 
     const target = new THREE.Vector3(-16, 0, -18);
     if (player.pos.distanceTo(target) < 2.4) {
-      finishGenericChallenge('CORE DELIVERY', 55, 110);
+      finishGenericChallenge('CORE DELIVERY', 'delivery', 55, 110);
     }
   }
 
