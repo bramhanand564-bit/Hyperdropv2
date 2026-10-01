@@ -931,40 +931,60 @@ function buildPlayer() {
   const body = new THREE.Group();
 
   const torso = mesh(
-    new THREE.CapsuleGeometry(0.46, 0.95, 6, 12),
-    mat(0xe9f0f9, 0.64),
-    new THREE.Vector3(0, 1.3, 0),
+    new THREE.CapsuleGeometry(0.48, 0.92, 7, 14),
+    mat(0x172536, 0.48, 0.55, 0x0d3150),
+    new THREE.Vector3(0, 1.32, 0),
     body
   );
 
-  mesh(
-    new THREE.SphereGeometry(0.36, 18, 12),
-    mat(0xdce5ee, 0.7),
-    new THREE.Vector3(0, 2.27, 0),
+  const head = mesh(
+    new THREE.SphereGeometry(0.37, 20, 14),
+    mat(0xdce5ee, 0.68),
+    new THREE.Vector3(0, 2.28, 0),
     body
   );
 
-  mesh(
-    new THREE.BoxGeometry(0.5, 0.14, 0.1),
-    mat(0x07111b, 0.3, 0.4),
-    new THREE.Vector3(0, 2.26, -0.33),
+  const visor = mesh(
+    new THREE.BoxGeometry(0.52, 0.15, 0.11),
+    mat(0x06111d, 0.18, 0.5, 0x1676aa),
+    new THREE.Vector3(0, 2.28, -0.34),
     body
   );
 
-  const shoulder = mat(0x91b4d9, 0.45, 0.3, 0x284667);
-  const leg = mat(0x566c85, 0.7, 0.2);
-  const la = mesh(new THREE.BoxGeometry(0.2, 0.82, 0.2), shoulder, new THREE.Vector3(-0.6, 1.36, 0), body);
-  const ra = mesh(new THREE.BoxGeometry(0.2, 0.82, 0.2), shoulder, new THREE.Vector3(0.6, 1.36, 0), body);
-  const ll = mesh(new THREE.BoxGeometry(0.25, 0.88, 0.25), leg, new THREE.Vector3(-0.2, 0.52, 0), body);
-  const rl = mesh(new THREE.BoxGeometry(0.25, 0.88, 0.25), leg, new THREE.Vector3(0.2, 0.52, 0), body);
+  const shoulder = mat(0x355a7e, 0.42, 0.45, 0x163f63);
+  const leg = mat(0x202f40, 0.65, 0.35);
+  const boot = mat(0x07101a, 0.35, 0.65, 0x0c4e78);
+  const la = mesh(new THREE.BoxGeometry(0.24, 0.84, 0.28), shoulder, new THREE.Vector3(-0.61, 1.38, 0), body);
+  const ra = mesh(new THREE.BoxGeometry(0.24, 0.84, 0.28), shoulder, new THREE.Vector3(0.61, 1.38, 0), body);
+  const ll = mesh(new THREE.BoxGeometry(0.27, 0.9, 0.3), leg, new THREE.Vector3(-0.21, 0.53, 0), body);
+  const rl = mesh(new THREE.BoxGeometry(0.27, 0.9, 0.3), leg, new THREE.Vector3(0.21, 0.53, 0), body);
+  const bootL = mesh(new THREE.BoxGeometry(0.34, 0.22, 0.58), boot, new THREE.Vector3(-0.21, 0.1, -0.08), body);
+  const bootR = mesh(new THREE.BoxGeometry(0.34, 0.22, 0.58), boot, new THREE.Vector3(0.21, 0.1, -0.08), body);
+
+  const backpack = mesh(
+    new THREE.BoxGeometry(0.7, 0.92, 0.28),
+    mat(0x0b1623, 0.4, 0.55, 0x103d5c),
+    new THREE.Vector3(0, 1.35, 0.42),
+    body
+  );
+  const backpackLight = mesh(
+    new THREE.BoxGeometry(0.34, 0.07, 0.06),
+    mat(0x6ee2ff, 0.2, 0.5, 0x2ccaff),
+    new THREE.Vector3(0, 1.5, 0.58),
+    body
+  );
+
+  // Original NEXUS chest/back identity mark.
   const accent = mesh(
-    new THREE.BoxGeometry(0.34, 0.08, 0.12),
-    mat(0xb8d8ff, 0.3, 0.5),
-    new THREE.Vector3(0, 1.55, -0.43),
+    new THREE.BoxGeometry(0.38, 0.1, 0.08),
+    mat(0x8fe8ff, 0.25, 0.55, 0x27c9ff),
+    new THREE.Vector3(0, 1.5, -0.47),
     body
   );
 
-  player.group.userData.parts = { la: la, ra: ra, ll: ll, rl: rl, torso: torso, accent: accent };
+  player.group.userData.parts = {
+    la, ra, ll, rl, torso, head, visor, bootL, bootR, backpack, backpackLight, accent
+  };
   player.group.add(body);
   player.group.position.copy(player.pos);
   scene.add(player.group);
@@ -974,11 +994,16 @@ function applyAvatarStyle() {
   const style = avatarStyles[avatarStyleIndex];
   const parts = player.group.userData.parts;
   if (!parts) return;
-  parts.torso.material.color.setHex(style.body);
+  parts.torso.material.color.setHex(style.suit);
+  parts.head.material.color.setHex(style.body);
   parts.la.material.color.setHex(style.suit);
   parts.ra.material.color.setHex(style.suit);
   parts.ll.material.color.setHex(style.suit);
   parts.rl.material.color.setHex(style.suit);
+  parts.bootL.material.color.setHex(0x07101a);
+  parts.bootR.material.color.setHex(0x07101a);
+  parts.backpack.material.color.setHex(style.suit);
+  parts.backpackLight.material.color.setHex(style.accent);
   parts.accent.material.color.setHex(style.accent);
 }
 
