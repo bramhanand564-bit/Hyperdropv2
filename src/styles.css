@@ -31,6 +31,7 @@ header{position:absolute;top:max(10px,env(safe-area-inset-top));left:0;right:0;p
 .mission-kicker{font-size:8px;color:#8190a4;letter-spacing:.14em}
 #mission-card strong{display:block;font-size:13px;margin-top:4px}
 #mission-card p{font-size:10px;line-height:1.4;color:#a5b1c1;margin:7px 0 10px}
+#nav-hint{position:absolute;top:254px;left:15px;font-size:8px;letter-spacing:.11em;color:#718198;padding:5px 8px;border-radius:9px;background:rgba(5,10,18,.48);backdrop-filter:blur(8px);max-width:52vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .progress-row{display:flex;align-items:center;gap:8px;font-size:9px;color:#8e9cb0}
 .progress-track{flex:1;height:5px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
 .progress-track i{display:block;width:0;height:100%;background:#edf2fa;border-radius:99px;transition:width .2s ease}
@@ -68,6 +69,7 @@ header{position:absolute;top:max(10px,env(safe-area-inset-top));left:0;right:0;p
   #hint{display:none}
   #mission-card{width:58vw}
   #radar-panel{top:112px;right:10px;width:min(330px,82vw)}
+  #nav-hint{left:10px;top:248px;max-width:58vw}
 }
 @media(max-width:520px){
   .right-controls{grid-template-columns:repeat(2,78px);right:10px}
