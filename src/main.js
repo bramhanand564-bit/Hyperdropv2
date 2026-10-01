@@ -250,6 +250,35 @@ function buildHub() {
     [0, 0, 8, 78],
     [0, -31, 12, 10]
   ];
+
+  // Permanent player home / opening spawn: the first place the player sees.
+  const homePad = mesh(
+    new THREE.CylinderGeometry(4.6, 5.0, 0.28, 40),
+    mat(0x162a3b, 0.42, 0.5, 0x244f70),
+    new THREE.Vector3(0, 0.14, 8),
+    g
+  );
+  homePad.userData.label = 'NEXUS HOME';
+  const homeRing = mesh(
+    new THREE.TorusGeometry(4.0, 0.12, 10, 48),
+    mat(0xb9d9ff, 0.18, 0.65, 0x6aa9dc),
+    new THREE.Vector3(0, 0.3, 8),
+    g
+  );
+  homeRing.rotation.x = Math.PI / 2;
+
+  for (const [x, z] of [[-3.6, 5], [3.6, 5], [-3.6, 11], [3.6, 11]]) {
+    addPillar(x, 0, z, 2.8, 0x5e91bb, g);
+  }
+
+  const homeSign = mesh(
+    new THREE.BoxGeometry(5.8, 0.9, 0.18),
+    mat(0x14283a, 0.3, 0.45, 0x356e94),
+    new THREE.Vector3(0, 3.9, 5.0),
+    g
+  );
+  homeSign.userData.label = 'NEXUS HOME';
+  addGlow(new THREE.Vector3(0, 3.9, 5.0), 0.5, 0x8bc7ef, g);
   roads.forEach((item) => {
     mesh(
       new THREE.BoxGeometry(item[2], 0.06, item[3]),
@@ -2468,7 +2497,11 @@ function startGame() {
     player.pos.copy(state.checkpoint);
     if (player.pos.z > -29 || player.pos.z < -98) player.pos.set(0, 0, -64);
   } else {
+    // New sessions always begin at the permanent NEXUS Home pad.
     player.pos.set(0, 0, 8);
+    cameraState.yaw = 0.18;
+    cameraState.pitch = 0.34;
+    cameraState.distance = 7.8;
   }
 
   player.group.position.copy(player.pos);
