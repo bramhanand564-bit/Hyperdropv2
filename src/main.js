@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { buildLobbyExperience } from './lobby.js';
 import { buildHeroRig } from './animation/heroRig.js';
+import { updateHeroMicroAnimation } from './animation/heroAnimator.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -2330,6 +2331,14 @@ function updatePlayer(dt) {
       }
     }
   }
+  updateHeroMicroAnimation(
+    player,
+    dt,
+    performance.now(),
+    magnitude > 0.01,
+    input.sprint
+  );
+
 }
 
 function updateChallenge(nowSeconds) {
