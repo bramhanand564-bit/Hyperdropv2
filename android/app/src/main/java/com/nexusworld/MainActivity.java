@@ -16,8 +16,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // NEXUS World is designed as a portrait-first mobile game.
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        // NEXUS World is designed as a landscape-first mobile game.
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         webView = new WebView(this);
         webView.setBackgroundColor(0xFF05070D);
