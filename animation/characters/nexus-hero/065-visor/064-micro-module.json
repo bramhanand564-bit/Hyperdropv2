@@ -1,0 +1,37 @@
+{
+  "version": 2,
+  "dimension": "3D",
+  "character": "nexus-hero",
+  "primaryCount": 100,
+  "microCountPerPrimary": 100,
+  "addressing": {
+    "primaryIndex": "parent-folder-001..100",
+    "microIndex": "filename-001..100",
+    "totalAddressableUnits": 10000
+  },
+  "geometry": {
+    "format": "procedural-instanced",
+    "families": ["sphere", "capsule", "box", "octahedron"],
+    "placement": "deterministic-anchor-jitter",
+    "meshData": "generated-at-runtime-from-primary-and-micro-index"
+  },
+  "material": {
+    "model": "MeshStandardMaterial",
+    "roughness": 0.38,
+    "metalness": 0.45,
+    "emissive": "accent"
+  },
+  "animation": {
+    "channels": ["translate", "rotate", "scale"],
+    "states": ["IDLE", "WALK", "RUN", "TURN", "JUMP", "LANDING", "INTERACT", "DAMAGE"]
+  },
+  "mobile": {
+    "instanced": true,
+    "maxVisibleInstances": 10000,
+    "perFileFetch": false
+  },
+  "qa": {
+    "addressable": true,
+    "sourceOfTruth": "character-100x100.json"
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "character": "nexus-hero",
   "primaryCount": 100,
   "microCountPerPrimary": 100,
@@ -106,5 +106,12 @@
     "fx-slot",
     "detail-reserve",
     "reserved-100"
-  ]
+  ],
+  "runtime3D": {
+    "format": "procedural-instanced",
+    "totalInstances": 10000,
+    "sourceFiles": "animation/characters/nexus-hero/**/**/*.json",
+    "renderer": "src/animation/hero3dMicroLayer.js",
+    "perFileRuntimeFetch": false
+  }
 }

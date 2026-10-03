@@ -3,6 +3,7 @@ import { buildLobbyExperience } from './lobby.js';
 import { buildHeroRig } from './animation/heroRig.js';
 import { updateHeroMicroAnimation } from './animation/heroAnimator.js';
 import { Hero2DRenderer } from './animation/hero2d.js';
+import { buildHero3DMicroLayer } from './animation/hero3dMicroLayer.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -129,6 +130,7 @@ const basinEventNodes = [];
 const streamedDecor = [];
 let lobbyExperience = null;
 let hero2d = null;
+let hero3dMicroLayer = null;
 const collisionBoxes = [];
 const zoneGroups = {
   HUB: new THREE.Group(),
@@ -2683,6 +2685,7 @@ buildHub();
 buildOutpost();
 buildBasin();
 buildPlayer();
+hero3dMicroLayer = buildHero3DMicroLayer(player.group);
 lobbyExperience = buildLobbyExperience(scene, zoneGroups.HUB, player.group);
 hero2d = hero2dCanvas ? new Hero2DRenderer(hero2dCanvas) : null;
 

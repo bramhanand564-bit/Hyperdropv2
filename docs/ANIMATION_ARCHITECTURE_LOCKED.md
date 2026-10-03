@@ -8,6 +8,10 @@ Each micro-module owns: design, geometry, material, attachment, idle, movement, 
 
 **Workflow:** DESIGN → SPLIT 100 → SPLIT EACH 100 → IMPLEMENT → ANIMATE → TEST → PROFILE → LOCK → NEXT PART.
 
-The hierarchy is represented by a registry plus a generator. We will not hand-maintain 10,000 runtime JS files; generated contracts provide the requested 100×100 decomposition without making Android/CI unmaintainable.
+The hierarchy is physically materialized as 10,000 addressable 3D micro-module JSON files and rendered through one mobile-safe InstancedMesh layer. The files carry the 3D contract while runtime geometry is generated from the primary/micro address, avoiding 10,000 network/file fetches.
 
 First target: **NEXUS Hero Character**.
+
+
+## 3D runtime
+The NEXUS Hero now mounts a 10,000-instance procedural 3D micro-detail layer. The existing 2D canvas preview remains a separate QA/reference renderer; it does not replace the 3D character.
