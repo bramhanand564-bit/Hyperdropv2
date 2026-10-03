@@ -942,23 +942,35 @@ function applyAvatarStyle() {
   const style = avatarStyles[avatarStyleIndex];
   const parts = player.group.userData.parts;
   if (!parts) return;
-  parts.torso.material.color.setHex(0x101722);
-  parts.head.material.color.setHex(style.body);
-  parts.la.material.color.setHex(style.suit);
-  parts.ra.material.color.setHex(style.suit);
-  parts.ll.material.color.setHex(0x111822);
-  parts.rl.material.color.setHex(0x111822);
-  if (parts.backpack) parts.backpack.material.color.setHex(0x050a10);
-  if (parts.accent) parts.accent.material.color.setHex(style.accent);
-  if (parts.backpackLight) parts.backpackLight.material.color.setHex(style.accent);
-  parts.visorGlow.material.color.setHex(style.accent);
-  if (parts.seamL) parts.seamL.material.color.setHex(style.accent);
-  if (parts.seamR) parts.seamR.material.color.setHex(style.accent);
-  if (parts.shoulderLightL) parts.shoulderLightL.material.color.setHex(style.accent);
-  if (parts.shoulderLightR) parts.shoulderLightR.material.color.setHex(style.accent);
-  if (parts.chestCore) parts.chestCore.material.color.setHex(style.accent);
-  if (parts.backpackLight) parts.backpackLight.material.color.setHex(style.accent);
-  if (parts.energyNodes) parts.energyNodes.forEach((node) => node.material.color.setHex(style.accent));
+
+  // Some rig entries are Groups (for animated body sections), not Meshes.
+  // Never assume a direct .material exists: apply the color to every mesh
+  // contained by the part so startup/style switching cannot throw.
+  const setPartColor = (part, color) => {
+    if (!part) return;
+    part.traverse((node) => {
+      if (node.isMesh && node.material?.color?.setHex) {
+        node.material.color.setHex(color);
+      }
+    });
+  };
+
+  setPartColor(parts.torso, 0x101722);
+  setPartColor(parts.head, style.body);
+  setPartColor(parts.la, style.suit);
+  setPartColor(parts.ra, style.suit);
+  setPartColor(parts.ll, 0x111822);
+  setPartColor(parts.rl, 0x111822);
+  setPartColor(parts.backpack, 0x050a10);
+  setPartColor(parts.accent, style.accent);
+  setPartColor(parts.backpackLight, style.accent);
+  setPartColor(parts.visorGlow, style.accent);
+  setPartColor(parts.seamL, style.accent);
+  setPartColor(parts.seamR, style.accent);
+  setPartColor(parts.shoulderLightL, style.accent);
+  setPartColor(parts.shoulderLightR, style.accent);
+  setPartColor(parts.chestCore, style.accent);
+  setPartColor(parts.energyNodes, style.accent);
   syncHero2DStyle();
 }
 function syncHero2DStyle() {
