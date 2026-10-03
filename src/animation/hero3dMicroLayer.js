@@ -15,7 +15,7 @@ const anchorFor = (name) => {
 };
 
 export function buildHero3DMicroLayer(heroGroup) {
-  const geometry = new THREE.IcosahedronGeometry(0.018, 0);
+  // HIGH quality uses a denser 3D micro-primitive. MEDIUM/LOW are handled by the quality gate.\n  const geometry = new THREE.IcosahedronGeometry(0.018, 1);
   const material = new THREE.MeshStandardMaterial({
     color: 0x8bdcff,
     emissive: 0x1b9bd1,
@@ -24,7 +24,7 @@ export function buildHero3DMicroLayer(heroGroup) {
     metalness: 0.48
   });
   const mesh = new THREE.InstancedMesh(geometry, material, COUNT);
-  mesh.name = "NEXUS_HERO_10000_MICRO_3D";
+  mesh.name = "NEXUS_HERO_10000_MICRO_3D_ULTRA";\n  mesh.userData.qualityContract = {\n    addressableUnits: COUNT,\n    geometryDetail: "ICOSAHEDRON_SUBDIVISION_1",\n    material: "PBR_STANDARD",\n    animation: "DETERMINISTIC_PER_INSTANCE",\n    lod: ["HIGH:10000", "MEDIUM:5000", "LOW:0"]\n  };
   mesh.frustumCulled = false;
 
   const dummy = new THREE.Object3D();
