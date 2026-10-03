@@ -130,10 +130,10 @@ for i in range(40):
     x=.27*math.cos(a)
     z=.23*math.sin(a)
     y=3.25+.045*math.cos(a*3)
-    cone("HairStrand_%02d"%i,.045,.008,.38,(x,y,z),hair,20)
+    cone("HairStrand_%02d"%i,.045,.38,(x,y,z),hair,sections=20)
 for i in range(11):
     x=(i-5)*.055
-    cone("FrontBang_%02d"%i,.05,.006,.34,(x,3.10,-.25),hair,20)
+    cone("FrontBang_%02d"%i,.05,.34,(x,3.10,-.25),hair,sections=20)
 
 # shoulders, arms, elbows, gauntlets, fingers
 for side,x in [("L",-0.55),("R",0.55)]:
