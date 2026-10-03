@@ -21,6 +21,10 @@ jobs:
           node --check src/animation/heroRig.js &&
           node --check src/animation/heroAnimator.js &&
           node --check src/animation/hero2d.js &&
-          node --check src/animation/hero2dClips.js
+          node --check src/animation/hero2dClips.js &&
+          node --check src/animation/hero3dMicroLayer.js &&
+          node --check src/animation/nexusHeroGLB.js
       - name: Verify animation architecture
         run: node tools/verify-animation-architecture.mjs
+      - name: Validate NEXUS Hero GLB contract
+        run: node tools/verify-nexus-hero-glb.mjs
