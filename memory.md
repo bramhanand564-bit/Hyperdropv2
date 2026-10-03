@@ -114,3 +114,5 @@ Never claim VERIFIED or LOCKED without target-device evidence.
 - 2026-10-03: Converted the locked 100×100 micro-module set from Markdown placeholders to 10,000 machine-readable 3D JSON specs and added a 10,000-instance procedural 3D micro-detail runtime layer for NEXUS Hero. Physical Android verification remains pending.
 
 - 2026-10-03: Fixed the NEXUS Home startup crash shown by Android ("Cannot read properties of undefined (reading 'color')"). The avatar style path was treating animated rig Groups as direct Mesh materials; applyAvatarStyle now safely traverses each part and colors only mesh materials. Physical Android verification remains pending.
+
+- 2026-10-03: Added the Ultra-HD 3D detail rule. The 10,000 micro-module files remain machine-readable 3D contracts rather than thousands of duplicated source lines; visual fidelity is driven by real geometry/material/lighting/animation data, deterministic transforms, LOD and performance budgets. Raised the NEXUS Hero HIGH micro layer to subdivision-1 3D geometry while retaining 10,000 addressable instances and mobile-safe MEDIUM/LOW budgets.
