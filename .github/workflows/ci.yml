@@ -26,5 +26,9 @@ jobs:
           node --check src/animation/nexusHeroGLB.js
       - name: Verify animation architecture
         run: node tools/verify-animation-architecture.mjs
+      - name: Generate production NEXUS Hero GLB
+        run: |
+          python3 -m pip install --disable-pip-version-check --quiet trimesh
+          python3 tools/generate-nexus-hero-glb.py
       - name: Validate NEXUS Hero GLB contract
-        run: node tools/verify-nexus-hero-glb.mjs
+        run: node tools/verify-nexus-hero-glb.mjs --strict
