@@ -54,7 +54,7 @@ export function buildHeroRig({ scene, player, mat }) {
 
   // Neck + face: narrower jaw and high-collar silhouette.
   const neck = G('neck',new THREE.Vector3(0,1.93,0));
-  cyl(.135,.24,skin,new THREE.Vector3(0,.09,0),16,neck);
+  cyl(.135,.24,skin,new THREE.Vector3(0,.09,0),neck,16);
   box(.48,.28,.38,black,new THREE.Vector3(0,.02,-.03),neck);
 
   const head = G('head',new THREE.Vector3(0,2.17,0));
