@@ -147,9 +147,10 @@ scene.add(zoneGroups.OUTPOST);
 scene.add(zoneGroups.BASIN);
 
 const avatarStyles = [
-  { name: 'AURORA', body: 0xe9f0f9, suit: 0x5e88bd, accent: 0xb8d8ff },
-  { name: 'EMBER', body: 0xf0d6c4, suit: 0x9a4f45, accent: 0xffc08a },
-  { name: 'VOLT', body: 0xd8e1ee, suit: 0x6b58a6, accent: 0xdec9ff }
+  // Reference-matched default: warm skin + black/white futuristic suit + electric blue.
+  { name: 'NEXUS', body: 0xd9b8a8, suit: 0x10141b, accent: 0x47bfff },
+  { name: 'EMBER', body: 0xf0c6ae, suit: 0x211316, accent: 0xff765e },
+  { name: 'VOLT', body: 0xd8dce8, suit: 0x11182a, accent: 0x8a7cff }
 ];
 let avatarStyleIndex = 0;
 
