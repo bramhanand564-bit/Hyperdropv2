@@ -2290,8 +2290,11 @@ function updatePlayer(dt) {
 
   player.group.position.copy(player.pos);
 
-  const p = player.group.userData.parts;
-  if (magnitude > 0.01) {
+  if (player.group.userData.gltf) {
+    player.group.userData.gltfMixer?.update(dt);
+  } else {
+    const p = player.group.userData.parts;
+    if (magnitude > 0.01) {
     const targetYaw = Math.atan2(move.x, move.z);
     player.group.rotation.y = THREE.MathUtils.lerp(
       player.group.rotation.y,
@@ -2352,6 +2355,7 @@ function updatePlayer(dt) {
       spike.rotation.z += Math.sin(performance.now() * 0.001 + i * 0.6) * 0.0015;
     });
     p.torso.position.y = 1.3 + Math.sin(performance.now() * 0.0022) * 0.018;
+    }
   }
 
   if (state.activeZone === 'OUTPOST') {
