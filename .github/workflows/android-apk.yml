@@ -80,6 +80,10 @@ jobs:
           # This removes both file:// ES-module resolution and import-map dependency.
           npm install --no-audit --no-fund
           npx esbuild src/main.js --bundle --format=iife --outfile=android/app/src/main/assets/src/game.bundle.js
+          python3 -m pip install --disable-pip-version-check --quiet trimesh
+          python3 tools/generate-nexus-hero-glb.py
+          mkdir -p android/app/src/main/assets/assets/characters
+          cp assets/characters/nexus-hero.glb android/app/src/main/assets/assets/characters/nexus-hero.glb
           python3 - <<'PY'
           from pathlib import Path
 
