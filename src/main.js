@@ -4,6 +4,7 @@ import { buildHeroRig } from './animation/heroRig.js';
 import { updateHeroMicroAnimation } from './animation/heroAnimator.js';
 import { Hero2DRenderer } from './animation/hero2d.js';
 import { buildHero3DMicroLayer } from './animation/hero3dMicroLayer.js';
+import { loadNexusHeroGLB } from './animation/nexusHeroGLB.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -937,7 +938,24 @@ function buildBasin() {
   });
 }
 function buildPlayer() {
+  // Keep the proven procedural rig as an immediate fallback while the
+  // production GLB is loading. Once the GLB exists, it replaces the rig.
   buildHeroRig({ scene, player, mat });
+
+  loadNexusHeroGLB({ scene, player, mat })
+    .then((result) => {
+      if (result.source !== 'GLB') return;
+      if (hero3dMicroLayer) {
+        player.group.remove(hero3dMicroLayer);
+        hero3dMicroLayer = null;
+      }
+      hero3dMicroLayer = buildHero3DMicroLayer(player.group);
+      applyAvatarStyle();
+      console.info('[NEXUS] Production GLB character loaded.');
+    })
+    .catch((error) => {
+      console.warn('[NEXUS] Production GLB not installed yet; procedural rig remains active.', error);
+    });
 }
 function applyAvatarStyle() {
   const style = avatarStyles[avatarStyleIndex];
