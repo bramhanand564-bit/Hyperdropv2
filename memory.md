@@ -112,3 +112,5 @@ Never claim VERIFIED or LOCKED without target-device evidence.
 - 2026-10-01: The locked 100×100 rule is now physically materialized in the repository for NEXUS Hero: 100 primary directories × 100 micro-module files = 10,000 addressable animation/detail files under animation/characters/nexus-hero/. Commit 08f454bdb29ca6725fc6c42456322d24a3931720.
 
 - 2026-10-03: Converted the locked 100×100 micro-module set from Markdown placeholders to 10,000 machine-readable 3D JSON specs and added a 10,000-instance procedural 3D micro-detail runtime layer for NEXUS Hero. Physical Android verification remains pending.
+
+- 2026-10-03: Fixed the NEXUS Home startup crash shown by Android ("Cannot read properties of undefined (reading 'color')"). The avatar style path was treating animated rig Groups as direct Mesh materials; applyAvatarStyle now safely traverses each part and colors only mesh materials. Physical Android verification remains pending.
