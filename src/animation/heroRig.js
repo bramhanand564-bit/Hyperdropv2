@@ -1,230 +1,211 @@
 import * as THREE from 'three';
 
-/*
- * NEXUS HERO — reference-driven original 3D character rig.
- * Visual target: black/white futuristic street armor, electric-blue emissive
- * details, long asymmetric coat, spiky black hair, armored boots and sheathed
- * energy blade. All geometry is procedural so the mobile build has no texture
- * download dependency.
- */
 export function buildHeroRig({ scene, player, mat }) {
   const body = new THREE.Group();
   body.name = 'NEXUS_HERO_RIG';
 
-  const skin = new THREE.MeshStandardMaterial({ color: 0xd9b8a8, roughness: 0.56, metalness: 0.02 });
-  const skinDark = new THREE.MeshStandardMaterial({ color: 0x8e5f58, roughness: 0.7, metalness: 0.02 });
-  const black = new THREE.MeshStandardMaterial({ color: 0x05070b, roughness: 0.3, metalness: 0.72 });
-  const cloth = new THREE.MeshStandardMaterial({ color: 0x10141b, roughness: 0.66, metalness: 0.18 });
-  const white = new THREE.MeshStandardMaterial({ color: 0xd9dde2, roughness: 0.48, metalness: 0.28 });
-  const silver = new THREE.MeshStandardMaterial({ color: 0xaeb8c4, roughness: 0.25, metalness: 0.88 });
-  const blue = new THREE.MeshStandardMaterial({
-    color: 0x47bfff, roughness: 0.2, metalness: 0.55,
-    emissive: 0x087dff, emissiveIntensity: 3.2
-  });
-  const darkBlue = new THREE.MeshStandardMaterial({
-    color: 0x10263d, roughness: 0.32, metalness: 0.65,
-    emissive: 0x06345b, emissiveIntensity: 1.25
-  });
-  const glass = new THREE.MeshStandardMaterial({
-    color: 0x081522, roughness: 0.12, metalness: 0.55,
-    emissive: 0x116dca, emissiveIntensity: 1.8
-  });
+  // Reference-driven palette: black tactical base + white coat + silver armor + electric blue emissive.
+  const skin = mat(0xe0b9a8, .72, .08);
+  const skinDark = mat(0x9d6f63, .55, .12);
+  const black = mat(0x070b12, .28, .78, 0x07121e);
+  const fabric = mat(0x111722, .55, .58, 0x0b2136);
+  const fabric2 = mat(0x252d38, .62, .46, 0x102b43);
+  const white = mat(0xdfe5eb, .46, .42, 0x152b42);
+  const silver = mat(0xb9c6d2, .3, .82, 0x193b57);
+  const darkMetal = mat(0x27313b, .32, .9, 0x10263b);
+  const blue = mat(0x4fdcff, .16, .62, 0x19cfff);
+  const blue2 = mat(0x146ea4, .24, .68, 0x0b4e7a);
 
-  const M = (geometry, material, p = new THREE.Vector3(), parent = body) => {
-    const o = new THREE.Mesh(geometry, material);
+  const M = (g, m, p, parent = body) => {
+    const o = new THREE.Mesh(g, m);
     o.position.copy(p);
-    o.castShadow = false;
-    o.receiveShadow = false;
     parent.add(o);
     return o;
   };
-  const G = (name, p = new THREE.Vector3(), parent = body) => {
+  const G = (name, p, parent = body) => {
     const g = new THREE.Group();
     g.name = name;
     g.position.copy(p);
     parent.add(g);
     return g;
   };
-  const panel = (w, h, d, material, p, parent = body, bevel = 0.08) => {
-    const o = M(new THREE.BoxGeometry(w, h, d), material, p, parent);
-    o.userData.detail = 'panel';
-    o.scale.set(1, 1, 1);
-    return o;
-  };
-  const glowStrip = (w, h, p, parent = body) =>
-    M(new THREE.BoxGeometry(w, h, 0.035), blue, p, parent);
+  const box = (x,y,z,m,p,parent=body) => M(new THREE.BoxGeometry(x,y,z),m,p,parent);
+  const cyl = (r,h,m,p,parent=body,seg=16) => M(new THREE.CylinderGeometry(r,r,h,seg),m,p,parent);
 
-  // HIPS / BELT
-  const hips = G('hips', new THREE.Vector3(0, 0.98, 0));
-  panel(0.9, 0.26, 0.58, black, new THREE.Vector3(0, 0, 0), hips);
-  const belt = G('belt', new THREE.Vector3(0, 1.16, -0.01));
-  panel(0.98, 0.13, 0.62, black, new THREE.Vector3(0, 0, 0), belt);
-  panel(0.18, 0.15, 0.06, silver, new THREE.Vector3(0, 0, -0.33), belt);
-  panel(0.10, 0.07, 0.025, blue, new THREE.Vector3(0, 0, -0.37), belt);
+  // Hips / layered tactical waist.
+  const hips = G('hips', new THREE.Vector3(0, .98, 0));
+  box(.92,.24,.58,black,new THREE.Vector3(),hips);
+  box(.72,.18,.62,darkMetal,new THREE.Vector3(0,.12,-.01),hips);
+  box(.18,.14,.08,silver,new THREE.Vector3(0,.02,-.34),hips);
 
-  // TORSO — fitted black tactical suit + armored chest.
-  const torso = G('torso', new THREE.Vector3(0, 1.08, 0));
-  M(new THREE.CapsuleGeometry(0.48, 0.82, 10, 20), cloth, new THREE.Vector3(0, 0.38, 0), torso);
-  panel(0.72, 0.64, 0.16, black, new THREE.Vector3(0, 0.43, -0.44), torso);
-  panel(0.52, 0.48, 0.075, darkBlue, new THREE.Vector3(0, 0.49, -0.51), torso);
-  const chestCore = M(new THREE.OctahedronGeometry(0.105, 2), blue, new THREE.Vector3(0, 0.48, -0.57), torso);
-  glowStrip(0.08, 0.31, new THREE.Vector3(-0.26, 0.49, -0.555), torso);
-  glowStrip(0.08, 0.31, new THREE.Vector3(0.26, 0.49, -0.555), torso);
+  const belt = box(1.02,.14,.66,black,new THREE.Vector3(0,1.22,-.01));
+  const buckle = box(.22,.18,.06,silver,new THREE.Vector3(0,1.22,-.36));
+  box(.08,.24,.04,blue,new THREE.Vector3(-.38,1.22,-.38));
+  box(.08,.24,.04,blue,new THREE.Vector3(.38,1.22,-.38));
 
-  // Neck + human-like head.
-  const neck = G('neck', new THREE.Vector3(0, 1.91, 0));
-  M(new THREE.CylinderGeometry(0.12, 0.15, 0.24, 16), skinDark, new THREE.Vector3(0, 0.08, 0), neck);
-  const head = G('head', new THREE.Vector3(0, 2.14, -0.005));
-  const face = M(new THREE.SphereGeometry(0.39, 32, 24), skin, new THREE.Vector3(0, 0.24, 0), head);
-  face.scale.set(0.86, 1.05, 0.92);
-  // Jaw/chin planes.
-  M(new THREE.SphereGeometry(0.25, 24, 16), skin, new THREE.Vector3(0, 0.05, -0.025), head).scale.set(0.9, 0.52, 0.76);
+  // Fitted tactical torso with chest plate, collar and illuminated core.
+  const torso = G('torso', new THREE.Vector3(0,1.08,0));
+  M(new THREE.CapsuleGeometry(.49,.84,10,20),fabric,new THREE.Vector3(0,.39,0),torso);
+  box(.72,.62,.18,fabric2,new THREE.Vector3(0,.44,-.43),torso);
+  box(.48,.38,.08,black,new THREE.Vector3(0,.53,-.52),torso);
+  const core = M(new THREE.OctahedronGeometry(.14,1),blue,new THREE.Vector3(0,.49,-.57),torso);
+  box(.08,.54,.035,blue2,new THREE.Vector3(-.28,.48,-.55),torso);
+  box(.08,.54,.035,blue2,new THREE.Vector3(.28,.48,-.55),torso);
 
-  // Eyes / brows / nose / mouth are geometry, not a flat visor.
-  const eyeL = M(new THREE.SphereGeometry(0.045, 14, 10), glass, new THREE.Vector3(-0.125, 0.29, -0.355), head);
-  const eyeR = M(new THREE.SphereGeometry(0.045, 14, 10), glass, new THREE.Vector3(0.125, 0.29, -0.355), head);
-  eyeL.scale.set(1.45, 0.58, 0.45); eyeR.scale.copy(eyeL.scale);
-  panel(0.16, 0.025, 0.018, black, new THREE.Vector3(-0.125, 0.365, -0.36), head);
-  panel(0.16, 0.025, 0.018, black, new THREE.Vector3(0.125, 0.365, -0.36), head);
-  M(new THREE.ConeGeometry(0.035, 0.11, 8), skinDark, new THREE.Vector3(0, 0.18, -0.365), head).rotation.x = Math.PI / 2;
-  panel(0.13, 0.025, 0.02, skinDark, new THREE.Vector3(0, 0.08, -0.365), head);
+  // Neck + face: narrower jaw and high-collar silhouette.
+  const neck = G('neck',new THREE.Vector3(0,1.93,0));
+  cyl(.135,.24,skin,new THREE.Vector3(0,.09,0),16,neck);
+  box(.48,.28,.38,black,new THREE.Vector3(0,.02,-.03),neck);
 
-  // Spiky black hair: crown + long directional spikes.
-  const hair = G('hair', new THREE.Vector3(0, 0.46, 0), head);
-  M(new THREE.SphereGeometry(0.43, 28, 18), black, new THREE.Vector3(0, 0, 0), hair).scale.set(1.02, 0.82, 0.96);
-  const hairSpikes = [];
-  for (let i = 0; i < 24; i += 1) {
-    const a = (i / 24) * Math.PI * 2;
-    const front = i > 17 || i < 4;
-    const len = front ? 0.42 + (i % 4) * 0.06 : 0.30 + (i % 5) * 0.055;
-    const spike = M(new THREE.ConeGeometry(0.065, len, 7), black,
-      new THREE.Vector3(Math.cos(a) * 0.28, 0.10 + (i % 3) * 0.025, Math.sin(a) * 0.23), hair);
-    spike.rotation.z = Math.cos(a) * 0.9;
-    spike.rotation.x = -Math.sin(a) * 0.9 - (front ? 0.18 : 0);
-    hairSpikes.push(spike);
+  const head = G('head',new THREE.Vector3(0,2.17,0));
+  M(new THREE.SphereGeometry(.385,32,24),skin,new THREE.Vector3(0,.22,0),head);
+  // Jaw/chin shaping layers.
+  M(new THREE.SphereGeometry(.26,24,18),skinDark,new THREE.Vector3(0,.08,-.01),head).scale.set(.92,.52,.72);
+  // Eyes and subtle brows.
+  const eyeL=M(new THREE.SphereGeometry(.035,12,10),blue,new THREE.Vector3(-.115,.27,-.385),head);
+  const eyeR=M(new THREE.SphereGeometry(.035,12,10),blue,new THREE.Vector3(.115,.27,-.385),head);
+  box(.14,.025,.018,black,new THREE.Vector3(-.115,.33,-.39),head).rotation.z=.10;
+  box(.14,.025,.018,black,new THREE.Vector3(.115,.33,-.39),head).rotation.z=-.10;
+  // Blue visor strip retained as a restrained futuristic accent.
+  const visor=box(.54,.09,.10,black,new THREE.Vector3(0,.205,-.365),head);
+  const visorGlow=box(.37,.022,.018,blue,new THREE.Vector3(0,.205,-.421),head);
+
+  // Hair: layered dark mass plus many directional spikes, closer to the reference silhouette.
+  const hair=G('hair',new THREE.Vector3(0,.49,.015),head);
+  M(new THREE.SphereGeometry(.425,28,20),black,new THREE.Vector3(0,.01,.015),hair).scale.set(1.02,1.0,.92);
+  const hairSpikes=[];
+  for(let i=0;i<28;i++){
+    const a=(i/28)*Math.PI*2;
+    const top=i<10;
+    const len=top?.46+(i%4)*.08:.34+(i%5)*.065;
+    const s=M(new THREE.ConeGeometry(.055,.52,6),black,new THREE.Vector3(Math.cos(a)*.27,.16+Math.sin(a)*.05,Math.sin(a)*.23),hair);
+    s.scale.y=len/.52;
+    s.rotation.z=Math.cos(a)*(.55+.18*(i%3));
+    s.rotation.x=-Math.sin(a)*(.65+.12*(i%2));
+    hairSpikes.push(s);
   }
-  // Long side locks.
-  for (const side of [-1, 1]) {
-    for (let i = 0; i < 4; i += 1) {
-      const lock = M(new THREE.ConeGeometry(0.045, 0.34 + i * 0.055, 6), black,
-        new THREE.Vector3(side * (0.29 + i * 0.025), 0.02 - i * 0.06, -0.03 - i * 0.01), hair);
-      lock.rotation.z = side * 0.28;
-      hairSpikes.push(lock);
+  // Front hair strands.
+  for(let i=0;i<7;i++){
+    const s=M(new THREE.ConeGeometry(.038,.34+(i%3)*.07,5),black,new THREE.Vector3((i-3)*.075,.17,-.31),hair);
+    s.rotation.z=(i-3)*.18;
+    s.rotation.x=.42;
+    hairSpikes.push(s);
+  }
+
+  // Shoulders / layered silver-blue armor.
+  const makeArm=(side)=>{
+    const x=side*.66;
+    const shoulder=G(`shoulder-${side<0?'L':'R'}`,new THREE.Vector3(x,1.72,0));
+    const sh=M(new THREE.SphereGeometry(.29,20,14),silver,new THREE.Vector3(),shoulder);
+    sh.scale.set(1.38,.78,1.16);
+    M(new THREE.SphereGeometry(.20,16,12),darkMetal,new THREE.Vector3(0,-.02,-.05),shoulder).scale.set(1.2,.65,1.1);
+    M(new THREE.OctahedronGeometry(.085,1),blue,new THREE.Vector3(0,-.01,-.28),shoulder);
+
+    const upper=G(`upper-arm-${side<0?'L':'R'}`,new THREE.Vector3(0,-.10,0),shoulder);
+    M(new THREE.CapsuleGeometry(.145,.55,8,12),fabric2,new THREE.Vector3(0,-.34,0),upper);
+    const elbow=G(`elbow-${side<0?'L':'R'}`,new THREE.Vector3(0,-.68,0),upper);
+    box(.27,.20,.30,black,new THREE.Vector3(),elbow);
+    const fore=G(`forearm-${side<0?'L':'R'}`,new THREE.Vector3(0,-.10,0),elbow);
+    M(new THREE.CapsuleGeometry(.135,.52,8,12),fabric2,new THREE.Vector3(0,-.30,0),fore);
+    box(.19,.07,.06,blue,new THREE.Vector3(0,-.58,-.17),fore);
+
+    const hand=G(`hand-${side<0?'L':'R'}`,new THREE.Vector3(0,-.63,0),fore);
+    M(new THREE.SphereGeometry(.16,16,12),skin,new THREE.Vector3(0,-.07,0),hand);
+    // Finger armor / glove plates.
+    for(let i=0;i<5;i++){
+      const finger=G(`finger-${side<0?'L':'R'}-${i+1}`,new THREE.Vector3((i-2)*.045,-.17,-.08),hand);
+      M(new THREE.CapsuleGeometry(.024,.115,5,7),black,new THREE.Vector3(0,-.06,0),finger);
+      box(.034,.045,.026,blue,new THREE.Vector3(0,-.10,-.015),finger);
+      if(!hand.userData.fingers) hand.userData.fingers=[];
+      hand.userData.fingers.push(finger);
+    }
+    box(.27,.12,.34,black,new THREE.Vector3(0,-.10,-.03),hand);
+    box(.09,.05,.08,blue,new THREE.Vector3(0,-.14,-.20),hand);
+    return {arm:upper,shoulder,hand,fingers:hand.userData.fingers};
+  };
+  const Larm=makeArm(-1), Rarm=makeArm(1);
+  const shoulders=[Larm.shoulder,Rarm.shoulder];
+
+  // Tactical pants with layered cargo panels and blue side strips.
+  const makeLeg=(side)=>{
+    const x=side*.22;
+    const thigh=G(`thigh-${side<0?'L':'R'}`,new THREE.Vector3(x,.92,0));
+    M(new THREE.CapsuleGeometry(.18,.68,8,12),black,new THREE.Vector3(0,-.38,0),thigh);
+    box(.27,.36,.08,fabric2,new THREE.Vector3(side*.025,-.30,-.17),thigh);
+    box(.18,.32,.05,black,new THREE.Vector3(side*.09,-.43,-.20),thigh);
+    const knee=G(`knee-${side<0?'L':'R'}`,new THREE.Vector3(0,-.76,-.02),thigh);
+    box(.35,.23,.34,darkMetal,new THREE.Vector3(0,0,-.14),knee);
+    box(.13,.07,.05,blue,new THREE.Vector3(0,-.01,-.32),knee);
+    const shin=G(`shin-${side<0?'L':'R'}`,new THREE.Vector3(0,-.11,0),knee);
+    M(new THREE.CapsuleGeometry(.17,.70,8,12),black,new THREE.Vector3(0,-.38,0),shin);
+    box(.20,.46,.07,fabric2,new THREE.Vector3(0,-.38,-.16),shin);
+    const boot=G(`boot-${side<0?'L':'R'}`,new THREE.Vector3(0,-.79,-.07),shin);
+    box(.43,.29,.76,black,new THREE.Vector3(0,-.08,-.10),boot);
+    box(.46,.065,.12,blue,new THREE.Vector3(0,-.12,-.47),boot);
+    box(.32,.07,.10,silver,new THREE.Vector3(0,.02,-.49),boot);
+    box(.12,.12,.16,blue2,new THREE.Vector3(side*.15,-.08,-.47),boot);
+    return {leg:thigh,boot};
+  };
+  const Lleg=makeLeg(-1),Rleg=makeLeg(1);
+
+  // Long asymmetric white/black coat with blue luminous inner panels.
+  const coatL=M(new THREE.BoxGeometry(.56,1.50,.13),white,new THREE.Vector3(-.32,1.00,.34));
+  const coatR=M(new THREE.BoxGeometry(.56,1.50,.13),white,new THREE.Vector3(.32,1.00,.34));
+  coatL.rotation.z=-.065; coatR.rotation.z=.065;
+  box(.42,1.30,.06,black,new THREE.Vector3(-.30,1.01,.27));
+  box(.42,1.30,.06,black,new THREE.Vector3(.30,1.01,.27));
+  box(.07,1.35,.035,blue2,new THREE.Vector3(-.60,1.00,.27));
+  box(.07,1.35,.035,blue2,new THREE.Vector3(.60,1.00,.27));
+  // Coat tails / pointed silhouette.
+  for(const side of [-1,1]){
+    const tail=M(new THREE.ConeGeometry(.28,.82,4),white,new THREE.Vector3(side*.30,.35,.37));
+    tail.rotation.z=side*.08;
+    tail.rotation.x=Math.PI;
+  }
+
+  // High collar and shoulder straps.
+  box(.18,.48,.16,black,new THREE.Vector3(-.30,1.88,-.02)).rotation.z=-.20;
+  box(.18,.48,.16,black,new THREE.Vector3(.30,1.88,-.02)).rotation.z=.20;
+  box(.08,.72,.05,white,new THREE.Vector3(-.43,1.48,-.47)).rotation.z=-.12;
+  box(.08,.72,.05,white,new THREE.Vector3(.43,1.48,-.47)).rotation.z=.12;
+
+  // Backpack and rear luminous spine.
+  const backpack=box(.76,.94,.32,black,new THREE.Vector3(0,1.43,.43));
+  box(.40,.10,.07,blue,new THREE.Vector3(0,1.56,.61));
+  box(.10,.66,.06,blue2,new THREE.Vector3(-.20,1.43,.60));
+  box(.10,.66,.06,blue2,new THREE.Vector3(.20,1.43,.60));
+
+  // Belts, hanging straps and chains.
+  for(const side of [-1,1]){
+    box(.08,.62,.04,black,new THREE.Vector3(side*.43,.86,-.40)).rotation.z=side*.12;
+    for(let i=0;i<3;i++){
+      const link=M(new THREE.TorusGeometry(.045,.012,6,10),silver,new THREE.Vector3(side*(.46+.02*(i%2)),.78-i*.09,-.44));
+      link.rotation.x=Math.PI/2;
     }
   }
 
-  // SHOULDERS / ARMS / GLOVES.
-  const makeArm = (side) => {
-    const tag = side < 0 ? 'L' : 'R';
-    const x = side * 0.64;
-    const shoulder = G('shoulder-' + tag, new THREE.Vector3(x, 1.72, 0));
-    const armor = M(new THREE.SphereGeometry(0.30, 20, 14), silver, new THREE.Vector3(0, 0, -0.02), shoulder);
-    armor.scale.set(1.35, 0.72, 1.22);
-    panel(0.22, 0.20, 0.08, darkBlue, new THREE.Vector3(0, 0.02, -0.28), shoulder);
-    M(new THREE.TetrahedronGeometry(0.10, 1), blue, new THREE.Vector3(0, 0.02, -0.34), shoulder);
+  // Back-mounted sword with blue wrapped grip, guard and emissive blade.
+  const sword=G('sword',new THREE.Vector3(.43,1.65,.42));
+  sword.rotation.z=-.22;
+  box(.15,1.48,.14,black,new THREE.Vector3(0,.18,0),sword);
+  box(.085,1.26,.065,blue,new THREE.Vector3(0,.72,-.01),sword);
+  box(.34,.08,.09,silver,new THREE.Vector3(0,-.55,0),sword);
+  box(.08,.30,.08,blue2,new THREE.Vector3(0,-.73,0),sword);
+  box(.06,.08,.05,blue,new THREE.Vector3(0,.15,-.08),sword);
 
-    const upper = G('upper-arm-' + tag, new THREE.Vector3(0, -0.09, 0), shoulder);
-    M(new THREE.CapsuleGeometry(0.14, 0.55, 8, 12), cloth, new THREE.Vector3(0, -0.34, 0), upper);
-    const fore = G('forearm-' + tag, new THREE.Vector3(0, -0.69, 0), upper);
-    M(new THREE.CapsuleGeometry(0.14, 0.53, 8, 12), black, new THREE.Vector3(0, -0.29, 0), fore);
-    panel(0.22, 0.32, 0.26, silver, new THREE.Vector3(0, -0.34, -0.13), fore);
-    glowStrip(0.14, 0.035, new THREE.Vector3(0, -0.34, -0.285), fore);
-
-    const hand = G('hand-' + tag, new THREE.Vector3(0, -0.64, 0), fore);
-    M(new THREE.SphereGeometry(0.155, 18, 14), skin, new THREE.Vector3(0, -0.06, 0), hand);
-    panel(0.23, 0.22, 0.20, black, new THREE.Vector3(0, 0.01, -0.10), hand);
-    const fingers = [];
-    for (let i = 0; i < 5; i += 1) {
-      const f = G('finger-' + tag + '-' + (i + 1),
-        new THREE.Vector3((i - 2) * 0.045, -0.16, -0.08), hand);
-      M(new THREE.CapsuleGeometry(0.021, 0.10, 5, 7), black, new THREE.Vector3(0, -0.055, 0), f);
-      fingers.push(f);
-    }
-    const shoulderLight = glowStrip(0.18, 0.035, new THREE.Vector3(0, 0.01, -0.31), shoulder);
-    return { arm: upper, shoulder, hand, fingers, shoulderLight };
+  // Explicit part map preserves compatibility with animator and avatar-style system.
+  player.group.userData.parts={
+    la:Larm.arm,ra:Rarm.arm,ll:Lleg.leg,rl:Rleg.leg,
+    torso,head,bootL:Lleg.boot,bootR:Rleg.boot,backpack,
+    accent:core,coatL,coatR,sword,visorGlow,chestCore:core,
+    coatHemL:coatL,coatHemR:coatR,hands:[Larm.hand,Rarm.hand],
+    fingers:[...Larm.fingers,...Rarm.fingers],eyes:[eyeL,eyeR],shoulders,
+    hips,hairSpikes,microDetails:{eyeL,eyeR,hairSpikes},
+    shoulderLightL:Larm.shoulder,shoulderLightR:Rarm.shoulder,
+    seamL:coatL,seamR:coatR,backpackLight:blue,
+    energyNodes:[core]
   };
 
-  const Larm = makeArm(-1);
-  const Rarm = makeArm(1);
-  const shoulders = [Larm.shoulder, Rarm.shoulder];
-
-  // TACTICAL PANTS + KNEE ARMOR + HIGH-TECH BOOTS.
-  const makeLeg = (side) => {
-    const tag = side < 0 ? 'L' : 'R';
-    const x = side * 0.23;
-    const thigh = G('thigh-' + tag, new THREE.Vector3(x, 0.92, 0));
-    M(new THREE.CapsuleGeometry(0.18, 0.68, 8, 12), cloth, new THREE.Vector3(0, -0.38, 0), thigh);
-    panel(0.34, 0.30, 0.31, black, new THREE.Vector3(0, -0.34, -0.13), thigh);
-    panel(0.08, 0.38, 0.035, silver, new THREE.Vector3(side * 0.12, -0.40, -0.30), thigh);
-    const knee = G('knee-' + tag, new THREE.Vector3(0, -0.77, -0.02), thigh);
-    panel(0.36, 0.23, 0.34, silver, new THREE.Vector3(0, 0, -0.14), knee);
-    M(new THREE.TetrahedronGeometry(0.09, 1), blue, new THREE.Vector3(0, 0, -0.32), knee);
-    const shin = G('shin-' + tag, new THREE.Vector3(0, -0.12, 0), knee);
-    M(new THREE.CapsuleGeometry(0.16, 0.66, 8, 12), black, new THREE.Vector3(0, -0.36, 0), shin);
-    const boot = G('boot-' + tag, new THREE.Vector3(0, -0.76, -0.08), shin);
-    M(new THREE.BoxGeometry(0.40, 0.30, 0.70), black, new THREE.Vector3(0, -0.08, -0.10), boot);
-    panel(0.34, 0.20, 0.42, silver, new THREE.Vector3(0, -0.02, -0.30), boot);
-    glowStrip(0.34, 0.055, new THREE.Vector3(0, -0.20, -0.45), boot);
-    panel(0.46, 0.10, 0.72, darkBlue, new THREE.Vector3(0, -0.23, -0.10), boot);
-    return { leg: thigh, boot };
-  };
-  const Lleg = makeLeg(-1);
-  const Rleg = makeLeg(1);
-
-  // Long asymmetric black/white coat tails.
-  const coatL = G('coatL', new THREE.Vector3(-0.30, 1.06, 0.16));
-  const coatR = G('coatR', new THREE.Vector3(0.30, 1.06, 0.16));
-  panel(0.46, 1.52, 0.12, white, new THREE.Vector3(0, 0, 0), coatL);
-  panel(0.46, 1.52, 0.12, white, new THREE.Vector3(0, 0, 0), coatR);
-  panel(0.16, 1.42, 0.035, black, new THREE.Vector3(-0.17, 0, -0.075), coatL);
-  panel(0.16, 1.42, 0.035, black, new THREE.Vector3(0.17, 0, -0.075), coatR);
-  glowStrip(0.07, 1.28, new THREE.Vector3(-0.22, 0, -0.075), coatL);
-  glowStrip(0.07, 1.28, new THREE.Vector3(0.22, 0, -0.075), coatR);
-  coatL.rotation.z = -0.055; coatR.rotation.z = 0.055;
-
-  // Back emblem / backpack.
-  const backpack = G('backpack', new THREE.Vector3(0, 1.44, 0.42));
-  panel(0.70, 0.92, 0.30, black, new THREE.Vector3(0, 0, 0), backpack);
-  panel(0.48, 0.50, 0.035, white, new THREE.Vector3(0, 0.05, 0.17), backpack);
-  M(new THREE.TetrahedronGeometry(0.19, 1), blue, new THREE.Vector3(0, 0.04, 0.20), backpack);
-  const backpackLight = glowStrip(0.34, 0.045, new THREE.Vector3(0, -0.29, 0.18), backpack);
-
-  // Shoulder-to-hip straps and chain-like accessory.
-  const strapL = panel(0.09, 1.38, 0.045, white, new THREE.Vector3(-0.37, 1.42, -0.48));
-  strapL.rotation.z = -0.22;
-  const strapR = panel(0.09, 1.38, 0.045, white, new THREE.Vector3(0.37, 1.42, -0.48));
-  strapR.rotation.z = 0.22;
-  const chain = G('chain', new THREE.Vector3(-0.36, 1.02, -0.54));
-  for (let i = 0; i < 7; i += 1) {
-    const link = M(new THREE.TorusGeometry(0.045, 0.012, 6, 10), silver,
-      new THREE.Vector3(0.07 * Math.sin(i), -i * 0.10, 0), chain);
-    link.rotation.x = Math.PI / 2;
-    link.rotation.z = i % 2 ? 0.55 : -0.55;
-  }
-
-  // Sheathed energy sword over right shoulder/back.
-  const sword = G('sword', new THREE.Vector3(0.47, 1.62, 0.48));
-  sword.rotation.z = -0.22;
-  panel(0.15, 1.48, 0.15, black, new THREE.Vector3(0, 0.18, 0), sword);
-  panel(0.08, 1.26, 0.045, blue, new THREE.Vector3(0, 0.72, -0.02), sword);
-  panel(0.38, 0.08, 0.08, silver, new THREE.Vector3(0, -0.57, 0), sword);
-  panel(0.12, 0.22, 0.12, black, new THREE.Vector3(0, -0.70, 0), sword);
-
-  const parts = {
-    la: Larm.arm, ra: Rarm.arm, ll: Lleg.leg, rl: Rleg.leg,
-    torso, head, bootL: Lleg.boot, bootR: Rleg.boot, backpack,
-    backpackLight, accent: chestCore, chestCore, coatL, coatR, sword,
-    visorGlow: glass, hands: [Larm.hand, Rarm.hand],
-    fingers: [...Larm.fingers, ...Rarm.fingers],
-    eyes: [eyeL, eyeR], shoulders, hips, hairSpikes,
-    shoulderLightL: Larm.shoulderLight, shoulderLightR: Rarm.shoulderLight,
-    seamL: glowStrip(0.06, 0.9, new THREE.Vector3(-0.42, 1.0, -0.04)),
-    seamR: glowStrip(0.06, 0.9, new THREE.Vector3(0.42, 1.0, -0.04)),
-    microDetails: { face, hairSpikes, strapL, strapR, chain }
-  };
-
-  player.group.userData.parts = parts;
-  body.add(coatL); body.add(coatR);
   player.group.add(body);
   player.group.position.copy(player.pos);
   scene.add(player.group);
