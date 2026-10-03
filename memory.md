@@ -123,3 +123,5 @@ Never claim VERIFIED or LOCKED without target-device evidence.
 - 2026-10-03: Added the production NEXUS Hero GLB contract and loader integration. The game now attempts `assets/characters/nexus-hero.glb` first and keeps the procedural rig as fallback. Added a binary GLB validator to CI; the actual production GLB binary is still pending and is not fabricated.
 
 - 2026-10-03: Build APK workflow #110 completed successfully on commit `56669394209b114b2d5eace8f3675398f4b10af5`, producing `nexus-world-apk-110`. This confirms repository/packaging build success only; physical Android verification remains pending.
+
+- 2026-10-03: Added a reproducible binary NEXUS Hero GLB generator and wired both NEXUS CI and Android APK packaging to generate the reference-driven GLB, strictly validate its GLB v2 structure, and bundle it at `assets/characters/nexus-hero.glb`. The generated local production candidate is a real 340 KB GLB with 137 mesh geometries; rig/animation clips remain a later asset pass.
