@@ -13,8 +13,11 @@ for(let i=1;i<=100;i++){
   const dir=path.join(root,String(i).padStart(3,"0")+"-"+names[i-1]);
   fs.mkdirSync(dir,{recursive:true});
   for(let j=1;j<=100;j++){
-    const f=path.join(dir,String(j).padStart(3,"0")+"-micro-module.json");
+    const stem=String(j).padStart(3,"0");
+    const f=path.join(dir,stem+"-micro-module.json");
+    const legacy=path.join(dir,stem+"-micro-module.md");
     if(!fs.existsSync(f)) fs.writeFileSync(f,spec);
+    if(fs.existsSync(legacy)) fs.unlinkSync(legacy);
   }
 }
 console.log("100 primary × 100 micro = 10,000 3D micro-module specs");
